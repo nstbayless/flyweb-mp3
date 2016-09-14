@@ -7,6 +7,14 @@ div.nav {
 	padding: 0px 12px;
 	display: block;
 	width:100%;
+	position:fixed;
+}
+
+div.pane {
+	padding-top: 48px;
+	padding-bottom: 48px;
+	overflow: auto;
+	width:100%;
 }
 
 a.fill {
@@ -21,10 +29,14 @@ a.fill:hover {
 }
 
 div.menu {
-	float: right;
+	float:right;
 	display: block;
 	text-align: right;
 	width: 40px;
+}
+
+div.q {
+	padding: 4px 16px;
 }
 
 table.q {
@@ -34,6 +46,10 @@ table.q {
 }
 
 td.q {
+	padding: 6px 14px;
+}
+
+th.q {
 	padding: 6px 14px;
 }
 

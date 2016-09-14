@@ -1,0 +1,23 @@
+extends layout
+
+block head
+	script.
+		var pl = !{JSON.stringify(pl)};
+
+block content
+	div.q
+		h1=pl.name
+		table.q
+			tr
+				th.q
+				th.q Name
+				th.q Duration
+			tr(ng-repeat="i in range(pl.l_song.length)" style="background-color: #{{(i%2==0)?'ccf':'eef'}};")
+				td.q.num {{i+1}}
+				td.q {{pl.l_song[i].name}}
+				td.q {{pretty_time(pl.l_song[i].duration)}}
+
+block bottom
+	div(style="text-align:right; padding: 0px 12px;")
+		a(href = "/add/#{pl.id}")
+			img(src="/images/add.png" onmouseover="this.src='/images/add_hover.png';" onmouseout="this.src='/images/add.png';")
