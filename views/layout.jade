@@ -8,6 +8,8 @@ html
 		script(src="/static/js/jquery.js" charset="utf-8")
 		script(src="/static/js/angular.min.js" charset="utf-8")
 		script(src="/javascripts/angapp.js")
+		script.
+			var track = !{JSON.stringify(track)};
 		block head
 	body(ng-app="angApp")
 		div(ng-controller="angCon")
@@ -24,5 +26,5 @@ html
 			div.bottomfloat
 				block bottom
 				div.footer
-					p.footer Nothing Playing
-					p.footer.tracker {{"+".repeat(25)+"-".repeat(15)}}
+					p.footer {{track.props.name}}
+					p.footer.tracker {{get_tracker_text()}}

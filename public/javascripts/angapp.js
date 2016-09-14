@@ -1,6 +1,7 @@
 var app = angular.module('angApp', []);
 app.controller('angCon', function($scope, $http) {
 	$scope.pl=pl;
+	$scope.track = track;	
 
 	$scope.range = function (n) {
 		l = [];
@@ -9,6 +10,7 @@ app.controller('angCon', function($scope, $http) {
 		return l;
 	}
 
+	//converts seconds to m:ss time format
 	$scope.pretty_time = function (t) {
 		date = new Date(t*1000);
 		mm = date.getUTCMinutes();
@@ -17,4 +19,14 @@ app.controller('angCon', function($scope, $http) {
 			ss = "0" + ss;
 		return mm + ":" + ss
 	}
-});s
+
+	//creates text-based tracker
+	$scope.get_tracker_text = function () {
+		var t_elapsed = track.t_elapsed;
+		var duration = track.props.duration;
+		var counter_n = 50;
+		var p = t_elapsed/duration;
+		var counter_n_elapsed = Math.round(counter_n*p);
+		return $scope.pretty_time(t_elapsed) + "  [" + "@".repeat(counter_n_elapsed) + "~".repeat(counter_n-counter_n_elapsed)+"]  " + $scope.pretty_time(duration);
+	}
+});

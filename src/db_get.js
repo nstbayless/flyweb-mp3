@@ -1,15 +1,13 @@
 /* Handles backend for database retrieval*/
 
+tmp = require('./tmp_store')
+make_playlist = require('./_playlist');
+make_song = require('./_song');
+
 ex = {}
 
 ex.get_song = function (id) {
-	song = {
-		id: id,
-		name: "Song Name",
-		duration: 114.3,
-		artist: "Artist",
-		album: "Album"
-	}
+	song = make_song(id);
 	return song;
 }
 
@@ -19,20 +17,22 @@ ex.get_song = function (id) {
 ex.playlist = function (id,realize) {
 	if (!id)
 		id="q"
-	pl = {
-		id: id,
-		name: id,
-		l_song_id: [],
-		l_song: []
-	}
-	if (pl.name=="q") {
-		pl.name = "Queue";
-		pl.l_song_id = [37,33,19,4]
+	var pl;
+	if (id=="q") {
+		pl = tmp.q;
+	} else {
+		pl = make_playlist(id);
 	}
 	if (realize)
-		for (i=0;i<pl.l_song_id.length;i++)
-			pl.l_song.push(ex.get_song(pl.l_song_id[i]));
+		ex.realize_playlist(pl);
 	return pl;
+}
+
+//retrieves songs from playlist, places in pl.l_song
+ex.realize_playlist = function (pl) {
+	pl.l_song = [];
+	for (i=0;i<pl.l_song_id.length;i++)
+			pl.l_song.push(ex.get_song(pl.l_song_id[i]));
 }
 
 module.exports = ex;
