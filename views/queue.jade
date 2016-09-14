@@ -1,0 +1,10 @@
+extends layout
+
+block content
+	div(style="padding: 0px 12px")
+		h1 Queue
+		table.q
+			tr(ng-repeat="x in [0,1,2,3,4]" style="background-color: #{{(x%2==0)?'ccf':'eef'}};")
+				td.q.num {{x+1}}
+				td.q "Song Name"
+				td.q

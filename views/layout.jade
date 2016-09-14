@@ -1,0 +1,26 @@
+doctype html
+html
+	head
+		title= title
+		link(rel='stylesheet', href='/stylesheets/style.css')
+		link(rel="stylesheet" href="/static/css/bootstrap.min.css")
+		meta(name="viewport" content="width=device-width, initial-scale=1")
+		script(src="/static/js/jquery.js" charset="utf-8")
+		script(src="/static/js/bootstrap.js" charset="utf-8")
+		script(src="/static/js/angular.min.js" charset="utf-8")
+		script(src="/javascripts/angapp.js")
+	body(ng-app="angApp")
+		div(ng-controller="angCon")
+			div.nav
+				a.fill(href="/")
+					p=title
+				div.menu
+					a(href="/")
+						img(src="/images/menu.png")
+			block content
+			div.bottomfloat
+				p(style="text-align:right; padding: 0px 12px;") 
+					b + Add Song
+				div.footer
+					p.footer Nothing Playing
+					p.footer.tracker {{"+".repeat(25)+"-".repeat(15)}}

@@ -1,0 +1,68 @@
+div.nav {
+	font-size: 32px;
+	color: #fff;
+	background-color: #f71;
+	height: 48px;
+	max-height: 48px;
+	padding: 0px 12px;
+	display: block;
+	width:100%;
+}
+
+a.fill {
+	float: left;
+	color: #fff;
+	width: 80%;
+	text-decoration: none;
+}
+a.fill:hover {
+	color: #fff;
+	text-decoration: none;
+}
+
+div.menu {
+	float: right;
+	display: block;
+	text-align: right;
+	width: 40px;
+}
+
+table.q {
+	width:80%; 
+    margin-left:10%; 
+    margin-right:10%;
+}
+
+td.q {
+	padding: 6px 14px;
+}
+
+td.num {
+	width: 25px
+}
+
+div.bottomfloat {
+	position:fixed;
+	left:0px;
+	bottom:0px;
+	width:100%;
+}
+
+div.footer {
+	height:48px;
+	width:100%;
+	background-color: #bbb;
+	padding: 7px 0px;
+}
+
+p.footer {
+	text-align: center;
+	text-decoration:bold;
+	color: #222;
+	font-size:16px;
+	line-height: 60%
+}
+
+p.tracker {
+	font-family:'Lucida Console', monospace;
+}
