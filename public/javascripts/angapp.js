@@ -1,7 +1,7 @@
 var app = angular.module('angApp', []);
 app.controller('angCon', function($scope, $http) {
-	$scope.pl=pl;
-	$scope.track = track;	
+	try{ $scope.pl=pl } catch(e) {} //pl might not be supplied
+	$scope.track = track | {};	
 
 	$scope.range = function (n) {
 		l = [];

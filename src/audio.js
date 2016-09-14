@@ -35,8 +35,9 @@ function update (dt) {
 	if (tmp.playing.props.type=="silence") {
 		tmp.playing.t_elapsed+=dt;
 		if (tmp.playing.t_elapsed>tmp.playing.props.duration) {
+			t_reupdate = tmp.playing.t_elapsed-tmp.playing.props.duration
 			tmp.playing = null;
-			update(tmp.playing.t_elapsed-tmp.playing.props.duration);
+			update(t_reupdate);
 		}
 	}
 }
