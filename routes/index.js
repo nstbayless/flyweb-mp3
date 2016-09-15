@@ -1,3 +1,5 @@
+module.exports = () => {
+
 var express = require('express');
 var router = express.Router();
 var db_get = require('../src/db_get');
@@ -20,7 +22,7 @@ function get_add (req,res,next, path) {
 	else
 		id = path[0];
 	pl = db_get.playlist(id,true);
-	res.render('add', { title: 'Local Area MP3', track:tmp.playing});
+	res.render('add', { title: 'Local Area MP3', pl: pl, track:tmp.playing});
 }
 
 /* GET router */
@@ -39,4 +41,6 @@ router.get(/.*/, function(req, res, next) {
 	next();
 });
 
-module.exports = router;
+return router;
+
+}

@@ -4,13 +4,22 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var fs = require('fs')
+var multer = require('multer');
 
 var audio = require('./src/audio')
 
-var routes = require('./routes/index');
-var route_api = require('./routes/api');
+//upload directory:
+fs.existsSync("uploads/") || fs.mkdirSync("uploads/");
+var upload = multer({dest:"uploads/"})
 
 var app = express();
+
+//multer
+app.upload = upload;
+
+var routes = require('./routes/index')();
+var route_api = require('./routes/api')(upload);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

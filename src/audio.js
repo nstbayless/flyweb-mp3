@@ -1,15 +1,21 @@
 // pops queue, plays audio
 
+repeat = require('repeat');
+
 tmp = require('./tmp_store');
 make_song = require ('./_song');
-repeat = require('repeat');
+db_get = require('./db_get');
 
 //takes song metadata, makes playable information for update below
 function song_realize(song) {
 	//copy song metadata into realized object:
 	re = {props:song};
+
+	//adjusts re object based on song type:
 	if (song.type=="silence") {
 		re.props.name = "Nothing Playing"
+		re.t_elapsed = 0;
+	} else if (song.type=="upload") {
 		re.t_elapsed = 0;
 	}
 
@@ -21,9 +27,10 @@ function update (dt) {
 	if (!tmp.playing) {
 		//nothing playing, correct this
 		console.log("Track change.")
-
+		
 		if (tmp.q.l_song.length>0) {
 			//pop song from queue:
+			tmp.q = db_get.realize_playlist(tmp.q);
 			tmp.playing = song_realize(tmp.q.l_song[0]);
 			tmp.q.l_song = tmp.q.l_song.slice(1);
 			tmp.q.l_song_id = tmp.q.l_song_id.slice(1);

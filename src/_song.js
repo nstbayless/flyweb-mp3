@@ -13,3 +13,4 @@ module.exports = function (id) {
 //"empty": plays no sound and never elapses
 //"silence": plays no sound, but still has a duration
 //"http": file from url
+//"upload": file from upload

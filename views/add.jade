@@ -5,3 +5,8 @@ block head
 block content
 	div.q
 		h1 Add to #{pl.name}
+		p Only file upload supported currently
+		form(method="post" enctype="multipart/form-data" action = "/api/#{pl.id}/songs/upload")
+			input(type="file" name="song")
+			input(type="hidden" name="redirect" value="/p/#{pl.id}")
+			input(type="submit")
