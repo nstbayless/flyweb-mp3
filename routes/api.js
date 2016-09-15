@@ -5,6 +5,7 @@ var assert = require('assert');
 
 var db_get = require('../src/db_get');
 var db_post = require('../src/db_post');
+var audio = require('../src/audio');
 
 var router = express.Router();
 
@@ -22,7 +23,7 @@ router.get('/', function(req, res, next) {
 
 // POST a song to the given playlist
 // sends back id of song
-function post_songs_upload(req,res,next,plid) {
+function post_song_upload(req,res,next,plid) {
 	assert(!!req.file);
 	db_post.song({
 		type: "upload",
@@ -34,6 +35,7 @@ function post_songs_upload(req,res,next,plid) {
 		if (err)
 			return api_error(500);
 		db_post.playlist_append(sid,plid,function (err) {
+			audio.update(0);
 			if (err)
 				return api_error(500);
 			else
@@ -55,7 +57,7 @@ function post(req,res,next) {
 				if (path[2]=="upload") {
 					if (path.length>3)
 						return api_error(400);
-					return post_songs_upload(req,res,next,plid);
+					return post_song_upload(req,res,next,plid);
 				}
 			}
 		}

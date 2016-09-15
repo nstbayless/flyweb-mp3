@@ -21,6 +21,7 @@ var speaker = new Speaker({
 
 //plays song with audio pipeline above
 function play_file(file,cb) {
+	console.log(file);
 	var stream = fs.createReadStream(file);
 
 	//Throttle to allow play/pause:
@@ -33,9 +34,9 @@ function play_file(file,cb) {
 }
 
 //takes song metadata, makes playable information for update below
-function song_realize(song) {
+function song_play(song) {
 	//copy song metadata into realized object:
-	re = {props:song};
+	var re = {props:song};
 
 	//adjusts re object based on song type:
 	if (song.type=="silence" || song.type=="empty") {
@@ -48,28 +49,28 @@ function song_realize(song) {
 		play_file(song.upload_file, (ev) => {
 			//handle event:
 			if (ev=="finish")
-				re.state="finish";
-
+				tmp.playing.state="finish";
 			update(0);
 		})
 	}
 
-	return re;
+	tmp.playing=re;
 }
 
 // checks if audio paused or stops, takes appropriate action
 function update (dt) {
+	if (!dt) dt=0;
 	if (!tmp.playing || tmp.playing.props.type=="empty") {
-		if (tmp.q.l_song.length>0) {
+		if (tmp.q.l_song_id.length>0) {
 			//pop song from queue:
 			tmp.q = db_get.realize_playlist(tmp.q);
-			tmp.playing = song_realize(tmp.q.l_song[0]);
+			song_play(tmp.q.l_song[0]);
 			tmp.q.l_song = tmp.q.l_song.slice(1);
 			tmp.q.l_song_id = tmp.q.l_song_id.slice(1);
 		}
 		else
 			//if no song, add default empty:
-			tmp.playing = song_realize(make_song(''));
+			song_play(make_song(''));
 	}
 	if (tmp.playing.props.type=="silence") {
 		tmp.playing.t_elapsed+=dt;
@@ -96,3 +97,7 @@ function update_dec() {
 };
 
 repeat(update_dec).every(100, 'ms').start.now();
+
+module.exports = {
+	update: update
+}
