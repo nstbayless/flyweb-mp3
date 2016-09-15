@@ -11,6 +11,7 @@ var Speaker = require('speaker');
 var lame = require('lame')
 var fs = require('fs');
 var decoder = lame.Decoder();
+var Throttle = require('throttle')
 
 var speaker = new Speaker({
   channels: 2,          // 2 channels
@@ -19,9 +20,16 @@ var speaker = new Speaker({
 });
 
 //plays song with audio pipeline above
-function play_file(file) {
+function play_file(file,cb) {
 	var stream = fs.createReadStream(file);
+
+	//Throttle to allow play/pause:
+	stream = stream.pipe(new Throttle(44100));
 	stream.pipe(decoder).pipe(speaker);
+
+	stream.on('finish', () => {
+		cb("finish");
+	});
 }
 
 //takes song metadata, makes playable information for update below
@@ -36,7 +44,14 @@ function song_realize(song) {
 	} else if (song.type=="upload") {
 		re.t_elapsed = 0;
 		console.log("Now playing: " + song.name);
-		play_file(song.upload_file)
+		re.state="play";
+		play_file(song.upload_file, (ev) => {
+			//handle event:
+			if (ev=="finish")
+				re.state="finish";
+
+			update(0);
+		})
 	}
 
 	return re;
@@ -45,7 +60,6 @@ function song_realize(song) {
 // checks if audio paused or stops, takes appropriate action
 function update (dt) {
 	if (!tmp.playing || tmp.playing.props.type=="empty") {
-		
 		if (tmp.q.l_song.length>0) {
 			//pop song from queue:
 			tmp.q = db_get.realize_playlist(tmp.q);
@@ -67,7 +81,11 @@ function update (dt) {
 	} else if (tmp.playing.props.type=="empty") {
 		//do nothing
 	} else if (tmp.playing.props.type=="upload") {
-		
+		if  (tmp.playing.state=="finish") {
+			//go to next song on queue:
+			tmp.playing = null;
+			update(0);
+		}
 	}
 }
 
