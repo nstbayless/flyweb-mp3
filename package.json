@@ -14,10 +14,12 @@
     "extend": "^3.0.0",
     "fs": "0.0.1-security",
     "jade": "~1.11.0",
+    "lame": "^1.2.4",
     "mdns": "^2.3.3",
     "morgan": "~1.6.1",
     "multer": "^1.2.0",
     "repeat": "0.0.6",
-    "serve-favicon": "~2.3.0"
+    "serve-favicon": "~2.3.0",
+    "speaker": "^0.3.0"
   }
 }
