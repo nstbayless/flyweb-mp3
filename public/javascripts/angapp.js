@@ -1,7 +1,7 @@
 var app = angular.module('angApp', []);
 app.controller('angCon', function($scope, $http) {
 	try{ $scope.pl=pl } catch(e) {} //pl might not be supplied
-	$scope.track = track | {};	
+	$scope.track = track;	
 
 	$scope.range = function (n) {
 		l = [];
@@ -22,8 +22,16 @@ app.controller('angCon', function($scope, $http) {
 
 	//creates text-based tracker
 	$scope.get_tracker_text = function () {
-		var t_elapsed = track.t_elapsed;
-		var duration = track.props.duration;
+		var has_duration=true;
+		if ($scope.track.props.type=="silence")
+			has_duration=false;
+		if ($scope.track.props.type=="empty")
+			has_duration=false;
+		if (!has_duration) {
+			return "---";
+		}
+		var t_elapsed = $scope.track.t_elapsed;
+		var duration = $scope.track.props.duration;
 		var counter_n = 50;
 		var p = t_elapsed/duration;
 		var counter_n_elapsed = Math.round(counter_n*p);

@@ -7,7 +7,7 @@ block head
 block content
 	div.q
 		h1=pl.name
-		table.q
+		table.q(ng-show="pl.l_song.length>0")
 			tr
 				th.q
 				th.q Name
@@ -16,6 +16,12 @@ block content
 				td.q.num {{i+1}}
 				td.q {{pl.l_song[i].name}}
 				td.q {{pretty_time(pl.l_song[i].duration)}}
+		div(ng-show="pl.l_song.length==0")
+			center
+				p
+					| It looks like this queue is empty. Feel free to 
+					a(href='/add/#{pl.id}') add to it
+					| !
 
 block bottom
 	div(style="text-align:right; padding: 0px 12px;")

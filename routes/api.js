@@ -28,7 +28,7 @@ function post_songs_upload(req,res,next,plid) {
 		type: "upload",
 		name: req.file.originalname,
 		duration: 100, //TODO
-		uploade_file: req.file.destination + req.file.filename
+		upload_file: req.file.destination + req.file.filename
 	},
 	function(sid, err) {
 		if (err)

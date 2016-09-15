@@ -13,7 +13,7 @@ db_post = {}
 db_post.song = function (opts, cb) {
 	song = make_song(0);
 	extend(song,opts);
-	song.id='0';
+	song.id=0;
 	//TODO: store in actual database
 	tmp._last_song=song;
 	cb(song.id,false);
