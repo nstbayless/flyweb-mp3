@@ -25,11 +25,19 @@ var server = http.createServer(app);
 /**
  * Create mDNS advertisement for FlyWeb
  */
-var fw = mdns.createAdvertisement(mdns.tcp('flyweb'), port, {
-  //todo: allow admin to customize broadcast name.
-  name: 'Local Area MP3',
-  txtRecord: {}
-});
+
+var fw;
+
+function start_flyweb(name) {
+	app._server_name = name;
+	fw = mdns.createAdvertisement(mdns.tcp('flyweb'), port, {
+	  //todo: allow admin to customize broadcast name.
+	  name: app.server_name,
+	  txtRecord: {}
+	});
+}
+
+start_flyweb("Local Area MP3")
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -110,4 +118,16 @@ function onListening() {
 function onClose() {
   // Stop broadcasting FlyWeb
   fw.stop();
+}
+
+/**add restart/rename feature to app*/
+app.restart_flyweb = function (name) {
+	console.log("restarting server...")
+	//kill server
+	fw.stop();
+
+	//start server
+	start_flyweb(name);
+
+	console.log("server restarted as '" + name + "'");
 }

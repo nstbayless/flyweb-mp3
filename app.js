@@ -33,6 +33,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(function (req,res,next){
+	//server name is set in bin/www with the restart_flyweb() function
+	res.server_name = app._server_name;
+	next();
+})
+
 app.use('/api', route_api);
 app.use('/', routes);
 

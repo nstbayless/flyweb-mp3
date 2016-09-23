@@ -12,7 +12,7 @@ function get_playlist (req,res,next, path) {
 	else
 		id = path[0];
 	pl = db_get.playlist(id,true);
-	res.render('playlist', { title: 'Local Area MP3', pl: pl, track:tmp.track});
+	res.render('playlist', { title: res.server_name, pl: pl, track:tmp.track});
 }
 
 /** GET for adding to playlist or queue */
@@ -22,7 +22,7 @@ function get_add (req,res,next, path) {
 	else
 		id = path[0];
 	pl = db_get.playlist(id,true);
-	res.render('add', { title: 'Local Area MP3', pl: pl, track:tmp.track});
+	res.render('add', { title: res.server_name, pl: pl, track:tmp.track});
 }
 
 /* GET router */
