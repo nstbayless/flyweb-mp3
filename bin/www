@@ -8,7 +8,7 @@ var app = require('../app');
 var debug = require('debug')('flyweb-mp3:server');
 var http = require('http');
 var mdns = require('mdns');
-var config = require('../config.json')
+var config = {defaults:{name:"Local Area mp3"}}//require('../config.json')
 
 /**
  * Get port from environment and store in Express.
