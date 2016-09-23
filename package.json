@@ -18,6 +18,7 @@
     "mdns": "^2.3.3",
     "morgan": "~1.6.1",
     "multer": "^1.2.0",
+    "player": "^0.6.1",
     "repeat": "0.0.6",
     "serve-favicon": "~2.3.0",
     "speaker": "^0.3.0"

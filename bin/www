@@ -8,6 +8,7 @@ var app = require('../app');
 var debug = require('debug')('flyweb-mp3:server');
 var http = require('http');
 var mdns = require('mdns');
+var config = require('../config.json')
 
 /**
  * Get port from environment and store in Express.
@@ -37,7 +38,7 @@ function start_flyweb(name) {
 	});
 }
 
-start_flyweb("Local Area MP3")
+start_flyweb(config.defaults.name)
 
 /**
  * Listen on provided port, on all network interfaces.
