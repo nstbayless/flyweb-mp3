@@ -1,4 +1,6 @@
 node_modules/*
+*/upload/*
+*/uploads/*
 upload/*
 uploads/*
 *.log

@@ -2,6 +2,8 @@ module.exports = (upload) => {
 
 var express = require('express');
 var assert = require('assert');
+var fs = require('fs');
+var mm = require('musicmetadata');
 
 var db_get = require('../src/db_get');
 var db_post = require('../src/db_post');
@@ -40,23 +42,33 @@ router.get(/.*/, function(req, res, next) {
 // sends back id of song
 function post_song_upload(req,res,next,plid) {
 	assert(!!req.file);
-	db_post.song({
-		type: "upload",
-		name: req.file.originalname,
-		duration: 100, //TODO
-		upload_file: req.file.destination + req.file.filename
-	},
-	function(sid, err) {
-		if (err)
-			return api_error(500);
-		db_post.playlist_append(sid,plid,function (err) {
-			audio.update(0);
+
+	var parser = mm(fs.createReadStream(req.file.destination + req.file.filename), { duration: true }, function (err, metadata) {
+		if (err) throw err;
+		if (metadata.title != "") {
+			var title = metadata.title;
+		} else {
+			var title = req.file.originalname;
+		}
+		console.log(title);
+		db_post.song({
+			type: "upload",
+			name: title,
+			duration: metadata.duration, //TODO
+			upload_file: req.file.destination + req.file.filename
+		},
+		function(sid, err) {
 			if (err)
 				return api_error(500);
-			else
-				return res.status(200).send();
+			db_post.playlist_append(sid,plid,function (err) {
+				audio.update(0);
+				if (err)
+					return api_error(500);
+				else
+					return res.status(200).send();
+			})
 		})
-	})
+	});
 }
 
 function post(req,res,next) {
