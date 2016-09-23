@@ -1,5 +1,5 @@
 node_modules/*
-upload/*
-uploads/*
+*/upload/*
+*/uploads/*
 *.log
 config.json
