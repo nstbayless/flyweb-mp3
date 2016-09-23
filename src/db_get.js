@@ -18,6 +18,8 @@ ex.get_song = function (id) {
 // id: id of playlist to retrieve
 // realize: also retrieve songs (populates l_song)
 ex.playlist = function (id,realize) {
+	if (!realize)
+		 realize=false;
 	if (!id)
 		id="q"
 	var pl;

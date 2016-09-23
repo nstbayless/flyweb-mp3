@@ -12,7 +12,7 @@ block content
 				th.q
 				th.q Name
 				th.q Duration
-			tr(ng-repeat="i in range(pl.l_song.length)" style="background-color: #{{(i%2==0)?'ccf':'eef'}};")
+			tr(ng-repeat="i in range(pl.l_song_id.length)" style="background-color: #{{(i%2==0)?'ccf':'eef'}};")
 				td.q.num {{i+1}}
 				td.q {{pl.l_song[i].name}}
 				td.q {{pretty_time(pl.l_song[i].duration)}}
