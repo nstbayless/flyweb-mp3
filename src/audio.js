@@ -8,20 +8,30 @@ db_get = require('./db_get');
 
 // audio playing pipeline:
 var Player = require('player')
+
 var current_player = new Player();
-var current_timer = 0;
-var current_state = "paused";
-var current_song_duration = 0;
+var current_timer = 0; //timer records time elapsed
+var current_state = "paused"; //state of the music
+var current_song_duration = 0; //the length of the current song
 
 //plays song with audio pipeline above
-function play_file(file,cb) {
+function play_file(file, cb) {
 	console.log(file);
 	var player = new Player(file);
 	current_player = player;
-	player.play();
-	console.log("PLAYING WITH PLAYER");
+	current_player.on('error', function(err){
+		console.log("all song finished");
+	});
+	current_player.on('playing', function(item){
+		console.log('im playing... src:' + item);
+	});
+	current_player.on('playend', function(item){
+		console.log('src:' + item + ' play done, switching to next one ...');
+	});
+	current_player.play();
 }
 
+//pauses the song
 function pause() {
 	current_state = "paused";
 	current_player.pause();
@@ -70,21 +80,18 @@ function update (interval) {
 		}
 		else
 			//if no song, add default empty:
-			play(make_song(''));
-	}
-	if (tmp.track.props.type == "silence") {
+			play(make_song('-1'));
+	} else if (tmp.track.props.type == "silence") {
 		tmp.track.t_elapsed += interval;
 		timer += interval;
-		if (tmp.track.t_elapsed>tmp.track.props.duration) {
+		if (tmp.track.t_elapsed > tmp.track.props.duration) {
 			t_reupdate = tmp.track.t_elapsed-tmp.track.props.duration
 			tmp.track = null;
 			update(t_reupdate);
 		}
-	} else if (tmp.track.props.type=="empty") {
-		//do nothing
 	} else if (tmp.track.props.type=="upload") {
-		console.log("into upload");
 		if (current_state == "playing") {
+			console.log(status());
 			tmp.track.t_elapsed+=interval;
 			current_timer += interval;
 		} else {
@@ -97,16 +104,14 @@ function update (interval) {
 			tmp.track = null;
 			update(0);
 		}
-		console.log("out of upload");
 	}
-	console.log(status());
 }
-
-update(0);
 
 function update_dec() {
   update(1);
 };
+
+update(0);
 
 repeat(update_dec).every(1000, 'ms').start.now();
 
