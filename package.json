@@ -21,6 +21,8 @@
     "player": "^0.6.1",
     "repeat": "0.0.6",
     "serve-favicon": "~2.3.0",
-    "speaker": "^0.3.0"
+    "speaker": "^0.3.0",
+	"player": "0.6.1",
+	"musicmetadata": "2.0.4"
   }
 }
