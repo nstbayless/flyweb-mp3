@@ -46,12 +46,15 @@ function start_flyweb(name) {
 	app._server_name = name;
 	fw = mdns.createAdvertisement(mdns.tcp('flyweb'), port, {
 	  //todo: allow admin to customize broadcast name.
-	  name: app.server_name,
+	  name: app._server_name,
 	  txtRecord: {}
 	});
-}
 
-start_flyweb(config.defaults.name)
+	fw.start();
+	console.log("")
+	console.log("server started as '" + name + "'");
+	console.log("Listening on http://localhost:3000/ as well as flyweb")
+}
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -122,7 +125,7 @@ function onListening() {
   debug('Listening on ' + bind);
 
   // Start broadcasting FlyWeb
-  fw.start();
+  start_flyweb(config.defaults.name)
 }
 
 /**
@@ -142,6 +145,4 @@ app.restart_flyweb = function (name) {
 
 	//start server
 	start_flyweb(name);
-
-	console.log("server restarted as '" + name + "'");
 }
