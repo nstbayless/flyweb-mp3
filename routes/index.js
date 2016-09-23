@@ -4,7 +4,7 @@ var express = require('express');
 var router = express.Router();
 var db_get = require('../src/db_get');
 var tmp = require('../src/tmp_store');
-
+var audio = require('../src/audio');
 /* GET playlist render; */
 function get_playlist (req,res,next, path) {
 	if (path.length==0)
@@ -37,10 +37,17 @@ router.get(/.*/, function(req, res, next) {
 			return get_playlist(req,res,next, path.slice(1));
 		if (path[0]=="add")
 			return get_add(req,res,next,path.slice(1));
+		if (path[0]=="update") {
+			console.log(audio.status());
+			return JSON.stringify(audio.status());
+		}
+		if (path[0]=="pause") {
+			audio.pause();
+			return 0;
+		}
 	}
 	next();
 });
 
 return router;
-
 }
