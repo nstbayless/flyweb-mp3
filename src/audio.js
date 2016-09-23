@@ -52,7 +52,7 @@ function play(song) {
 }
 
 function status() {
-	return {state: current_state, duration: current_song_duration, time_elapsed: current_timer};
+	return {title: tmp.track.props.name, state: current_state, duration: current_song_duration, time_elapsed: current_timer};
 }
 
 // checks if audio paused or stops, takes appropriate action

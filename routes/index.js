@@ -37,7 +37,7 @@ router.get(/.*/, function(req, res, next) {
 			return get_playlist(req,res,next, path.slice(1));
 		if (path[0]=="add")
 			return get_add(req,res,next,path.slice(1));
-		if (path[0]=="update") {
+		if (path[0]=="status") {
 			console.log(audio.status());
 			return JSON.stringify(audio.status());
 		}
