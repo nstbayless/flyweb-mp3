@@ -49,18 +49,18 @@ function song_play(song) {
 		play_file(song.upload_file, (ev) => {
 			//handle event:
 			if (ev=="finish")
-				tmp.playing.state="finish";
+				tmp.track.state="finish";
 			update(0);
 		})
 	}
 
-	tmp.playing=re;
+	tmp.track=re;
 }
 
 // checks if audio paused or stops, takes appropriate action
 function update (dt) {
 	if (!dt) dt=0;
-	if (!tmp.playing || tmp.playing.props.type=="empty") {
+	if (!tmp.track || tmp.track.props.type=="empty") {
 		if (tmp.q.l_song_id.length>0) {
 			//pop song from queue:
 			tmp.q = db_get.realize_playlist(tmp.q);
@@ -72,19 +72,19 @@ function update (dt) {
 			//if no song, add default empty:
 			song_play(make_song(''));
 	}
-	if (tmp.playing.props.type=="silence") {
-		tmp.playing.t_elapsed+=dt;
-		if (tmp.playing.t_elapsed>tmp.playing.props.duration) {
-			t_reupdate = tmp.playing.t_elapsed-tmp.playing.props.duration
-			tmp.playing = null;
+	if (tmp.track.props.type=="silence") {
+		tmp.track.t_elapsed+=dt;
+		if (tmp.track.t_elapsed>tmp.track.props.duration) {
+			t_reupdate = tmp.track.t_elapsed-tmp.track.props.duration
+			tmp.track = null;
 			update(t_reupdate);
 		}
-	} else if (tmp.playing.props.type=="empty") {
+	} else if (tmp.track.props.type=="empty") {
 		//do nothing
-	} else if (tmp.playing.props.type=="upload") {
-		if  (tmp.playing.state=="finish") {
+	} else if (tmp.track.props.type=="upload") {
+		if  (tmp.track.state=="finish") {
 			//go to next song on queue:
-			tmp.playing = null;
+			tmp.track = null;
 			update(0);
 		}
 	}

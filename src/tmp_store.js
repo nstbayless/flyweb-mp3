@@ -9,8 +9,9 @@ ex.q = make_playlist('q');
 ex.q.name = "Play Queue";
 ex.q.l_song_id
 
-//song currently playing
-playing = null;
+//track currently playing; track.props is a song object (see _song.js)
+//other fields include time elapsed, etc.
+track = null;
 
 //last song uploaded, stored here because database not yet implemented
 //TODO: delete this when database retrieval is implemented
