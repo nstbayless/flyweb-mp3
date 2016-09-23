@@ -7,30 +7,16 @@ make_song = require ('./_song');
 db_get = require('./db_get');
 
 // audio playing pipeline:
-var Speaker = require('speaker');
-var lame = require('lame')
+var Player = require('player')
 var fs = require('fs');
-var decoder = lame.Decoder();
-var Throttle = require('throttle')
-
-var speaker = new Speaker({
-  channels: 2,          // 2 channels
-  bitDepth: 16,         // 16-bit samples
-  sampleRate: 44100     // 44,100 Hz sample rate
-});
+var mm = require('musicmetadata');
 
 //plays song with audio pipeline above
 function play_file(file,cb) {
 	console.log(file);
-	var stream = fs.createReadStream(file);
-
-	//Throttle to allow play/pause:
-	stream = stream.pipe(new Throttle(44100));
-	stream.pipe(decoder).pipe(speaker);
-
-	stream.on('finish', () => {
-		cb("finish");
-	});
+	var player = new Player(file);
+	player.play();
+	console.log("PLAYING WITH PLAYER");
 }
 
 //takes song metadata, makes playable information for update below
