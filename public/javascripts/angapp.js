@@ -1,5 +1,6 @@
 var app = angular.module('angApp', []);
-app.controller('angCon', function($scope, $http) {
+app.controller('angCon', function($scope, $http, $timeout) {
+	$scope.pl = {}
 	try{ $scope.pl=pl } catch(e) {} //pl might not be supplied
 	$scope.track = track;	
 
@@ -37,4 +38,27 @@ app.controller('angCon', function($scope, $http) {
 		var counter_n_elapsed = Math.round(counter_n*p);
 		return $scope.pretty_time(t_elapsed) + "  [" + "@".repeat(counter_n_elapsed) + "~".repeat(counter_n-counter_n_elapsed)+"]  " + $scope.pretty_time(duration);
 	}
+	
+	//live update playlist:
+	$scope.update_playlist = function() {
+		var endpoint= "/api/p/" + $scope.pl.id;
+		$.get(endpoint, (pl) => {
+			$scope.pl = pl
+		});
+	}
+
+	//grabs updates to page from server
+	$scope.live_update = function() {
+		if ($scope.pl)
+			$scope.update_playlist();
+		$timeout(function() {
+			$scope.live_update()
+		}, 40)
+	}
+	$scope.live_update();
+
 });
+
+
+
+//some other stuff
