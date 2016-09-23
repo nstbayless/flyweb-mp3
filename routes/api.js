@@ -16,7 +16,6 @@ function api_error(code,text) {
 	res.status(code).send(text + "API error occurred.");
 }
 
-
 function get(req,res,next) {
 	path = req.url.split("/").filter((e) => {return e.length>0});
 	if (path.length<=1) {
@@ -28,7 +27,6 @@ function get(req,res,next) {
 			if (path.length<2) return api_error(400,"must supply plid");
 			plid = path[1];
 			res.send(200,db_get.playlist(plid,true));
-//			db_get.playlist(plid,true, (pl)=>{res.send(200,pl);})
 		}
 	}
 }
@@ -66,14 +64,22 @@ function post(req,res,next) {
 	if (path.length<=1) {
 		return api_error(400,"Cannot post to API root");
 	} else {
+		// /api/
 		plid = path[0];
+		if (path.length==1) {
+			// /api/{plid}
+			// TODO: change to /api/p/{plid}
+			console.log(db_post);
+			return db_post.playlist(req.data);
+		}
 		if (path[1]=="songs") {
-			// /api/songs
+			// /api/{plid}/songs
+			// TODO: change to /api/p/{plid}/songs
 			if (path.length==2) {
 				return api_error(400,"Please post to a subpath, such as songs/upload");
 			} else {
 				if (path[2]=="upload") {
-					// /api/songs/upload
+					// /api/{plid}/songs/upload
 					if (path.length>3)
 						return api_error(400);
 					return post_song_upload(req,res,next,plid);

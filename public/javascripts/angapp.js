@@ -56,9 +56,4 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		}, 40)
 	}
 	$scope.live_update();
-
 });
-
-
-
-//some other stuff
