@@ -19,7 +19,6 @@ app.controller('angCon', function($scope, $http, $timeout) {
 			}
 		});
 	} catch(e) {} //pl might not be supplied on this page; this is okay.
-	$scope.track = track;
 
 	$scope.status = {
 		title: 'Nothing Playing',
