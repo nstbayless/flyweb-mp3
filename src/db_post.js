@@ -46,7 +46,8 @@ db_post.playlist = function (pl, cb) {
 		return cb(true);
 	//write queue:
 	tmp.q=pl;
-	return cb(false);
+	if (cb)
+		return cb(false);
 }
 
 module.exports = db_post;

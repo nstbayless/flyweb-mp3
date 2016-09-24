@@ -8,6 +8,7 @@ var mm = require('musicmetadata');
 var db_get = require('../src/db_get');
 var db_post = require('../src/db_post');
 var audio = require('../src/audio');
+var combine = require('merge')
 
 var router = express.Router();
 
@@ -73,7 +74,7 @@ function post_song_upload(req,res,next,plid) {
 
 function post(req,res,next) {
 	path = req.url.split("/").filter((e) => {return e.length>0});
-	if (path.length<=1) {
+	if (path.length<1) {
 		return api_error(400,"Cannot post to API root");
 	} else {
 		// /api/
@@ -81,8 +82,9 @@ function post(req,res,next) {
 		if (path.length==1) {
 			// /api/{plid}
 			// TODO: change to /api/p/{plid}
-			console.log(db_post);
-			return db_post.playlist(req.data);
+			pl=db_get.playlist(plid)
+			pl=combine(pl,{l_song_id:req.body['l[]']});
+			return db_post.playlist(pl);
 		}
 		if (path[1]=="songs") {
 			// /api/{plid}/songs

@@ -1,9 +1,20 @@
 var app = angular.module('angApp', []);
 app.controller('angCon', function($scope, $http, $timeout) {
 	$scope.pl = {}
-	try{ $scope.pl=pl } catch(e) {} //pl might not be supplied
+	try{
+		$scope.pl=pl;
+		
+		pl_table = document.getElementById("pltable");
+		pl_sortable = new Sortable(pl_table, {
+			dataIdAttr:"data",
+			onSort:function(evt){
+				$scope.arrange_playlist(pl_sortable.toArray());
+			}
+		});
+	} catch(e) {} //pl might not be supplied on this page; this is okay.
 	$scope.track = track;	
 
+	
 	$scope.range = function (n) {
 		l = [];
 		for (i=0;i<n;i++)
@@ -38,7 +49,14 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		var counter_n_elapsed = Math.round(counter_n*p);
 		return $scope.pretty_time(t_elapsed) + "  [" + "@".repeat(counter_n_elapsed) + "~".repeat(counter_n-counter_n_elapsed)+"]  " + $scope.pretty_time(duration);
 	}
-	
+
+	//edit playlist	
+	$scope.arrange_playlist = function(list) {
+		pl.l_song_id=list;
+		var endpoint= "/api/" + $scope.pl.id;
+		$.post(endpoint,{l:list});
+	}
+
 	//live update playlist:
 	$scope.update_playlist = function() {
 		var endpoint= "/api/p/" + $scope.pl.id;
@@ -55,5 +73,5 @@ app.controller('angCon', function($scope, $http, $timeout) {
 			$scope.live_update()
 		}, 40)
 	}
-	$scope.live_update();
+	//$scope.live_update();
 });

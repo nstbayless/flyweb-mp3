@@ -1,21 +1,24 @@
 extends layout
 
 block head
+	script(src="/static/js/sortable.js" charset="utf-8")
 	script.
 		var pl = !{JSON.stringify(pl)};
 
 block content
 	div.q
 		h1=pl.name
-		table.q(ng-show="pl.l_song.length>0")
-			tr
-				th.q
-				th.q Name
-				th.q Duration
-			tr(ng-repeat="i in range(pl.l_song_id.length)" style="background-color: #{{(i%2==0)?'ccf':'eef'}};")
-				td.q.num {{i+1}}
-				td.q {{pl.l_song[i].name}}
-				td.q {{pretty_time(pl.l_song[i].duration)}}
+		div(ng-show="pl.l_song.length>0")
+			table.q
+				tr
+					th.q
+					th.q Name
+					th.q Duration
+				tbody#pltable
+					tr(ng-repeat="i in range(pl.l_song_id.length)" style="background-color: #{{(i%2==0)?'ccf':'eef'}};" data="{{pl.l_song_id[i]}}")
+						td.q.num {{i+1}}
+						td.q {{pl.l_song[i].name}}
+						td.q {{pretty_time(pl.l_song[i].duration)}}
 		div(ng-show="pl.l_song.length==0")
 			center
 				p
