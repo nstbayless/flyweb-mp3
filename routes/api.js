@@ -32,8 +32,7 @@ function get(req,res,next) {
 			//send list and track index:
 			manager.currentPlaylist(function(list_id) {
 				manager.currentSongIndex(function(sid) {
-					console.log("!");
-					res.send(200,{list_id: list, index: sid});
+					res.send(200,{list_id: list_id, index: sid});
 				})
 			})
 		}

@@ -25,7 +25,7 @@ playlist_manager.getPlaylist = function(list, callback) {
     else {
         // TODO: read from db
     }
-    callback(l);
+    if (callback) callback(l);
 };
 
 /**
@@ -35,7 +35,7 @@ playlist_manager.getPlaylist = function(list, callback) {
             {Object} result: the playlist ID
  */
 playlist_manager.currentPlaylist = function(callback) {
-    callback(playlist_manager.currentList.id);
+    if (callback) callback(playlist_manager.currentList.id);
 }
 
 /**
@@ -45,7 +45,7 @@ playlist_manager.currentPlaylist = function(callback) {
             {Object} result: the song index
  */
 playlist_manager.currentSongIndex = function(callback) {
-    callback(playlist_manager.songIndex);
+    if (callback) callback(playlist_manager.songIndex);
 }
 
 /**
@@ -63,7 +63,7 @@ playlist_manager.getSong = function(songId, callback) {
     else {
         // TODO: read from db
     }
-    callback(s);
+    if (callback) callback(s);
 };
 
 /**
@@ -89,7 +89,7 @@ playlist_manager.nextSong = function(callback) {
         playlist_manager.songIndex = 0;
     }
     playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(s) {
-        callback(s);
+        if (callback) callback(s);
     });
 };
 
@@ -104,7 +104,7 @@ playlist_manager.prevSong = function(callback) {
         playlist_manager.songIndex = playlist_manager.currentList.length - 1;
     }
     playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(s) {
-        callback(s);
+        if (callback) callback(s);
     });
 };
 
@@ -130,7 +130,7 @@ playlist_manager.addSong = function(list, songId, callback) {
             Playlist.addSongId(l, songId);
         });
     }
-    callback();
+    if (callback) callback();
 };
 
 /**
@@ -148,7 +148,7 @@ playlist_manager.createSong = function(list, path, callback) {
     s.type = "upload";
     playlist_manager.songMap[id] = s;
     playlist_manager.addSong(list, id, function() {
-        callback(id, false);
+        if (callback) callback(id, false);
     });
 };
 
@@ -165,7 +165,7 @@ playlist_manager.replaceList = function(list, songIds, callback) {
         for (var i = 0; i < l.songIds.length; i++) {
             l.songs.push(playlist_manager.songMap[songIds[i]]);
         }
-        callback();
+        if (callback) callback();
     });
 };
 

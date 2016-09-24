@@ -134,9 +134,9 @@ app.controller('angCon', function($scope, $http, $timeout) {
 			console.log(track);
 			if (!update_lock) {
 				if (track.list_id==pl.id)
-					$scope.pl_current_song = track.index
+					$scope.pl_track_index = track.index
 				else
-					$scope.pl_current_song = -1;
+					$scope.pl_track_index = -1;
 				$scope.replace_playlist();
 			}
 		});
