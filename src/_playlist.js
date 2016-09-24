@@ -1,10 +1,20 @@
-function make_playlist (id) {
+playlist = {}
+
+playlist.Playlist = function(id) {
 	return {
 		id: id,
 		name: id,
-		l_song_id: [],
-		l_song: []
-	}
+		songIds: [],
+		songs: []
+	};
 }
 
-module.exports = make_playlist;
+playlist.addSong = function(list, song) {
+	list.songs.push(song);
+}
+
+playlist.addSongId = function(list, songId) {
+	list.songIds.push(songId);
+}
+
+module.exports = playlist;

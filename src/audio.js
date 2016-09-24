@@ -3,8 +3,8 @@
 repeat = require('repeat');
 
 tmp = require('./tmp_store');
-make_song = require ('./_song');
-db_get = require('./db_get');
+Song = require ('./_song');
+manager = require('./playlist_manager');
 
 // audio playing pipeline:
 var Player = require('player')
@@ -35,13 +35,11 @@ function previous() {
 	//to be implemented
 	//var last_song = getthelastsongplayed
 	play(last_song);
-	//update_db_go_prev();
 }
 
 function next() {
 	var next_song = 0; //to be implement ed
 	play(next_song);
-	//update_db_go_next(); //to be implemented
 }
 
 //pauses the song
@@ -68,7 +66,7 @@ function play(song) {
 		current_state = "playing"
 		current_song_duration = song.duration
 		re.state="play";
-		play_file(song.upload_file, (ev) => {
+		play_file(song.path, (ev) => {
 			//handle event:
 			if (ev=="finish")
 				tmp.track.state="finish";
@@ -87,22 +85,23 @@ function update (interval) {
 	if (!interval) {
 		interval=0;
 	}
-	if (!tmp.track || tmp.track.props.type=="empty") {
-		if (tmp.q.l_song_id.length>0) {
+	if (!tmp.track || tmp.track.props.type == "empty") {
+		if (manager.queue.songIds.length > 0) {
 			//pop song from queue:
-			tmp.q = db_get.realize_playlist(tmp.q);
-			play(tmp.q.l_song[0]);
-			tmp.q.l_song = tmp.q.l_song.slice(1);
-			tmp.q.l_song_id = tmp.q.l_song_id.slice(1);
+			play(manager.queue.songs[0]);
+			manager.queue.songs = manager.queue.songs.slice(1);
+			manager.queue.songIds = manager.queue.songIds.slice(1);
 		}
-		else
+		else {
 			//if no song, add default empty:
-			play(make_song('-1'));
+			play(Song.Song("-1"));
+		}
+
 	} else if (tmp.track.props.type == "silence") {
 		tmp.track.t_elapsed += interval;
 		timer += interval;
 		if (tmp.track.t_elapsed > tmp.track.props.duration) {
-			t_reupdate = tmp.track.t_elapsed-tmp.track.props.duration
+			t_reupdate = tmp.track.t_elapsed - tmp.track.props.duration
 			tmp.track = null;
 			update(t_reupdate);
 		}
