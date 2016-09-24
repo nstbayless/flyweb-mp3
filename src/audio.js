@@ -7,28 +7,57 @@ Song = require ('./_song');
 manager = require('./playlist_manager');
 
 // audio playing pipeline:
-var Player = require('player')
+var Player = require('player');
+var Speaker = require('speaker');
+var Lame = require('lame');
+var Fs = require('fs');
+var Throttle = require('throttle');
+var Stream = require('stream');
 
 var current_player = new Player();
 var current_timer = 0; //timer records time elapsed
 var current_state = "paused"; //state of the music
 var current_song_duration = 0; //the length of the current song
 
+var stream;
+var speaker;
+
 //plays song with audio pipeline above
 function play_file(file, cb) {
 	console.log(file);
-	var player = new Player(file);
-	current_player = player;
-	current_player.on('error', function(err){
-		console.log("all song finished");
+	
+	stream = Fs.createReadStream(file);
+	speaker = new Speaker({
+		channels: 2,
+		bitDepth: 16,
+		sampleRate: 44100
 	});
-	current_player.on('playing', function(item){
-		console.log('im playing... src:' + item);
+
+    let totalBytesSeen = 0;
+
+
+    transform = new Stream.Transform({
+		transform: function(chunk, encoding, callback) {
+			this.push(chunk);
+			console.log("PUSHED LENGTH: " + chunk.length);
+			totalBytesSeen += chunk.length;
+			console.log("TOTAL LENGTH: " + totalBytesSeen);
+			callback();
+		}
 	});
-	current_player.on('playend', function(item){
-		console.log('src:' + item + ' play done, switching to next one ...');
-	});
-	current_player.play();
+
+	speaker.on('pipe', () => {
+		console.log("***************************************");
+		current_state = "playing";
+	})
+
+	//stream = stream.pipe(new Throttle(44100));
+	stream.pipe(Lame.Decoder()).pipe(transform).pipe(speaker);
+
+	speaker.on('finish', () => {
+		current_state = 'paused';
+		console.log("********SONG SHOULD BE STOPPED********");
+	})
 }
 
 function previous() {
@@ -44,12 +73,12 @@ function next() {
 
 //pauses the song
 function pause() {
-	current_player.pause();
-
 	if (current_state === 'paused') {
 		current_state = 'playing';
+		speaker.uncork();
 	} else if (current_state === 'playing') {
 		current_state = 'paused';
+		speaker.cork();
 	}
 
 	return current_state;
@@ -66,7 +95,6 @@ function play(song) {
 	} else if (song.type=="upload") {
 		re.t_elapsed = 0;
 		console.log("Now playing: " + song.name);
-		current_state = "playing"
 		current_song_duration = song.duration
 		re.state="play";
 		play_file(song.path, (ev) => {
@@ -109,7 +137,6 @@ function update (interval) {
 		}
 	} else if (tmp.track.props.type=="upload") {
 		if (current_state == "playing") {
-			console.log(status());
 			tmp.track.t_elapsed+=interval;
 			current_timer += interval;
 		} else {
@@ -126,12 +153,12 @@ function update (interval) {
 }
 
 function update_dec() {
-  update(1);
+  update(0.1);
 };
 
 update(0);
 
-repeat(update_dec).every(1000, 'ms').start.now();
+repeat(update_dec).every(100, 'ms').start.now();
 
 module.exports = {
 	pause: pause,
