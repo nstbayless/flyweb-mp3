@@ -31,6 +31,18 @@ function play_file(file, cb) {
 	current_player.play();
 }
 
+function previous() {
+	var last_song = getthelastsongplayed
+	play(last_song);
+	update_db_go_prev();
+}
+
+function next() {
+	var next_song = getthenextsong
+	play(next_song);
+	update_db_go_next();
+}
+
 //pauses the song
 function pause() {
 	current_state = "paused";
