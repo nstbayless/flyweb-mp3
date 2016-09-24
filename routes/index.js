@@ -22,7 +22,14 @@ function get_add (req,res,next, path) {
 	else
 		id = path[0];
 	pl = db_get.playlist(id,true);
-	res.render('add', { title: res.server_name, pl: pl, track:tmp.track});
+	if (path.length<=1)  // /add[/{plid}]
+		res.render('add', { title: res.server_name, pl: pl, track:tmp.track});
+	else {
+		if (path[1]=="upload") {
+			// /add[/{plid}]/upload
+			res.render('add-upload', { title: res.server_name, pl: pl, track:tmp.track});
+		}
+	}
 }
 
 /* GET router */

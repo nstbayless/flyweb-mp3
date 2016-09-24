@@ -54,6 +54,11 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		return $scope.pretty_time(t_elapsed) + "  [" + "@".repeat(counter_n_elapsed) + "~".repeat(counter_n-counter_n_elapsed)+"]  " + $scope.pretty_time(duration);
 	}
 
+	//submit form upload
+	$scope.submit = function(){
+		console.log("hello, world!");
+	}
+
 	update_lock=false;
 	
 	//zebra stripes for playlist
@@ -132,7 +137,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 			$scope.update_playlist();
 		$timeout(function() {
 			$scope.live_update()
-		}, 100)
+		}, 50)
 	}
 	$scope.live_update();
 });

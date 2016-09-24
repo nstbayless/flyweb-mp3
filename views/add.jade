@@ -6,7 +6,9 @@ block content
 	div.q
 		h1 Add to #{pl.name}
 		p Only file upload supported currently
-		form(method="post" enctype="multipart/form-data" onSubmit = "window.location='/p/#{pl.id}'" action = "/api/#{pl.id}/songs/upload")
-			input(type="file" name="song" accept="audio/*")
-			input(TYPE="hidden" NAME="redirect" VALUE="/p/#{pl.id}")
-			input(type="submit" value="Submit")
+		div.add-module-container
+			div
+				a(href="/add/#{pl.id}/upload")
+					img(src="/images/add_module_upload.png")
+				p Upload from your device
+			div(ng-repeat = "i in range(3)")
