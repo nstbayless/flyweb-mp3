@@ -7,14 +7,18 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		pl_table = document.getElementById("pltable");
 		pl_sortable = new Sortable(pl_table, {
 			dataIdAttr:"data",
-			onSort:function(evt){
+			animation: 170,
+			onStart:function(evt) {
+				$scope.repaint_playlist("#eee","#eee",false);
+			},
+			onEnd:function(evt) {
 				$scope.arrange_playlist(pl_sortable.toArray());
+				$scope.repaint_playlist("#ccf","#eef",true);
 			}
 		});
 	} catch(e) {} //pl might not be supplied on this page; this is okay.
 	$scope.track = track;	
 
-	
 	$scope.range = function (n) {
 		l = [];
 		for (i=0;i<n;i++)
@@ -48,6 +52,15 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		var p = t_elapsed/duration;
 		var counter_n_elapsed = Math.round(counter_n*p);
 		return $scope.pretty_time(t_elapsed) + "  [" + "@".repeat(counter_n_elapsed) + "~".repeat(counter_n-counter_n_elapsed)+"]  " + $scope.pretty_time(duration);
+	}
+	
+	//zebra stripes for playlist
+	$scope.repaint_playlist = function(col1,col2,num) {
+		var rows = pl_table.children
+		for (var i=0;i<rows.length;i++) {
+			rows[i].style["background-color"]=(i%2==0)?col1:col2;
+			rows[i].childNodes[0].innerHTML=(num)?String(i+1):"";
+		}
 	}
 
 	//edit playlist	

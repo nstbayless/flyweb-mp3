@@ -15,10 +15,11 @@ block content
 					th.q Name
 					th.q Duration
 				tbody#pltable
-					tr(ng-repeat="i in range(pl.l_song_id.length)" style="background-color: #{{(i%2==0)?'ccf':'eef'}};" data="{{pl.l_song_id[i]}}")
-						td.q.num {{i+1}}
-						td.q {{pl.l_song[i].name}}
-						td.q {{pretty_time(pl.l_song[i].duration)}}
+					- for (var i=0; i<pl.l_song_id.length; i++)
+						tr(style="background-color: #{(i%2)?'#eef':'#ccf'};" data=pl.l_song_id[i] i="#{i}")
+							td.q.num #{i+1}
+							td.q #{pl.l_song[i].name}
+							td.q {{pretty_time(pl.l_song[#{i}].duration)}}
 		div(ng-show="pl.l_song.length==0")
 			center
 				p
