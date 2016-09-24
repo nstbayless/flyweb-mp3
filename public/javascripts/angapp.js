@@ -1,4 +1,5 @@
 var app = angular.module('angApp', []);
+
 app.controller('angCon', function($scope, $http, $timeout) {
 	$scope.pl = {}
 	try{
@@ -18,7 +19,18 @@ app.controller('angCon', function($scope, $http, $timeout) {
 			}
 		});
 	} catch(e) {} //pl might not be supplied on this page; this is okay.
-	$scope.track = track;	
+	$scope.track = track;
+
+	$scope.status = {
+		title: 'Nothing Playing',
+		state: 'paused',
+		duration: 0,
+		time_elapsed: 0
+	};
+
+	$scope.progress_style = {
+		width: "0%"
+	}
 
 	$scope.range = function (n) {
 		l = [];
@@ -37,22 +49,9 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		return mm + ":" + ss
 	}
 
-	//creates text-based tracker
-	$scope.get_tracker_text = function () {
-		var has_duration=true;
-		if ($scope.track.props.type=="silence")
-			has_duration=false;
-		if ($scope.track.props.type=="empty")
-			has_duration=false;
-		if (!has_duration) {
-			return "---";
-		}
-		var t_elapsed = $scope.track.t_elapsed;
-		var duration = $scope.track.props.duration;
-		var counter_n = 50;
-		var p = t_elapsed/duration;
-		var counter_n_elapsed = Math.round(counter_n*p);
-		return $scope.pretty_time(t_elapsed) + "  [" + "@".repeat(counter_n_elapsed) + "~".repeat(counter_n-counter_n_elapsed)+"]  " + $scope.pretty_time(duration);
+	$scope.pause_song = function() {
+		var endpoint = "/pause";
+		$.get(endpoint);
 	}
 
 	update_lock=false;
@@ -140,6 +139,23 @@ app.controller('angCon', function($scope, $http, $timeout) {
 				$scope.replace_playlist();
 			}
 		});
+	};
+
+	$scope.update_status = function() {
+		var endpoint = "/status";
+		$.get(endpoint, (status) => {
+			var prog_percent = status.time_elapsed / status.duration;
+			prog_percent = isNaN(prog_percent) ? 0 : prog_percent * 100;
+
+			if (status.state === 'paused') {
+				$('#controls-play').removeClass('glyphicon-pause').addClass('glyphicon-play');
+			} else if (status.state === 'playing') {
+				$('#controls-play').removeClass('glyphicon-play').addClass('glyphicon-pause');
+			}
+
+			$scope.status = status;
+			$scope.progress_style.width = prog_percent + "%";
+		});
 	}
 
 	//grabs updates to page from server
@@ -147,6 +163,9 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		if ($scope.pl) {
 			$scope.update_playlist();
 			$scope.update_currentSong();
+		}
+		if ($scope.status) {
+			$scope.update_status();
 		}
 		$timeout(function() {
 			$scope.live_update()

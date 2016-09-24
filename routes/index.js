@@ -5,7 +5,6 @@ module.exports = () => {
 	var audio = require('../src/audio');
 	var manager = require('../src/playlist_manager');
 
-
 	/* GET playlist render; */
 	function get_playlist(req, res, next, path) {
 		if (path.length == 0) {
@@ -47,16 +46,21 @@ module.exports = () => {
 		}
 		else {
 			if (path[0] == "p")
-				return get_playlist(req, res, next, path.slice(1));
+				return get_playlist(req,res,next, path.slice(1));
 			if (path[0] == "add")
-				return get_add(req, res, next, path.slice(1));
-			if (path[0]=="status") {
-				console.log(audio.status());
-				return JSON.stringify(audio.status());
+				return get_add(req,res,next,path.slice(1));
+			if (path[0] == "status") {
+				res.setHeader('Content-Type', 'application/json');
+				res.send(JSON.stringify(audio.status()));
+				return;
 			}
-			if (path[0]=="pause") {
-				audio.pause();
-				return 0;
+			if (path[0] == "pause") {
+				var state = audio.pause();
+				res.setHeader('Content-Type', 'application/json');
+				res.send(JSON.stringify({
+					state: state
+				}));
+				return;
 			}
 		}
 		next();

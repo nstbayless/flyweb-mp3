@@ -44,12 +44,15 @@ function next() {
 
 //pauses the song
 function pause() {
-	if (current_state == "paused") {
-		current_state = "playing"
-	} else {
-		current_state = "paused";
-	}
 	current_player.pause();
+
+	if (current_state === 'paused') {
+		current_state = 'playing';
+	} else if (current_state === 'playing') {
+		current_state = 'paused';
+	}
+
+	return current_state;
 }
 
 //takes song metadata, makes playable information for update below

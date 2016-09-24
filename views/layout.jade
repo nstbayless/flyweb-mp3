@@ -1,31 +1,34 @@
 doctype html
-html
+html(ng-app="angApp")
 	head
-		title= title
-		link(rel='stylesheet', href='/stylesheets/style.css')
+		block head
+		title=title
 		link(rel="stylesheet" href="/static/css/bootstrap.min.css")
+		link(rel='stylesheet', href='/stylesheets/style.css')
 		meta(name="viewport" content="width=device-width, initial-scale=1")
 		script(src="/static/js/jquery.js" charset="utf-8")
 		script(src="/static/js/jquery.form.min.js" charset="utf-8")
 		script(src="/static/js/angular.min.js" charset="utf-8")
 		script(src="/javascripts/angapp.js")
-		script.
-			var track = !{JSON.stringify(track)};
-		block head
-	body(ng-app="angApp")
-		div(ng-controller="angCon")
-			div.nav
-				a.fill(href="/")
-					p=title
-				div.menu
-					a(href="/")
-						img.menu(src="/images/menu.png")
-			div.pane
-				block content
-			div
-				block init
-			div.bottomfloat
-				block bottom
-				div.footer
-					p.footer {{track.props.name}}
-					p.footer.tracker {{get_tracker_text()}}
+	body(ng-controller="angCon")
+		block body
+		header
+			block header
+			section#logo
+				block logo
+				a(href="/") #{title}
+		div#content
+			block content
+		footer
+			block footer
+			div#player-song
+				span#song-name {{status.title}}
+			div#player-controls
+				span#controls-prev(class="glyphicon glyphicon-step-backward" aria-hidden="true")
+				span#controls-play(class="glyphicon glyphicon-play" aria-hidden="true" ng-click="pause_song()")
+				span#controls-next(class="glyphicon glyphicon-step-forward" aria=hidden="true")
+			div#player-progress
+				span#progress-elapsed {{pretty_time(status.time_elapsed)}}
+				div#progress-bar
+					div#progress-bar-elapsed(ng-style="progress_style")
+				span#progress-total {{pretty_time(status.duration)}}
