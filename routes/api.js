@@ -30,9 +30,6 @@ function get(req,res,next) {
 			if (path.length<2) return api_error(400,"must supply plid");
 			plid = path[1];
 			manager.getPlaylist(id, function(list) {
-				// remove after making naming consistent
-				list.l_song_id = list.songIds;
-				list.l_song = list.songs;
 				res.send(200, list);
 			});
 		}
@@ -82,7 +79,6 @@ function post(req,res,next) {
 		if (path.length==1) {
 			// /api/{plid}
 			// TODO: change to /api/p/{plid}
-			pl=db_get.playlist(plid)
 			return manager.replaceList(plid,req.body['l[]'])
 		}
 		if (path[1]=="songs") {

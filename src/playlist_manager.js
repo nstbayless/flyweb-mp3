@@ -141,7 +141,10 @@ playlist_manager.createSong = function(list, path, callback) {
 playlist_manager.replaceList = function(list, songIds, callback) {
     playlist_manager.getPlaylist(list, function(l) {
         l.songIds = songIds;
-        // TODO: l.songs = songs generated from new IDs
+        l.songs = [];
+        for (var i = 0; i < l.songIds.length; i++) {
+            l.songs.push(playlist_manager.songMap[songIds[i]]);
+        }
         callback();
     });
 };
