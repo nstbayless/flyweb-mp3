@@ -25,6 +25,17 @@ function get(req,res,next) {
 		return res.status(200).send("Welcome to the FlyWeb-mp3 API!")
 	} else {
 		// /api/
+		if (path[0]=="track") {
+			// /api/track
+			if (path.length>2) return api_error(400);
+
+			//send list and track index:
+			manager.currentPlaylist(function(list_id) {
+				manager.currentSongIndex(function(sid)) {
+					res.send(200,{list_id: list, index: sid});
+				}
+			})
+		}
 		if (path[0]=="p") {
 			// /api/p/{plid}/
 			if (path.length<2) return api_error(400,"must supply plid");

@@ -3,6 +3,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	$scope.pl = {}
 	try{
 		$scope.pl=pl;
+		$scope.pl_track_index=-1;
 		
 		pl_table = document.getElementById("pltable");
 		pl_sortable = new Sortable(pl_table, {
@@ -89,7 +90,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 				tr.removeChild(tr.firstChild)
 			tr.setAttribute("data",song.id);
 			//TODO: bold if playing.
-			style="font-weight:"+((i==0)?'bold':'normal')+';';
+			style="font-weight:"+((i==$scope.pl_track_index)?'bold':'normal')+';';
 
 			//add number cell:
 			var td = document.createElement("td");
@@ -133,10 +134,26 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		});
 	}
 
+	//live update current song:
+	$scope.update_currentSong = function() {
+		var endpoint= "/api/track";
+		$.get(endpoint, (track) => {
+			if (!update_lock) {
+				if (track.list_id==pl.id)
+					$scope.pl_current_song = track.index
+				else
+					$scope.pl_current_song = -1;
+				$scope.replace_playlist();
+			}
+		});
+	}
+
 	//grabs updates to page from server
 	$scope.live_update = function() {
-		if ($scope.pl)
+		if ($scope.pl) {
 			$scope.update_playlist();
+			$scope.update_currentSong();
+		}
 		$timeout(function() {
 			$scope.live_update()
 		}, 300)
