@@ -46,7 +46,11 @@ function next() {
 
 //pauses the song
 function pause() {
-	current_state = "paused";
+	if (current_state == "paused") {
+		current_state = "playing"
+	} else {
+		current_state = "paused";
+	}
 	current_player.pause();
 }
 
