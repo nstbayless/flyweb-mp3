@@ -32,15 +32,16 @@ function play_file(file, cb) {
 }
 
 function previous() {
-	var last_song = getthelastsongplayed
+	//to be implemented
+	//var last_song = getthelastsongplayed
 	play(last_song);
-	update_db_go_prev();
+	//update_db_go_prev();
 }
 
 function next() {
-	var next_song = getthenextsong
+	var next_song = 0; //to be implement ed
 	play(next_song);
-	update_db_go_next();
+	//update_db_go_next(); //to be implemented
 }
 
 //pauses the song
