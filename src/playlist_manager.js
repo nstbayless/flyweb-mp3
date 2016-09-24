@@ -5,7 +5,7 @@ var playlist_manager = {};
 playlist_manager.queue = Playlist.Playlist("q");
 playlist_manager.queue.name = "Play Queue"
 playlist_manager.currentList = playlist_manager.queue;
-playlist_manager.songIndex = 0;
+playlist_manager.songIndex = -1;
 playlist_manager.songMap = {};
 playlist_manager.listMap = {"q": playlist_manager.queue};
 playlist_manager.nextId = 0;
@@ -27,6 +27,26 @@ playlist_manager.getPlaylist = function(list, callback) {
     }
     callback(l);
 };
+
+/**
+ * Get the current playlist id.
+ * 
+ * @param {Function} callback(result): the callback function with:
+            {Object} result: the playlist ID
+ */
+playlist_manager.currentPlaylist = function(callback) {
+    callback(playlist_manager.currentList.id);
+}
+
+/**
+ * Get the current song index.
+ * 
+ * @param {Function} callback(result): the callback function with:
+            {Object} result: the song index
+ */
+playlist_manager.currentSongIndex = function(callback) {
+    callback(playlist_manager.songIndex);
+}
 
 /**
  * Get a song with the specified ID.
@@ -141,7 +161,10 @@ playlist_manager.createSong = function(list, path, callback) {
 playlist_manager.replaceList = function(list, songIds, callback) {
     playlist_manager.getPlaylist(list, function(l) {
         l.songIds = songIds;
-        // TODO: l.songs = songs generated from new IDs
+        l.songs = [];
+        for (var i = 0; i < l.songIds.length; i++) {
+            l.songs.push(playlist_manager.songMap[songIds[i]]);
+        }
         callback();
     });
 };

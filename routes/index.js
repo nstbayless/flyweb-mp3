@@ -15,9 +15,6 @@ module.exports = () => {
 			id = path[0];
 		}
 		manager.getPlaylist(id, function(list) {
-			// remove after making naming consistent
-			list.l_song_id = list.songIds;
-			list.l_song = list.songs;
 			res.render('playlist', {title: res.server_name, pl: list, track: tmp.track});
 		});
 	}
