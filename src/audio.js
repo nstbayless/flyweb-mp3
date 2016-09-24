@@ -87,10 +87,9 @@ function update (interval) {
 	}
 	if (!tmp.track || tmp.track.props.type == "empty") {
 		if (manager.queue.songIds.length > 0) {
-			//pop song from queue:
-			play(manager.queue.songs[0]);
-			manager.queue.songs = manager.queue.songs.slice(1);
-			manager.queue.songIds = manager.queue.songIds.slice(1);
+			manager.nextSong(function(s) {
+				play(s);
+			});
 		}
 		else {
 			//if no song, add default empty:
