@@ -78,22 +78,23 @@ app.controller('angCon', function($scope, $http, $timeout) {
 			} else
 				tr=pl_table.children[i];
 			
-			if (tr.getAttribute("data")==song.id)
-				continue;
 			while (tr.firstChild)
 				tr.removeChild(tr.firstChild)
 			tr.setAttribute("data",song.id);
 			//TODO: bold if playing.
-			console.log(tr.getAttribute("data"));
+			style="font-weight:"+((i==$scope.pl.current)?'bold':'normal')+';';
+
 			//add number cell:
 			var td = document.createElement("td");
 			td.setAttribute('class', "q num");
+			td.setAttribute('style',style)
 			td.innerHTML=(i+1)
 			tr.appendChild(td); 
 			
 			//add name cell
 			td = document.createElement("td");
 			td.setAttribute('class', "q");
+			td.setAttribute('style',style)
 			td.innerHTML=(song.name);
 			tr.appendChild(td); 
 
@@ -101,6 +102,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 			td = document.createElement("td");
 			td.setAttribute('class', "q");
 			td.innerHTML=($scope.pretty_time(song.duration));
+			td.setAttribute('style',style)
 			tr.appendChild(td);
 		}
 		$scope.repaint_playlist("#ccf","#eef",true)
