@@ -29,6 +29,26 @@ playlist_manager.getPlaylist = function(list, callback) {
 };
 
 /**
+ * Get the current playlist id.
+ * 
+ * @param {Function} callback(result): the callback function with:
+            {Object} result: the playlist ID
+ */
+playlist_manager.currentPlaylist = function(callback) {
+    callback(playlist_manager.currentList.id);
+}
+
+/**
+ * Get the current song index.
+ * 
+ * @param {Function} callback(result): the callback function with:
+            {Object} result: the song index
+ */
+playlist_manager.currentSongIndex = function(callback) {
+    callback(playlist_manager.songIndex);
+}
+
+/**
  * Get a song with the specified ID.
  * 
  * @param {Number} songId: the song ID
