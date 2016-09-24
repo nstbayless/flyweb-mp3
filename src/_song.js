@@ -1,13 +1,18 @@
-module.exports = function (id) {
+var song = {}
+
+song.Song = function (id) {
 	return {
 		id: id,
 		type: "empty",
 		name: "No song",
 		duration: 0,
 		artist: "Artist",
-		album: "Album"
+		album: "Album",
+		path: ""
 	}
 }
+
+module.exports = song
 
 //valid "types" are:
 //"empty": plays no sound and skips to next song if possible

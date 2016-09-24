@@ -5,12 +5,12 @@ var assert = require('assert');
 var fs = require('fs');
 var mm = require('musicmetadata');
 
-var db_get = require('../src/db_get');
-var db_post = require('../src/db_post');
 var audio = require('../src/audio');
 var combine = require('merge')
 
 var router = express.Router();
+
+manager = require('../src/playlist_manager');
 
 function api_error(code,text) {
 	if (!text)
@@ -29,7 +29,12 @@ function get(req,res,next) {
 			// /api/p/{plid}/
 			if (path.length<2) return api_error(400,"must supply plid");
 			plid = path[1];
-			res.send(200,db_get.playlist(plid,true));
+			manager.getPlaylist(id, function(list) {
+				// remove after making naming consistent
+				list.l_song_id = list.songIds;
+				list.l_song = list.songs;
+				res.send(200, list);
+			});
 		}
 	}
 }
@@ -41,9 +46,8 @@ router.get(/.*/, function(req, res, next) {
 
 // POST a song to the given playlist
 // sends back id of song
-function post_song_upload(req,res,next,plid) {
+function post_song_upload(req, res, next, list) {
 	assert(!!req.file);
-
 	var parser = mm(fs.createReadStream(req.file.destination + req.file.filename), { duration: true }, function (err, metadata) {
 		if (err) throw err;
 		if (metadata.title != "") {
@@ -52,23 +56,19 @@ function post_song_upload(req,res,next,plid) {
 			var title = req.file.originalname;
 		}
 		console.log(title);
-		db_post.song({
-			type: "upload",
-			name: title,
-			duration: metadata.duration, //TODO
-			upload_file: req.file.destination + req.file.filename
-		},
-		function(sid, err) {
-			if (err)
+		manager.createSong(list, req.file.destination + req.file.filename, function(id, err) {
+			if (err) {
 				return api_error(500);
-			db_post.playlist_append(sid,plid,function (err) {
-				audio.update(0);
-				if (err)
-					return api_error(500);
-				else
+			}
+			else {
+				manager.getSong(id, function(s) {
+					s.type = "upload";
+					s.name = title;
+					s.duration = metadata.duration;
 					return res.status(200).send();
-			})
-		})
+				});
+			}
+		});
 	});
 }
 
@@ -83,8 +83,7 @@ function post(req,res,next) {
 			// /api/{plid}
 			// TODO: change to /api/p/{plid}
 			pl=db_get.playlist(plid)
-			pl=combine(pl,{l_song_id:req.body['l[]']});
-			return db_post.playlist(pl);
+			return manager.replaceList(plid,req.body['l[]'])
 		}
 		if (path[1]=="songs") {
 			// /api/{plid}/songs

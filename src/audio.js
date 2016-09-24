@@ -3,27 +3,52 @@
 repeat = require('repeat');
 
 tmp = require('./tmp_store');
-make_song = require ('./_song');
-db_get = require('./db_get');
+Song = require ('./_song');
+manager = require('./playlist_manager');
 
 // audio playing pipeline:
 var Player = require('player')
+
 var current_player = new Player();
-var current_timer = 0;
-var current_state = "paused";
-var current_song_duration = 0;
+var current_timer = 0; //timer records time elapsed
+var current_state = "paused"; //state of the music
+var current_song_duration = 0; //the length of the current song
 
 //plays song with audio pipeline above
-function play_file(file,cb) {
+function play_file(file, cb) {
 	console.log(file);
 	var player = new Player(file);
 	current_player = player;
-	player.play();
-	console.log("PLAYING WITH PLAYER");
+	current_player.on('error', function(err){
+		console.log("all song finished");
+	});
+	current_player.on('playing', function(item){
+		console.log('im playing... src:' + item);
+	});
+	current_player.on('playend', function(item){
+		console.log('src:' + item + ' play done, switching to next one ...');
+	});
+	current_player.play();
 }
 
+function previous() {
+	//to be implemented
+	//var last_song = getthelastsongplayed
+	play(last_song);
+}
+
+function next() {
+	var next_song = 0; //to be implement ed
+	play(next_song);
+}
+
+//pauses the song
 function pause() {
-	current_state = "paused";
+	if (current_state == "paused") {
+		current_state = "playing"
+	} else {
+		current_state = "paused";
+	}
 	current_player.pause();
 }
 
@@ -41,7 +66,7 @@ function play(song) {
 		current_state = "playing"
 		current_song_duration = song.duration
 		re.state="play";
-		play_file(song.upload_file, (ev) => {
+		play_file(song.path, (ev) => {
 			//handle event:
 			if (ev=="finish")
 				tmp.track.state="finish";
@@ -60,31 +85,29 @@ function update (interval) {
 	if (!interval) {
 		interval=0;
 	}
-	if (!tmp.track || tmp.track.props.type=="empty") {
-		if (tmp.q.l_song_id.length>0) {
+	if (!tmp.track || tmp.track.props.type == "empty") {
+		if (manager.queue.songIds.length > 0) {
 			//pop song from queue:
-			tmp.q = db_get.realize_playlist(tmp.q);
-			play(tmp.q.l_song[0]);
-			tmp.q.l_song = tmp.q.l_song.slice(1);
-			tmp.q.l_song_id = tmp.q.l_song_id.slice(1);
+			play(manager.queue.songs[0]);
+			manager.queue.songs = manager.queue.songs.slice(1);
+			manager.queue.songIds = manager.queue.songIds.slice(1);
 		}
-		else
+		else {
 			//if no song, add default empty:
-			play(make_song(''));
-	}
-	if (tmp.track.props.type == "silence") {
+			play(Song.Song("-1"));
+		}
+
+	} else if (tmp.track.props.type == "silence") {
 		tmp.track.t_elapsed += interval;
 		timer += interval;
-		if (tmp.track.t_elapsed>tmp.track.props.duration) {
-			t_reupdate = tmp.track.t_elapsed-tmp.track.props.duration
+		if (tmp.track.t_elapsed > tmp.track.props.duration) {
+			t_reupdate = tmp.track.t_elapsed - tmp.track.props.duration
 			tmp.track = null;
 			update(t_reupdate);
 		}
-	} else if (tmp.track.props.type=="empty") {
-		//do nothing
 	} else if (tmp.track.props.type=="upload") {
-		console.log("into upload");
 		if (current_state == "playing") {
+			console.log(status());
 			tmp.track.t_elapsed+=interval;
 			current_timer += interval;
 		} else {
@@ -97,16 +120,14 @@ function update (interval) {
 			tmp.track = null;
 			update(0);
 		}
-		console.log("out of upload");
 	}
-	console.log(status());
 }
-
-update(0);
 
 function update_dec() {
   update(1);
 };
+
+update(0);
 
 repeat(update_dec).every(1000, 'ms').start.now();
 

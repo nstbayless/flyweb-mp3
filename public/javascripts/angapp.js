@@ -73,6 +73,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 
 	//replaces playlist table with new one, with new elements
 	$scope.replace_playlist = function () {
+		console.log($scope.pl);
 		//add children:
 		for (i=0;i<$scope.pl.l_song.length;i++) {
 			var song = $scope.pl.l_song[i];
@@ -80,6 +81,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 			if (i>=pl_table.children.length) {
 				tr = document.createElement("tr");
 				pl_table.appendChild(tr)
+				console.log("added element...");
 			} else
 				tr=pl_table.children[i];
 			
@@ -87,7 +89,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 				tr.removeChild(tr.firstChild)
 			tr.setAttribute("data",song.id);
 			//TODO: bold if playing.
-			style="font-weight:"+((i==$scope.pl.current)?'bold':'normal')+';';
+			style="font-weight:"+((i==0)?'bold':'normal')+';';
 
 			//add number cell:
 			var td = document.createElement("td");
@@ -137,7 +139,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 			$scope.update_playlist();
 		$timeout(function() {
 			$scope.live_update()
-		}, 50)
+		}, 300)
 	}
 	$scope.live_update();
 });
