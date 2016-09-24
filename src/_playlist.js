@@ -3,7 +3,8 @@ function make_playlist (id) {
 		id: id,
 		name: id,
 		l_song_id: [],
-		l_song: []
+		l_song: [],
+		current: 0
 	}
 }
 

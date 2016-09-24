@@ -53,14 +53,57 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		var counter_n_elapsed = Math.round(counter_n*p);
 		return $scope.pretty_time(t_elapsed) + "  [" + "@".repeat(counter_n_elapsed) + "~".repeat(counter_n-counter_n_elapsed)+"]  " + $scope.pretty_time(duration);
 	}
+
+	update_lock=false;
 	
 	//zebra stripes for playlist
 	$scope.repaint_playlist = function(col1,col2,num) {
+		update_lock=!num;
 		var rows = pl_table.children
 		for (var i=0;i<rows.length;i++) {
 			rows[i].style["background-color"]=(i%2==0)?col1:col2;
 			rows[i].childNodes[0].innerHTML=(num)?String(i+1):"";
 		}
+	}
+
+	//replaces playlist table with new one, with new elements
+	$scope.replace_playlist = function () {
+		//add children:
+		for (i=0;i<$scope.pl.l_song.length;i++) {
+			var song = $scope.pl.l_song[i];
+			var tr;
+			if (i>=pl_table.children.length) {
+				tr = document.createElement("tr");
+				pl_table.appendChild(tr)
+			} else
+				tr=pl_table.children[i];
+			
+			if (tr.getAttribute("data")==song.id)
+				continue;
+			while (tr.firstChild)
+				tr.removeChild(tr.firstChild)
+			tr.setAttribute("data",song.id);
+			//TODO: bold if playing.
+			console.log(tr.getAttribute("data"));
+			//add number cell:
+			var td = document.createElement("td");
+			td.setAttribute('class', "q num");
+			td.innerHTML=(i+1)
+			tr.appendChild(td); 
+			
+			//add name cell
+			td = document.createElement("td");
+			td.setAttribute('class', "q");
+			td.innerHTML=(song.name);
+			tr.appendChild(td); 
+
+			//add duration cell
+			td = document.createElement("td");
+			td.setAttribute('class', "q");
+			td.innerHTML=($scope.pretty_time(song.duration));
+			tr.appendChild(td);
+		}
+		$scope.repaint_playlist("#ccf","#eef",true)
 	}
 
 	//edit playlist	
@@ -74,7 +117,10 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	$scope.update_playlist = function() {
 		var endpoint= "/api/p/" + $scope.pl.id;
 		$.get(endpoint, (pl) => {
-			$scope.pl = pl
+			if (!update_lock) {
+				$scope.pl = pl
+				$scope.replace_playlist();
+			}
 		});
 	}
 
@@ -84,7 +130,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 			$scope.update_playlist();
 		$timeout(function() {
 			$scope.live_update()
-		}, 40)
+		}, 100)
 	}
-	//$scope.live_update();
+	$scope.live_update();
 });
