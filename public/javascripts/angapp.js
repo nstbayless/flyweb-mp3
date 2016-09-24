@@ -55,11 +55,6 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		return $scope.pretty_time(t_elapsed) + "  [" + "@".repeat(counter_n_elapsed) + "~".repeat(counter_n-counter_n_elapsed)+"]  " + $scope.pretty_time(duration);
 	}
 
-	//submit form upload
-	$scope.submit = function(){
-		console.log("hello, world!");
-	}
-
 	update_lock=false;
 	
 	//zebra stripes for playlist
@@ -74,15 +69,13 @@ app.controller('angCon', function($scope, $http, $timeout) {
 
 	//replaces playlist table with new one, with new elements
 	$scope.replace_playlist = function () {
-		console.log($scope.pl);
 		//add children:
 		for (i=0;i<$scope.pl.songs.length;i++) {
 			var song = $scope.pl.songs[i];
 			var tr;
 			if (i>=pl_table.children.length) {
 				tr = document.createElement("tr");
-				pl_table.appendChild(tr)
-				console.log("added element...");
+				pl_table.appendChild(tr);
 			} else
 				tr=pl_table.children[i];
 			
@@ -138,6 +131,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	$scope.update_currentSong = function() {
 		var endpoint= "/api/track";
 		$.get(endpoint, (track) => {
+			console.log(track);
 			if (!update_lock) {
 				if (track.list_id==pl.id)
 					$scope.pl_current_song = track.index

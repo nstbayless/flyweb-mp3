@@ -21,7 +21,7 @@ function api_error(code,text) {
 
 function get(req,res,next) {
 	path = req.url.split("/").filter((e) => {return e.length>0});
-	if (path.length<=1) {
+	if (path.length==0) {
 		return res.status(200).send("Welcome to the FlyWeb-mp3 API!")
 	} else {
 		// /api/
@@ -31,9 +31,10 @@ function get(req,res,next) {
 
 			//send list and track index:
 			manager.currentPlaylist(function(list_id) {
-				manager.currentSongIndex(function(sid)) {
+				manager.currentSongIndex(function(sid) {
+					console.log("!");
 					res.send(200,{list_id: list, index: sid});
-				}
+				})
 			})
 		}
 		if (path[0]=="p") {
