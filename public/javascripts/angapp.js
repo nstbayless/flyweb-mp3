@@ -75,8 +75,8 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	$scope.replace_playlist = function () {
 		console.log($scope.pl);
 		//add children:
-		for (i=0;i<$scope.pl.l_song.length;i++) {
-			var song = $scope.pl.l_song[i];
+		for (i=0;i<$scope.pl.songs.length;i++) {
+			var song = $scope.pl.songs[i];
 			var tr;
 			if (i>=pl_table.children.length) {
 				tr = document.createElement("tr");
@@ -117,7 +117,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 
 	//edit playlist	
 	$scope.arrange_playlist = function(list) {
-		pl.l_song_id=list;
+		pl.songIds=list;
 		var endpoint= "/api/" + $scope.pl.id;
 		$.post(endpoint,{l:list});
 	}
