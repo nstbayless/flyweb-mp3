@@ -98,7 +98,9 @@ function post(req,res,next) {
 		if (path.length==1) {
 			// /api/{plid}
 			// TODO: change to /api/p/{plid}
-			return manager.moveSong(plid,req.body.from,req.body.to,api_success(res))
+	
+			//rearrange playlist
+			return manager.moveSong(plid,req.body.from,req.body.to,()=>{})
 		}
 		if (path[1]=="songs") {
 			// /api/{plid}/songs

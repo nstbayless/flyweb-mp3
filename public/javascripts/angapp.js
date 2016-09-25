@@ -14,7 +14,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 				$scope.repaint_playlist("#eee","#eee",false);
 			},
 			onEnd:function(evt) {
-				$scope.move_song(pl_sortable.toArray(evt.oldIndex,evt.newIndex));
+				$scope.move_song(evt.oldIndex,evt.newIndex);
 				$scope.repaint_playlist("#ccf","#eef",true);
 			}
 		});
@@ -63,12 +63,14 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		$.get(endpoint);
 	}
 
-	//submit form upload
-	$scope.submit = function(){
-		console.log("hello, world!");
-	}
-
 	update_lock=false;
+
+	//moves element from from to to
+	function move_in_list(l, from,to) {
+		var e = l[from];
+		l.splice(from, 1);
+		l.splice(to, 0, e);
+	}
 	
 	//zebra stripes for playlist
 	$scope.repaint_playlist = function(col1,col2,num) {
@@ -124,7 +126,8 @@ app.controller('angCon', function($scope, $http, $timeout) {
 
 	//edit playlist	
 	$scope.move_song = function(index_start,index_end) {
-		pl.songIds=list;
+		move_in_list($scope.pl.songIds,index_start,index_end);
+		move_in_list($scope.pl.songs,index_start,index_end);
 		var endpoint= "/api/" + $scope.pl.id;
 		$.post(endpoint,{from:index_start,to:index_end});
 	}
@@ -144,7 +147,6 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	$scope.update_currentSong = function() {
 		var endpoint= "/api/track";
 		$.get(endpoint, (track) => {
-			console.log(track);
 			if (!update_lock) {
 				if (track.list_id==pl.id)
 					$scope.pl_track_index = track.index
