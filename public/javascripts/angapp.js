@@ -53,6 +53,21 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		$.get(endpoint);
 	}
 
+	$scope.prev_song = function() {
+		var endpoint = "/prev";
+		$.get(endpoint);
+	}
+
+	$scope.next_song = function() {
+		var endpoint = "/next";
+		$.get(endpoint);
+	}
+
+	//submit form upload
+	$scope.submit = function(){
+		console.log("hello, world!");
+	}
+
 	update_lock=false;
 	
 	//zebra stripes for playlist

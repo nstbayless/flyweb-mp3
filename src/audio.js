@@ -20,22 +20,22 @@ var current_state = "paused"; //state of the music
 var current_song_duration = 0; //the length of the current song
 
 var speaker;
+var prevFlag = false;
 
 
 //plays song with audio pipeline above
 function play_file(file, cb) {
 	console.log(file);
 	
-	var totalBytesSeen = 0;
-	var timeLastPushed = new Date().now();
-
 	var stream = Fs.createReadStream(file);
+
+	var totalBytesSeen = 0;
+
 	var transform = new Stream.Transform({
 		transform: function(chunk, encoding, callback) {
 			this.push(chunk);
-			console.log("PUSHED LENGTH: " + chunk.length);
 			totalBytesSeen += chunk.length;
-			console.log("TOTAL LENGTH: " + totalBytesSeen);
+			current_timer = totalBytesSeen / (4 * 44100);
 			callback();
 		}
 	});
@@ -57,18 +57,27 @@ function play_file(file, cb) {
 	speaker.on('finish', () => {
 		current_timer = 0;
 		current_state = "paused";
-		manager.nextSong(play);
+
+		if (!prevFlag) {
+			manager.nextSong(play);
+		} else {
+			manager.prevSong(play);
+		}
+
+		prevFlag = false;
 	})
 }
 
 function prev() {
-	manager.prevSong(play);
-	return 'success';
+	prevFlag = true;
+	speaker.end();
+	return current_state;
 }
 
 function next() {
+	prevFlag = false;
 	speaker.end();
-	return 'success';
+	return current_state;
 }
 
 //pauses the song
@@ -136,12 +145,6 @@ function update (interval) {
 			update(t_reupdate);
 		}
 	} else if (tmp.track.props.type=="upload") {
-		if (current_state == "playing") {
-			tmp.track.t_elapsed+=interval;
-			current_timer += interval;
-		} else {
-			console.log("song is paused");
-		}
 		if  (tmp.track.state=="finish") {
 			//go to next song on queue:
 			current_state = "paused";

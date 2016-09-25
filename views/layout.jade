@@ -25,9 +25,9 @@ html(ng-app="angApp")
 			div#player-song
 				span#song-name {{status.title}}
 			div#player-controls
-				span#controls-prev(class="glyphicon glyphicon-step-backward" aria-hidden="true")
+				span#controls-prev(class="glyphicon glyphicon-step-backward" aria-hidden="true" ng-click="prev_song()")
 				span#controls-play(class="glyphicon glyphicon-play" aria-hidden="true" ng-click="pause_song()")
-				span#controls-next(class="glyphicon glyphicon-step-forward" aria=hidden="true")
+				span#controls-next(class="glyphicon glyphicon-step-forward" aria=hidden="true" ng-click="next_song()")
 			div#player-progress
 				span#progress-elapsed {{pretty_time(status.time_elapsed)}}
 				div#progress-bar
