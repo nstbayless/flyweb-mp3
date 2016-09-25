@@ -19,6 +19,14 @@ function api_error(code,text) {
 	res.status(code).send(text + "API error occurred.");
 }
 
+function api_success(res,code,object) {
+	if (!object)
+		object="success";
+	if (code==undefined)
+		code=200;
+	return function () {res.status(code).send(object);};
+}
+
 function get(req,res,next) {
 	path = req.url.split("/").filter((e) => {return e.length>0});
 	if (path.length==0) {
@@ -90,7 +98,7 @@ function post(req,res,next) {
 		if (path.length==1) {
 			// /api/{plid}
 			// TODO: change to /api/p/{plid}
-			return manager.replaceList(plid,req.body['l[]'])
+			return manager.moveSong(plid,req.body.from,req.body.to,api_success(res))
 		}
 		if (path[1]=="songs") {
 			// /api/{plid}/songs

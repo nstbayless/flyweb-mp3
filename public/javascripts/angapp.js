@@ -13,7 +13,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 				$scope.repaint_playlist("#eee","#eee",false);
 			},
 			onEnd:function(evt) {
-				$scope.arrange_playlist(pl_sortable.toArray());
+				$scope.move_song(pl_sortable.toArray(evt.oldIndex,evt.newIndex));
 				$scope.repaint_playlist("#ccf","#eef",true);
 			}
 		});
@@ -110,10 +110,10 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	}
 
 	//edit playlist	
-	$scope.arrange_playlist = function(list) {
+	$scope.move_song = function(index_start,index_end) {
 		pl.songIds=list;
 		var endpoint= "/api/" + $scope.pl.id;
-		$.post(endpoint,{l:list});
+		$.post(endpoint,{from:index_start,to:index_end});
 	}
 
 	//live update playlist:
