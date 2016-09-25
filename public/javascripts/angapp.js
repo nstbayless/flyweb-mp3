@@ -1,19 +1,26 @@
 var app = angular.module('angApp', []);
 
 app.controller('angCon', function($scope, $http, $timeout) {
+	//semaphore for GETting playlist
+	update_lock=0;
+
+	//jade input variables:
 	$scope.pl = {}
 	try{
 		$scope.pl=pl;
 		$scope.pl_track_index=-1;
 		
+		//make table rearrangeable:
 		pl_table = document.getElementById("pltable");
 		pl_sortable = new Sortable(pl_table, {
 			dataIdAttr:"data",
 			animation: 170,
 			onStart:function(evt) {
+				update_lock++;
 				$scope.repaint_playlist("#eee","#eee",false);
 			},
 			onEnd:function(evt) {
+				update_lock--;
 				$scope.move_song(evt.oldIndex,evt.newIndex);
 				$scope.repaint_playlist("#ccf","#eef",true);
 			}
@@ -63,9 +70,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		$.get(endpoint);
 	}
 
-	update_lock=false;
-
-	//moves element from from to to
+	//moves element in list
 	function move_in_list(l, from,to) {
 		var e = l[from];
 		l.splice(from, 1);
@@ -74,7 +79,6 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	
 	//zebra stripes for playlist
 	$scope.repaint_playlist = function(col1,col2,num) {
-		update_lock=!num;
 		var rows = pl_table.children
 		for (var i=0;i<rows.length;i++) {
 			rows[i].style["background-color"]=(i%2==0)?col1:col2;
@@ -129,7 +133,10 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		move_in_list($scope.pl.songIds,index_start,index_end);
 		move_in_list($scope.pl.songs,index_start,index_end);
 		var endpoint= "/api/" + $scope.pl.id;
-		$.post(endpoint,{from:index_start,to:index_end});
+		update_lock++;
+		$.post(endpoint,{from:index_start,to:index_end}, () => {
+			update_lock--;
+		});
 	}
 
 	//live update playlist:
@@ -157,6 +164,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		});
 	};
 
+	//live update tracker bar:
 	$scope.update_status = function() {
 		var endpoint = "/status";
 		$.get(endpoint, (status) => {

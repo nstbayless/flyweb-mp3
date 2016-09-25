@@ -24,7 +24,7 @@ function api_success(res,code,object) {
 		object="success";
 	if (code==undefined)
 		code=200;
-	return function () {res.status(code).send(object);};
+	res.status(code).send(object);
 }
 
 function get(req,res,next) {
@@ -100,7 +100,11 @@ function post(req,res,next) {
 			// TODO: change to /api/p/{plid}
 	
 			//rearrange playlist
-			return manager.moveSong(plid,req.body.from,req.body.to,()=>{})
+			return manager.moveSong(plid,req.body.from,req.body.to,function(err){
+				if (err)
+					return api_error(400,err);
+				api_success(res);
+			})
 		}
 		if (path[1]=="songs") {
 			// /api/{plid}/songs

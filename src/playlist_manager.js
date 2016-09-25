@@ -181,13 +181,14 @@ playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
         // remove song
         var id = l.songIds.splice(oldIndex, 1);
         var song = l.songs.splice(oldIndex, 1);
+
         // re-add song
         l.songIds.splice(newIndex, 0, id[0]);
         l.songs.splice(newIndex, 0, song[0]);
 
         // update index if playing song was moved
-        if (currentSongIndex == oldIndex) {
-            currentSongIndex = newIndex;
+        if (playlist_manager.songIndex == oldIndex) {
+            playlist_manager.songIndex = newIndex;
         }
         if (callback) {
             callback();   
