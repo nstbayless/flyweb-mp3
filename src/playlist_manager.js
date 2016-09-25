@@ -169,4 +169,30 @@ playlist_manager.replaceList = function(list, songIds, callback) {
     });
 };
 
+/**
+ * Move the song at the specified index to a new index in the specified playlist.
+ * @param {String} list: the playlist name
+ * @param {Number} oldIndex: the old index of the song in the list
+ * @param {Number} newIndex: the new index of the song in the list
+ * @param {Function} callback: the callback function
+ */
+playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
+    playlist_manager.getPlaylist(list, function(l) {
+        // remove song
+        var id = l.songIds.splice(oldIndex, 1);
+        var song = l.songs.splice(oldIndex, 1);
+        // re-add song
+        l.songIds.splice(newIndex, 0, id[0]);
+        l.songs.splice(newIndex, 0, song[0]);
+
+        // update index if playing song was moved
+        if (currentSongIndex == oldIndex) {
+            currentSongIndex = newIndex;
+        }
+        if (callback) {
+            callback();   
+        }
+    });
+}
+
 module.exports = playlist_manager;
