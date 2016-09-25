@@ -19,24 +19,18 @@ var current_timer = 0; //timer records time elapsed
 var current_state = "paused"; //state of the music
 var current_song_duration = 0; //the length of the current song
 
-var stream;
 var speaker;
+
 
 //plays song with audio pipeline above
 function play_file(file, cb) {
 	console.log(file);
 	
-	stream = Fs.createReadStream(file);
-	speaker = new Speaker({
-		channels: 2,
-		bitDepth: 16,
-		sampleRate: 44100
-	});
+	var totalBytesSeen = 0;
+	var timeLastPushed = new Date().now();
 
-    let totalBytesSeen = 0;
-
-
-    transform = new Stream.Transform({
+	var stream = Fs.createReadStream(file);
+	var transform = new Stream.Transform({
 		transform: function(chunk, encoding, callback) {
 			this.push(chunk);
 			console.log("PUSHED LENGTH: " + chunk.length);
@@ -44,6 +38,12 @@ function play_file(file, cb) {
 			console.log("TOTAL LENGTH: " + totalBytesSeen);
 			callback();
 		}
+	});
+
+	speaker = new Speaker({
+		channels: 2,
+		bitDepth: 16,
+		sampleRate: 44100
 	});
 
 	speaker.on('pipe', () => {
@@ -55,20 +55,20 @@ function play_file(file, cb) {
 	stream.pipe(Lame.Decoder()).pipe(transform).pipe(speaker);
 
 	speaker.on('finish', () => {
-		current_state = 'paused';
-		console.log("********SONG SHOULD BE STOPPED********");
+		current_timer = 0;
+		current_state = "paused";
+		manager.nextSong(play);
 	})
 }
 
-function previous() {
-	//to be implemented
-	//var last_song = getthelastsongplayed
-	play(last_song);
+function prev() {
+	manager.prevSong(play);
+	return 'success';
 }
 
 function next() {
-	var next_song = 0; //to be implement ed
-	play(next_song);
+	speaker.end();
+	return 'success';
 }
 
 //pauses the song
@@ -163,5 +163,7 @@ repeat(update_dec).every(100, 'ms').start.now();
 module.exports = {
 	pause: pause,
 	status: status,
-	update: update
+	update: update,
+	next: next,
+	prev: prev
 }
