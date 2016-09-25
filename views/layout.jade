@@ -19,7 +19,9 @@ html(ng-app="angApp")
 				a(href="/") #{title}
 		div#content
 			block content
-			block bottom
+			div#fab
+				block fab
+				a#fab-add(href="/add/#{pl.id}")
 		footer
 			block footer
 			div#player-song

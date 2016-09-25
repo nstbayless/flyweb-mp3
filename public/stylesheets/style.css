@@ -88,6 +88,24 @@ footer {
 	background-color: #8088eb;
 }
 
+#fab {
+	position: fixed;
+	bottom: 170px;
+	right: 20px;
+}
+
+#fab-add {
+	width: 64px;
+	height: 64px;
+	display: block;
+	background-image: url('/images/add.png');
+	background-size: 100%;
+}
+
+#fab-add:hover {
+	background-image: url('/images/add_hover.png');
+}
+
 div.nav {
 	font-size: 32px;
 	color: #fff;
