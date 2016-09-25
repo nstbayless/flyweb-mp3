@@ -85,7 +85,7 @@ playlist_manager.chooseSong = function(list, songId, callback) {
  */
 playlist_manager.nextSong = function(callback) {
     playlist_manager.songIndex++;
-    if (playlist_manager.songIndex >= playlist_manager.currentList.length) {
+    if (playlist_manager.songIndex >= playlist_manager.currentList.songIds.length) {
         playlist_manager.songIndex = 0;
     }
     playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(s) {
@@ -101,7 +101,7 @@ playlist_manager.nextSong = function(callback) {
 playlist_manager.prevSong = function(callback) {
     playlist_manager.songIndex--;
     if (playlist_manager.songIndex < 0) {
-        playlist_manager.songIndex = playlist_manager.currentList.length - 1;
+        playlist_manager.songIndex = playlist_manager.currentList.songIds.length - 1;
     }
     playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(s) {
         if (callback) callback(s);
