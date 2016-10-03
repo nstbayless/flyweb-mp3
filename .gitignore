@@ -4,4 +4,3 @@ node_modules/*
 upload/*
 uploads/*
 *.log
-config.json
