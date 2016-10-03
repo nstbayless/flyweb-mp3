@@ -25,6 +25,7 @@
     "player": "0.6.1",
     "repeat": "0.0.6",
     "serve-favicon": "~2.3.0",
+    "socket.io": "^1.4.8",
     "speaker": "^0.3.0",
     "throttle": "^1.0.3"
   }

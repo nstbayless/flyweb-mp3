@@ -14,6 +14,10 @@ fs.existsSync("uploads/") || fs.mkdirSync("uploads/");
 var upload = multer({dest:"uploads/"})
 
 var app = express();
+var io = require('socket.io')();
+app.io = io;
+
+var sockets = require('./src/sockets')(io);
 
 //multer
 app.upload = upload;

@@ -1,11 +1,12 @@
 var app = angular.module('angApp', []);
+var socket = io();
 
 app.controller('angCon', function($scope, $http, $timeout) {
 	$scope.pl = {}
 	try{
 		$scope.pl=pl;
 		$scope.pl_track_index=-1;
-		
+
 		pl_table = document.getElementById("pltable");
 		pl_sortable = new Sortable(pl_table, {
 			dataIdAttr:"data",
@@ -69,7 +70,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	}
 
 	update_lock=false;
-	
+
 	//zebra stripes for playlist
 	$scope.repaint_playlist = function(col1,col2,num) {
 		update_lock=!num;
@@ -91,7 +92,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 				pl_table.appendChild(tr);
 			} else
 				tr=pl_table.children[i];
-			
+
 			while (tr.firstChild)
 				tr.removeChild(tr.firstChild)
 			tr.setAttribute("data",song.id);
@@ -103,14 +104,14 @@ app.controller('angCon', function($scope, $http, $timeout) {
 			td.setAttribute('class', "q num");
 			td.setAttribute('style',style)
 			td.innerHTML=(i+1)
-			tr.appendChild(td); 
-			
+			tr.appendChild(td);
+
 			//add name cell
 			td = document.createElement("td");
 			td.setAttribute('class', "q");
 			td.setAttribute('style',style)
 			td.innerHTML=(song.name);
-			tr.appendChild(td); 
+			tr.appendChild(td);
 
 			//add duration cell
 			td = document.createElement("td");
@@ -122,7 +123,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		$scope.repaint_playlist("#ccf","#eef",true)
 	}
 
-	//edit playlist	
+	//edit playlist
 	$scope.arrange_playlist = function(list) {
 		pl.songIds=list;
 		var endpoint= "/api/" + $scope.pl.id;
@@ -155,31 +156,26 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		});
 	};
 
-	$scope.update_status = function() {
-		var endpoint = "/status";
-		$.get(endpoint, (status) => {
-			var prog_percent = status.time_elapsed / status.duration;
-			prog_percent = isNaN(prog_percent) ? 0 : prog_percent * 100;
+	socket.on('status', function(status) {
+		var prog_percent = status.time_elapsed / status.duration;
+		prog_percent = isNaN(prog_percent) ? 0 : prog_percent * 100;
 
-			if (status.state === 'paused') {
-				$('#controls-play').removeClass('glyphicon-pause').addClass('glyphicon-play');
-			} else if (status.state === 'playing') {
-				$('#controls-play').removeClass('glyphicon-play').addClass('glyphicon-pause');
-			}
+		if (status.state === 'paused') {
+			$('#controls-play').removeClass('glyphicon-pause').addClass('glyphicon-play');
+		} else if (status.state === 'playing') {
+			$('#controls-play').removeClass('glyphicon-play').addClass('glyphicon-pause');
+		}
 
-			$scope.status = status;
-			$scope.progress_style.width = prog_percent + "%";
-		});
-	}
+		$scope.status = status;
+		$scope.progress_style.width = prog_percent + "%";
+		$scope.$apply();
+	});
 
 	//grabs updates to page from server
 	$scope.live_update = function() {
 		if ($scope.pl) {
 			$scope.update_playlist();
 			$scope.update_currentSong();
-		}
-		if ($scope.status) {
-			$scope.update_status();
 		}
 		$timeout(function() {
 			$scope.live_update()

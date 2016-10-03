@@ -49,11 +49,6 @@ module.exports = () => {
 				return get_playlist(req,res,next, path.slice(1));
 			if (path[0] == "add")
 				return get_add(req,res,next,path.slice(1));
-			if (path[0] == "status") {
-				res.setHeader('Content-Type', 'application/json');
-				res.send(JSON.stringify(audio.status()));
-				return;
-			}
 			if (path[0] == "pause") {
 				var state = audio.pause();
 				res.setHeader('Content-Type', 'application/json');

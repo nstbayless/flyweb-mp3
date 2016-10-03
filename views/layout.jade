@@ -9,6 +9,7 @@ html(ng-app="angApp")
 		script(src="/static/js/jquery.js" charset="utf-8")
 		script(src="/static/js/jquery.form.min.js" charset="utf-8")
 		script(src="/static/js/angular.min.js" charset="utf-8")
+		script(src="/static/js/socket.io.js" charset="utf-8")
 		script(src="/javascripts/angapp.js")
 	body(ng-controller="angCon")
 		block body
@@ -21,7 +22,7 @@ html(ng-app="angApp")
 			block content
 			div#fab
 				block fab
-				a#fab-add(href="/add/#{pl.id}")
+				a#fab-add(href='/add/#{pl.id}')
 		footer
 			block footer
 			div#player-song

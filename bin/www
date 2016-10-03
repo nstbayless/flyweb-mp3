@@ -19,7 +19,7 @@ try {require.resolve("../"+config_file)} catch(e) {
 	var jsonfile = require('jsonfile')
 	jsonfile.writeFileSync(config_file,config)
 	console.log("Created file config.json")
-} 
+}
 
 config=require("../"+config_file)
 
@@ -35,6 +35,13 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+/**
+ * Socket.io
+ */
+
+var io = app.io;
+io.attach(server);
 
 /**
  * Create mDNS advertisement for FlyWeb

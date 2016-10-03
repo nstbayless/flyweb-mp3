@@ -5,6 +5,7 @@ repeat = require('repeat');
 tmp = require('./tmp_store');
 Song = require ('./_song');
 manager = require('./playlist_manager');
+sockets = require('./sockets')();
 
 // audio playing pipeline:
 var Player = require('player');
@@ -26,7 +27,7 @@ var prevFlag = false;
 //plays song with audio pipeline above
 function play_file(file, cb) {
 	console.log(file);
-	
+
 	var stream = Fs.createReadStream(file);
 
 	var totalBytesSeen = 0;
@@ -36,6 +37,7 @@ function play_file(file, cb) {
 			this.push(chunk);
 			totalBytesSeen += chunk.length;
 			current_timer = totalBytesSeen / (4 * 44100);
+			sockets.updateStatus(tmp.track.props.name, current_state, current_song_duration, current_timer);
 			callback();
 		}
 	});
@@ -116,10 +118,6 @@ function play(song) {
 	tmp.track=re;
 }
 
-function status() {
-	return {title: tmp.track.props.name, state: current_state, duration: current_song_duration, time_elapsed: current_timer};
-}
-
 // checks if audio paused or stops, takes appropriate action
 function update (interval) {
 	if (!interval) {
@@ -165,7 +163,6 @@ repeat(update_dec).every(100, 'ms').start.now();
 
 module.exports = {
 	pause: pause,
-	status: status,
 	update: update,
 	next: next,
 	prev: prev
