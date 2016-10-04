@@ -1,18 +1,21 @@
 // for keeping track of file upload progress
 
-function submit_fn() {
-	console.log(a);
-	return false;
+
+function submit_on_change(evt) {
+	//retrieve uploaded file
+	var f = evt.target.files[0];
+	if (f) {
+		var fr = new FileReader();
+		fr.onload = function(e) {
+			var body = e.target.result;
+			alert(f.name);
+		}
+		fr.readAsText(f);
+	} else {
+		//no file provided
+	}
 }
 
-$(function() {
-	alert("!");
-	$('form').ajaxForm({
-		beforeSend: function() {
-			alert("!");
-		},
-		 uploadProgress: function(event, position, total, percentComplete) {
-			alert("!");
-		}
-	})
+window.onload = function(){
+	var fin = document.getElementById('fi').addEventListener('change', submit_on_change,false);
 }
