@@ -70,6 +70,7 @@ function submitOnChange(evt) {
 	if (f) {
 		//file provided
 		setProgressBarVisibility(true);
+		errorMessage.innerHTML="";
 		var url = eltForm.getAttribute("action")
 		uploadFile(f,url, (err,success) => {
 			//display form to be re-shown:

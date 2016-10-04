@@ -10,3 +10,26 @@
 	height: 100%;
 	background: #45e;
 }
+
+.button {
+    position: relative;
+    overflow: hidden;
+    margin: 10px;
+	background-color: #f80;
+}
+
+.button > span {
+	font-size:30px;
+	color:white;
+}
+
+#fi {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.0;
+}
