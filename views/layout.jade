@@ -19,9 +19,10 @@ html(ng-app="angApp")
 				a(href="/") #{title}
 		div#content
 			block content
-			div#fab
-				block fab
-				a#fab-add(href="/add/#{pl.id}")
+			if (pl)
+				div#fab
+					block fab
+					a#fab-add(href="/add/#{pl.id}")
 		footer
 			block footer
 			div#player-song
