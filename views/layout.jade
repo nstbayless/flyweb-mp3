@@ -10,6 +10,9 @@ html(ng-app="angApp")
 		script(src="/static/js/jquery.form.min.js" charset="utf-8")
 		script(src="/static/js/angular.min.js" charset="utf-8")
 		script(src="/javascripts/angapp.js")
+		if (pl)
+			script.
+				var pl = !{JSON.stringify(pl)};
 	body(ng-controller="angCon")
 		block body
 		header

@@ -1,0 +1,12 @@
+#progbar {
+	width: 80%;
+	height:14px;
+	background: #fcfcfc;
+	outline: #000 solid thin;
+	margin: 32px auto;
+}
+
+#progbarprogress {
+	height: 100%;
+	background: #45e;
+}

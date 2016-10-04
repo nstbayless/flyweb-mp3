@@ -63,18 +63,14 @@ router.get(/.*/, function(req, res, next) {
 // POST a song to the given playlist
 // sends back id of song
 function post_song_upload(req, res, next, list) {
-	console.log("file handled")
 	assert(!!req.file);
-	console.log("assertion passed");
 	var parser = mm(fs.createReadStream(req.file.destination + req.file.filename), { duration: true }, function (err, metadata) {
-		console.log("file read");
 		if (err) throw err;
 		if (metadata.title != "") {
 			var title = metadata.title;
 		} else {
 			var title = req.file.originalname;
 		}
-		console.log(title);
 		manager.createSong(list, req.file.destination + req.file.filename, function(id, err) {
 			if (err) {
 				return api_error(500);
