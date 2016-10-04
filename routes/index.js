@@ -25,6 +25,8 @@ module.exports = () => {
 		else
 			id = path[0];
 		manager.getPlaylist(id, function(pl) {
+			if (!pl)
+				return next(); // error
 			if (path.length<=1)  // /add[/{plid}]
 				res.render('add', { title: res.server_name, pl: pl, track:tmp.track});
 			else {

@@ -48,7 +48,7 @@ function get(req,res,next) {
 			// /api/p/{plid}/
 			if (path.length<2) return api_error(400,"must supply plid");
 			plid = path[1];
-			manager.getPlaylist(id, function(list) {
+			manager.getPlaylist(plid, function(list) {
 				res.send(200, list);
 			});
 		}
@@ -63,8 +63,11 @@ router.get(/.*/, function(req, res, next) {
 // POST a song to the given playlist
 // sends back id of song
 function post_song_upload(req, res, next, list) {
+	console.log("file handled")
 	assert(!!req.file);
+	console.log("assertion passed");
 	var parser = mm(fs.createReadStream(req.file.destination + req.file.filename), { duration: true }, function (err, metadata) {
+		console.log("file read");
 		if (err) throw err;
 		if (metadata.title != "") {
 			var title = metadata.title;
