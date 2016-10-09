@@ -7,7 +7,9 @@ playlist_manager.queue.name = "Play Queue";
 playlist_manager.currentList = playlist_manager.queue;
 playlist_manager.songIndex = -1;
 playlist_manager.songMap = {};
-playlist_manager.listMap = {"q": playlist_manager.queue};
+playlist_manager.listMap = {
+    "q": playlist_manager.queue
+};
 playlist_manager.nextId = 0;
 
 /**
@@ -22,8 +24,7 @@ playlist_manager.getPlaylist = function(list, callback) {
     var l = playlist_manager.queue;
     if (list in playlist_manager.listMap) {
         l = playlist_manager.listMap[list];
-    }
-    else {
+    } else {
         // TODO: read from db
     }
     if (callback) callback(null, l);
@@ -63,8 +64,7 @@ playlist_manager.getSong = function(songId, callback) {
     var s = null;
     if (songId in playlist_manager.songMap) {
         s = playlist_manager.songMap[songId];
-    }
-    else {
+    } else {
         // TODO: read from db
     }
     if (callback) callback(null, s);
@@ -93,7 +93,7 @@ playlist_manager.nextSong = function(callback) {
     if (playlist_manager.songIndex >= playlist_manager.currentList.songIds.length) {
         playlist_manager.songIndex = 0;
     }
-    playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(err,s) {
+    playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(err, s) {
         if (callback) callback(null, s);
     });
 };
@@ -109,7 +109,7 @@ playlist_manager.prevSong = function(callback) {
     if (playlist_manager.songIndex < 0) {
         playlist_manager.songIndex = playlist_manager.currentList.songIds.length - 1;
     }
-    playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(err,s) {
+    playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(err, s) {
         if (callback) callback(null, s);
     });
 };
@@ -125,12 +125,11 @@ playlist_manager.addSong = function(list, songId, callback) {
     var l = null;
     if (list === "q") {
         l = playlist_manager.queue;
-        playlist_manager.getSong(songId, function(err,s) {
+        playlist_manager.getSong(songId, function(err, s) {
             Playlist.addSong(l, s);
             Playlist.addSongId(l, songId);
         })
-    }
-    else {
+    } else {
         playlist_manager.getPlaylist(list, function(s) {
             Playlist.addSong(l, s);
             Playlist.addSongId(l, songId);
@@ -166,7 +165,7 @@ playlist_manager.createSong = function(list, path, callback) {
  * @param {Function} callback(err): the callback function, with error if exists
  */
 playlist_manager.replaceList = function(list, songIds, callback) {
-    playlist_manager.getPlaylist(list, function(err,l) {
+    playlist_manager.getPlaylist(list, function(err, l) {
         l.songIds = songIds;
         l.songs = [];
         for (var i = 0; i < l.songIds.length; i++) {
@@ -185,8 +184,8 @@ playlist_manager.replaceList = function(list, songIds, callback) {
  */
 playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
     playlist_manager.getPlaylist(list, function(l) {
-        if (oldIndex < 0 || oldIndex >= l.songIds.length
-            || newIndex < 0 || newIndex >= l.songIds.length) {
+        if (oldIndex < 0 || oldIndex >= l.songIds.length ||
+            newIndex < 0 || newIndex >= l.songIds.length) {
             callback("Index out of range");
         }
 

@@ -13,16 +13,22 @@ var IsThere = require("is-there");
 //try to load config, create new config otherwise
 var config;
 var config_file = "config.json";
-try {fs.statSync("../"+config_file).isFile()} catch(e) {
-	config = {defaults:{name:"Local Area mp3"}}
+try {
+    fs.statSync("../" + config_file).isFile()
+} catch (e) {
+    config = {
+        defaults: {
+            name: "Local Area mp3"
+        }
+    }
 
-	//make new config file:
-	var jsonfile = require('jsonfile')
-	jsonfile.writeFileSync(config_file,config)
-	console.log("Created file config.json")
+    //make new config file:
+    var jsonfile = require('jsonfile')
+    jsonfile.writeFileSync(config_file, config)
+    console.log("Created file config.json")
 }
 
-config=require("../"+config_file)
+config = require("../" + config_file)
 
 /**
  * Get port from environment and store in Express.
@@ -44,17 +50,17 @@ var server = http.createServer(app);
 var fw;
 
 function start_flyweb(name) {
-	app._server_name = name;
-	fw = mdns.createAdvertisement(mdns.tcp('flyweb'), port, {
-	  //todo: allow admin to customize broadcast name.
-	  name: app._server_name,
-	  txtRecord: {}
-	});
+    app._server_name = name;
+    fw = mdns.createAdvertisement(mdns.tcp('flyweb'), port, {
+        //todo: allow admin to customize broadcast name.
+        name: app._server_name,
+        txtRecord: {}
+    });
 
-	fw.start();
-	console.log("")
-	console.log("server started as '" + name + "'");
-	console.log("Listening on http://localhost:3000/ as well as flyweb")
+    fw.start();
+    console.log("")
+    console.log("server started as '" + name + "'");
+    console.log("Listening on http://localhost:3000/ as well as flyweb")
 }
 
 /**
@@ -71,19 +77,19 @@ server.on('close', onClose);
  */
 
 function normalizePort(val) {
-  var port = parseInt(val, 10);
+    var port = parseInt(val, 10);
 
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
+    if (isNaN(port)) {
+        // named pipe
+        return val;
+    }
 
-  if (port >= 0) {
-    // port number
-    return port;
-  }
+    if (port >= 0) {
+        // port number
+        return port;
+    }
 
-  return false;
+    return false;
 }
 
 /**
@@ -91,27 +97,27 @@ function normalizePort(val) {
  */
 
 function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+    var bind = typeof port === 'string' ?
+        'Pipe ' + port :
+        'Port ' + port;
 
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+        case 'EACCES':
+            console.error(bind + ' requires elevated privileges');
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            console.error(bind + ' is already in use');
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
 }
 
 /**
@@ -119,14 +125,14 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+    var addr = server.address();
+    var bind = typeof addr === 'string' ?
+        'pipe ' + addr :
+        'port ' + addr.port;
+    debug('Listening on ' + bind);
 
-  // Start broadcasting FlyWeb
-  start_flyweb(config.defaults.name)
+    // Start broadcasting FlyWeb
+    start_flyweb(config.defaults.name)
 }
 
 /**
@@ -134,16 +140,16 @@ function onListening() {
  */
 
 function onClose() {
-  // Stop broadcasting FlyWeb
-  fw.stop();
+    // Stop broadcasting FlyWeb
+    fw.stop();
 }
 
 /**add restart/rename feature to app*/
-app.restart_flyweb = function (name) {
-	console.log("restarting server...")
-	//kill server
-	fw.stop();
+app.restart_flyweb = function(name) {
+    console.log("restarting server...")
+        //kill server
+    fw.stop();
 
-	//start server
-	start_flyweb(name);
+    //start server
+    start_flyweb(name);
 }

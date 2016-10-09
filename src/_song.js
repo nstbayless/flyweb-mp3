@@ -1,15 +1,15 @@
 var song = {}
 
-song.Song = function (id) {
-	return {
-		id: id,
-		type: "empty",
-		name: "No song",
-		duration: 0,
-		artist: "Artist",
-		album: "Album",
-		path: ""
-	}
+song.Song = function(id) {
+    return {
+        id: id,
+        type: "empty",
+        name: "No song",
+        duration: 0,
+        artist: "Artist",
+        album: "Album",
+        path: ""
+    }
 }
 
 module.exports = song
