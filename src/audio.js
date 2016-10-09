@@ -59,9 +59,9 @@ function play_file(file, cb) {
 		current_state = "paused";
 
 		if (!prevFlag) {
-			manager.nextSong(play);
+			manager.nextSong((err,s)=>{play(s)});
 		} else {
-			manager.prevSong(play);
+			manager.prevSong((err,s)=>{play(s)});
 		}
 
 		prevFlag = false;
@@ -127,7 +127,7 @@ function update (interval) {
 	}
 	if (!tmp.track || tmp.track.props.type == "empty") {
 		if (manager.queue.songIds.length > 0) {
-			manager.nextSong(function(s) {
+			manager.nextSong(function(err,s) {
 				play(s);
 			});
 		}

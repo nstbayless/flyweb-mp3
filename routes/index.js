@@ -8,12 +8,13 @@ module.exports = () => {
 	/* GET playlist render; */
 	function get_playlist(req, res, next, path) {
 		if (path.length == 0) {
-			id = "";
+			id = "q";
 		}
 		else {
 			id = path[0];
 		}
-		manager.getPlaylist(id, function(list) {
+		manager.getPlaylist(id, function(err, list) {
+			console.log(list)
 			res.render('playlist', {title: res.server_name, pl: list, track: tmp.track});
 		});
 	}
@@ -21,10 +22,10 @@ module.exports = () => {
 	/** GET for adding to playlist or queue */
 	function get_add (req,res,next, path) {
 		if (path.length==0)
-			id=""
+			id="q"
 		else
 			id = path[0];
-		manager.getPlaylist(id, function(pl) {
+		manager.getPlaylist(id, function(err,pl) {
 			if (!pl)
 				return next(); // error
 			if (path.length<=1)  // /add[/{plid}]

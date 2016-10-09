@@ -93,7 +93,7 @@ playlist_manager.nextSong = function(callback) {
     if (playlist_manager.songIndex >= playlist_manager.currentList.songIds.length) {
         playlist_manager.songIndex = 0;
     }
-    playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(s) {
+    playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(err,s) {
         if (callback) callback(null, s);
     });
 };
@@ -109,7 +109,7 @@ playlist_manager.prevSong = function(callback) {
     if (playlist_manager.songIndex < 0) {
         playlist_manager.songIndex = playlist_manager.currentList.songIds.length - 1;
     }
-    playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(s) {
+    playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(err,s) {
         if (callback) callback(null, s);
     });
 };
@@ -125,7 +125,7 @@ playlist_manager.addSong = function(list, songId, callback) {
     var l = null;
     if (list === "q") {
         l = playlist_manager.queue;
-        playlist_manager.getSong(songId, function(s) {
+        playlist_manager.getSong(songId, function(err,s) {
             Playlist.addSong(l, s);
             Playlist.addSongId(l, songId);
         })
@@ -166,7 +166,7 @@ playlist_manager.createSong = function(list, path, callback) {
  * @param {Function} callback(err): the callback function, with error if exists
  */
 playlist_manager.replaceList = function(list, songIds, callback) {
-    playlist_manager.getPlaylist(list, function(l) {
+    playlist_manager.getPlaylist(list, function(err,l) {
         l.songIds = songIds;
         l.songs = [];
         for (var i = 0; i < l.songIds.length; i++) {
