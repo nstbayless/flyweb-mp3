@@ -60,7 +60,7 @@ module.exports = (upload) => {
                     return api_error(400, "must supply plid");
                 }
                 plid = path[1];
-                manager.getPlaylist(id, function (err,list) {
+                manager.getPlaylist(plid, function (err,list) {
                     res.send(200, list);
                 });
             }

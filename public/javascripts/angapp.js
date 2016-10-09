@@ -27,8 +27,8 @@ app.controller('angCon', function ($scope, $http, $timeout) {
         });
     }
     catch (e) {
-
-    } // pl might not be supplied on this page; this is okay.
+			// pl might not be supplied on this page; this is okay.
+    } 
 
     $scope.status = {
         title: 'Nothing Playing',
@@ -153,7 +153,10 @@ app.controller('angCon', function ($scope, $http, $timeout) {
         $.get(endpoint, (pl) => {
             if (!update_lock) {
                 $scope.pl = pl;
-                $scope.replace_playlist();
+								// update playlist table if it exists:
+								if (pl_table) {
+	                $scope.replace_playlist();
+								}
             }
         });
     };

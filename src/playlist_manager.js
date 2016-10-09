@@ -49,7 +49,7 @@ playlist_manager.currentPlaylist = function(callback) {
             {Number} result: the song index
  */
 playlist_manager.currentSongIndex = function(callback) {
-    if (callback) callback(playlist_manager.songIndex);
+    if (callback) callback(null,playlist_manager.songIndex);
 };
 
 /**
@@ -185,7 +185,7 @@ playlist_manager.replaceList = function(list, songIds, callback) {
  * @param {Function} callback(err): the callback function, with error if exists
  */
 playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
-    playlist_manager.getPlaylist(list, function(l) {
+    playlist_manager.getPlaylist(list, function(err, l) {
         if (oldIndex < 0 || oldIndex >= l.songIds.length ||
             newIndex < 0 || newIndex >= l.songIds.length) {
             callback("Index out of range");
