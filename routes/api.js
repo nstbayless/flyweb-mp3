@@ -48,7 +48,7 @@ function get(req,res,next) {
 			// /api/p/{plid}/
 			if (path.length<2) return api_error(400,"must supply plid");
 			plid = path[1];
-			manager.getPlaylist(id, function(list) {
+			manager.getPlaylist(plid, function(list) {
 				res.send(200, list);
 			});
 		}
@@ -71,7 +71,6 @@ function post_song_upload(req, res, next, list) {
 		} else {
 			var title = req.file.originalname;
 		}
-		console.log(title);
 		manager.createSong(list, req.file.destination + req.file.filename, function(id, err) {
 			if (err) {
 				return api_error(500);
