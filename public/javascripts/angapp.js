@@ -132,6 +132,20 @@ app.controller('angCon', function ($scope, $http, $timeout) {
             td.innerHTML = ($scope.pretty_time(song.duration));
             td.setAttribute('style', style);
             tr.appendChild(td);
+
+            // add x button
+            td = document.createElement("td");
+            td.setAttribute('class',"qx");
+            // x image within td:
+            imgx = document.createElement("img");
+            imgx.setAttribute("src","/images/item_x.png");
+            imgx.onclick = function () {
+                console.log(i);
+                $scope.remove_song(i);
+            }
+            td.appendChild(imgx);
+            td.setAttribute('style', style);
+            tr.appendChild(td);
         }
         $scope.repaint_playlist("#ccf", "#eef", true);
     };
@@ -146,6 +160,22 @@ app.controller('angCon', function ($scope, $http, $timeout) {
             update_lock--;
         });
     };
+    
+    // remove song from playlist:
+    $scope.remove_song = function (index) {
+        console.log(index);
+        $scope.pl.songs.splice(index,1);
+        $scope.pl.songIds.splice(index,1);
+        var endpoint = "/api/p/" + $scope.pl.id + "/songs/" + index
+        update_lock++;
+        $.ajax({
+            type: "DELETE",
+            url: endpoint,
+            success: function () {
+                update_lock--;
+            }
+        });
+    }
 
     // live update playlist:
     $scope.update_playlist = function () {
