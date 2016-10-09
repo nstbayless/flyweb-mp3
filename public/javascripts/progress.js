@@ -1,13 +1,13 @@
 // for keeping track of file upload progress
 
 // DOM form element
-var eltForm
+var eltForm;
 
 // DOM input element for file input
-var eltFormFileInput
+var eltFormFileInput;
 
 // DOM div containing progress bar 
-var progressBarContainer
+var progressBarContainer;
 
 // DOM div of (inner) progress bar
 var progressBar;
@@ -38,12 +38,20 @@ function uploadProgress(p) {
 //cb: (err,success)=>(void)
 function uploadFile(f, url, cb, progress) {
     var xhr = new XMLHttpRequest();
-    if (!xhr.upload)
+
+    //check for obvious errors:
+    if (!xhr.upload) {
         return cb("Browser does not support uploading");
-    if (!f.type.match(/^audio\//))
+    }
+    if (!f.type.match(/^audio\//)) {
         return cb("Only audio files are allowed");
+    }
     var fd = new FormData();
+
+    //add song file to form data:
     fd.append('song', f, f.name);
+
+    //callback delegation:
     xhr.upload.addEventListener("progress", function(e) {
         var pc = parseInt(e.loaded / e.total);
         progress(pc);
@@ -58,7 +66,11 @@ function uploadFile(f, url, cb, progress) {
     xhr.upload.addEventListener("abort", function(e) {
         cb("Upload aborted", true);
     }, false);
+
+    //do POST to the given endpoint:
     xhr.open("POST", url, true);
+
+    //begin upload:
     xhr.send(fd);
     return cb();
 }
@@ -79,7 +91,7 @@ function submitOnChange(evt) {
                 errorMessage.innerHTML = "Error: " + err;
             }
             if (success) {
-                var redirect = '/p/' + pl.id
+                var redirect = '/p/' + pl.id;
                 window.location.replace(redirect);
             }
         }, uploadProgress);

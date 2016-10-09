@@ -14,13 +14,13 @@ playlist_manager.nextId = 0;
 
 /**
  * Get the specified playlist.
- * 
+ *
  * @param {String} list: the playlist name
  * @param {Function} callback(err, result): the callback function with:
  *          {Object} err: the error if exists
  *          {Object} result: the playlist object
  */
-playlist_manager.getPlaylist = function(list, callback) {
+playlist_manager.getPlaylist = function (list, callback) {
     var l = playlist_manager.queue;
     if (list in playlist_manager.listMap) {
         l = playlist_manager.listMap[list];
@@ -54,13 +54,13 @@ playlist_manager.currentSongIndex = function(callback) {
 
 /**
  * Get a song with the specified ID.
- * 
+ *
  * @param {Number} songId: the song ID
  * @param {Function} callback(err, result): the callback function with:
  *          {Object} err: the error if exists
  *          {Song} result: the song object
  */
-playlist_manager.getSong = function(songId, callback) {
+playlist_manager.getSong = function (songId, callback) {
     var s = null;
     if (songId in playlist_manager.songMap) {
         s = playlist_manager.songMap[songId];
@@ -73,12 +73,12 @@ playlist_manager.getSong = function(songId, callback) {
 /**
  * Select a song in the specified playlist. An ID less than 0 will
  *  result in starting at the beginning of the playlist.
- * 
+ *
  * @param {String} list: the playlist name
  * @param {Number} songId: the song ID
  * @param {Function} callback(err): the callback function, with error if exists
  */
-playlist_manager.chooseSong = function(list, songId, callback) {
+playlist_manager.chooseSong = function (list, songId, callback) {
 
 };
 
@@ -88,7 +88,7 @@ playlist_manager.chooseSong = function(list, songId, callback) {
  *          {Object} err: the error if exists
  *          {Song} result: the next song to be played
  */
-playlist_manager.nextSong = function(callback) {
+playlist_manager.nextSong = function (callback) {
     playlist_manager.songIndex++;
     if (playlist_manager.songIndex >= playlist_manager.currentList.songIds.length) {
         playlist_manager.songIndex = 0;
@@ -104,7 +104,7 @@ playlist_manager.nextSong = function(callback) {
  *          {Object} err: the error if exists
  *          {Song} result: the previous song to be played
  */
-playlist_manager.prevSong = function(callback) {
+playlist_manager.prevSong = function (callback) {
     playlist_manager.songIndex--;
     if (playlist_manager.songIndex < 0) {
         playlist_manager.songIndex = playlist_manager.currentList.songIds.length - 1;
@@ -120,7 +120,7 @@ playlist_manager.prevSong = function(callback) {
  * @param {Number} songId: the song ID
  * @param {Function} callback(err): the callback function, with error if exists
  */
-playlist_manager.addSong = function(list, songId, callback) {
+playlist_manager.addSong = function (list, songId, callback) {
     // get the list object to add to
     var l = null;
     if (list === "q") {
@@ -143,18 +143,20 @@ playlist_manager.addSong = function(list, songId, callback) {
  * @param {String} list: the playlist name
  * @param {String} path: the song path and name on disk
  * @param {Function} callback(id, err): the callback function with:
-            {Number} id: the song ID
-            {Object} err: error produced
+ {Number} id: the song ID
+ {Object} err: error produced
  */
-playlist_manager.createSong = function(list, path, callback) {
+playlist_manager.createSong = function (list, path, callback) {
     var id = playlist_manager.nextId;
     playlist_manager.nextId++;
     var s = Song.Song(id);
     s.path = path;
     s.type = "upload";
     playlist_manager.songMap[id] = s;
-    playlist_manager.addSong(list, id, function() {
-        if (callback) callback(id, false);
+    playlist_manager.addSong(list, id, function () {
+        if (callback) {
+            callback(id, false);
+        }
     });
 };
 

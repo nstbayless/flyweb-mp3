@@ -3,70 +3,64 @@
 /**
  * Module dependencies.
  */
-
 var app = require('../app');
 var debug = require('debug')('flyweb-mp3:server');
 var http = require('http');
 var mdns = require('mdns');
 var IsThere = require("is-there");
 
-//try to load config, create new config otherwise
+// try to load config, create new config otherwise
 var config;
 var config_file = "config.json";
 try {
-    fs.statSync("../" + config_file).isFile()
+    fs.statSync("../" + config_file).isFile();
 } catch (e) {
     config = {
         defaults: {
             name: "Local Area mp3"
         }
     }
-
     //make new config file:
-    var jsonfile = require('jsonfile')
-    jsonfile.writeFileSync(config_file, config)
-    console.log("Created file config.json")
+    var jsonfile = require('jsonfile');
+    jsonfile.writeFileSync(config_file, config);
+    console.log("Created file config.json");
 }
 
-config = require("../" + config_file)
+config = require("../" + config_file);
 
 /**
  * Get port from environment and store in Express.
  */
-
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
-
 var server = http.createServer(app);
 
 /**
  * Create mDNS advertisement for FlyWeb
  */
-
 var fw;
 
 function start_flyweb(name) {
     app._server_name = name;
     fw = mdns.createAdvertisement(mdns.tcp('flyweb'), port, {
-        //todo: allow admin to customize broadcast name.
+        // todo: allow admin to customize broadcast name.
         name: app._server_name,
         txtRecord: {}
     });
 
     fw.start();
-    console.log("")
+    console.log("");
     console.log("server started as '" + name + "'");
-    console.log("Listening on http://localhost:3000/ as well as flyweb")
+    console.log("Listening on http://localhost:" + port + "/ as well as FlyWeb");
 }
 
 /**
  * Listen on provided port, on all network interfaces.
  */
-
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
@@ -75,7 +69,6 @@ server.on('close', onClose);
 /**
  * Normalize a port into a number, string, or false.
  */
-
 function normalizePort(val) {
     var port = parseInt(val, 10);
 
@@ -95,16 +88,14 @@ function normalizePort(val) {
 /**
  * Event listener for HTTP server "error" event.
  */
-
 function onError(error) {
     if (error.syscall !== 'listen') {
         throw error;
     }
 
-    var bind = typeof port === 'string' ?
-        'Pipe ' + port :
-        'Port ' + port;
-
+    var bind = typeof port === 'string'
+        ? 'Pipe ' + port
+        : 'Port ' + port;
     // handle specific listen errors with friendly messages
     switch (error.code) {
         case 'EACCES':
@@ -123,33 +114,31 @@ function onError(error) {
 /**
  * Event listener for HTTP server "listening" event.
  */
-
 function onListening() {
     var addr = server.address();
-    var bind = typeof addr === 'string' ?
-        'pipe ' + addr :
-        'port ' + addr.port;
+    var bind = typeof addr === 'string'
+        ? 'pipe ' + addr
+        : 'port ' + addr.port;
     debug('Listening on ' + bind);
 
     // Start broadcasting FlyWeb
-    start_flyweb(config.defaults.name)
+    start_flyweb(config.defaults.name);
 }
 
 /**
  * Event listener for HTTP server "close" event.
  */
-
 function onClose() {
     // Stop broadcasting FlyWeb
     fw.stop();
 }
 
-/**add restart/rename feature to app*/
-app.restart_flyweb = function(name) {
-    console.log("restarting server...")
-        //kill server
+// add restart/rename feature to app
+app.restart_flyweb = function (name) {
+    console.log("restarting server...");
+    //kill server
     fw.stop();
 
     //start server
     start_flyweb(name);
-}
+};

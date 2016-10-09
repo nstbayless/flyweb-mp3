@@ -13,7 +13,6 @@ module.exports = () => {
             id = path[0];
         }
         manager.getPlaylist(id, function(err, list) {
-            console.log(list)
             res.render('playlist', {
                 title: res.server_name,
                 pl: list,
@@ -24,46 +23,43 @@ module.exports = () => {
 
     /** GET for adding to playlist or queue */
     function get_add(req, res, next, path) {
-        if (path.length == 0)
-            id = "q"
-        else
+
+        if (path.length == 0) {
+            id = "";
+        }
+        else {
             id = path[0];
-        manager.getPlaylist(id, function(err, pl) {
-            if (!pl)
-                return next(); // error
-            if (path.length <= 1) // /add[/{plid}]
-                res.render('add', {
-                title: res.server_name,
-                pl: pl,
-                track: tmp.track
-            });
+        }
+        manager.getPlaylist(id, function (err, pl) {
+            if (path.length <= 1) {  // /add[/{plid}]
+                res.render('add', {title: res.server_name, pl: pl, track: tmp.track});
+            }
             else {
                 if (path[1] == "upload") {
                     // /add[/{plid}]/upload
-                    res.render('add-upload', {
-                        title: res.server_name,
-                        pl: pl,
-                        track: tmp.track
-                    });
+                    res.render('add-upload', {title: res.server_name, pl: pl, track: tmp.track});
                 }
             }
         });
     }
 
     /* GET router */
-    router.get(/.*/, function(req, res, next) {
+    router.get(/.*/, function (req, res, next) {
         //parse URL:
         path = req.url.split("/").filter((e) => {
-            return e.length > 0
+                return e.length > 0;
         });
         if (path.length == 0) {
             //render home page:
             return get_playlist(req, res, next, []);
-        } else {
-            if (path[0] == "p")
+        }
+        else {
+            if (path[0] == "p") {
                 return get_playlist(req, res, next, path.slice(1));
-            if (path[0] == "add")
+            }
+            if (path[0] == "add") {
                 return get_add(req, res, next, path.slice(1));
+            }
             if (path[0] == "status") {
                 res.setHeader('Content-Type', 'application/json');
                 res.send(JSON.stringify(audio.status()));

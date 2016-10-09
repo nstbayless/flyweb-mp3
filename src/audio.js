@@ -15,15 +15,15 @@ var Throttle = require('throttle');
 var Stream = require('stream');
 
 var current_player = new Player();
-var current_timer = 0; //timer records time elapsed
-var current_state = "paused"; //state of the music
-var current_song_duration = 0; //the length of the current song
+var current_timer = 0; // timer records time elapsed
+var current_state = "paused"; // state of the music
+var current_song_duration = 0; // the length of the current song
 
 var speaker;
 var prevFlag = false;
 
 
-//plays song with audio pipeline above
+// plays song with audio pipeline above
 function play_file(file, cb) {
     console.log(file);
 
@@ -32,7 +32,7 @@ function play_file(file, cb) {
     var totalBytesSeen = 0;
 
     var transform = new Stream.Transform({
-        transform: function(chunk, encoding, callback) {
+        transform: function (chunk, encoding, callback) {
             this.push(chunk);
             totalBytesSeen += chunk.length;
             current_timer = totalBytesSeen / (4 * 44100);
@@ -49,7 +49,7 @@ function play_file(file, cb) {
     speaker.on('pipe', () => {
         console.log("***************************************");
         current_state = "playing";
-    })
+    });
 
     //stream = stream.pipe(new Throttle(44100));
     stream.pipe(Lame.Decoder()).pipe(transform).pipe(speaker);
@@ -69,7 +69,7 @@ function play_file(file, cb) {
         }
 
         prevFlag = false;
-    })
+    });
 }
 
 function prev() {
@@ -84,40 +84,42 @@ function next() {
     return current_state;
 }
 
-//pauses the song
+// pauses the song
 function pause() {
     if (current_state === 'paused') {
         current_state = 'playing';
         speaker.uncork();
-    } else if (current_state === 'playing') {
-        current_state = 'paused';
-        speaker.cork();
+    } else {
+        if (current_state === 'playing') {
+            current_state = 'paused';
+	          speaker.cork();
+        }
     }
 
     return current_state;
 }
 
-//takes song metadata, makes playable information for update below
+// takes song metadata, makes playable information for update below
 function play(song) {
-    //copy song metadata into realized object:
-    var re = {
-        props: song
-    };
-    //adjusts re object based on song type:
+    // copy song metadata into realized object:
+    var re = {props: song};
+    // adjusts re object based on song type:
     if (song.type == "silence" || song.type == "empty") {
-        re.props.name = "Nothing Playing"
+        re.props.name = "Nothing Playing";
         re.t_elapsed = 0;
-    } else if (song.type == "upload") {
+    }
+    else if (song.type == "upload") {
         re.t_elapsed = 0;
         console.log("Now playing: " + song.name);
-        current_song_duration = song.duration
+        current_song_duration = song.duration;
         re.state = "play";
         play_file(song.path, (ev) => {
             //handle event:
-            if (ev == "finish")
+            if (ev == "finish") {
                 tmp.track.state = "finish";
+            }
             update(0);
-        })
+        });
     }
     tmp.track = re;
 }
@@ -146,17 +148,19 @@ function update(interval) {
             play(Song.Song("-1"));
         }
 
-    } else if (tmp.track.props.type == "silence") {
+    }
+    else if (tmp.track.props.type == "silence") {
         tmp.track.t_elapsed += interval;
         timer += interval;
         if (tmp.track.t_elapsed > tmp.track.props.duration) {
-            t_reupdate = tmp.track.t_elapsed - tmp.track.props.duration
+            t_reupdate = tmp.track.t_elapsed - tmp.track.props.duration;
             tmp.track = null;
             update(t_reupdate);
         }
-    } else if (tmp.track.props.type == "upload") {
+    }
+    else if (tmp.track.props.type == "upload") {
         if (tmp.track.state == "finish") {
-            //go to next song on queue:
+            // go to next song on queue:
             current_state = "paused";
             current_timer = 0;
             tmp.track = null;
@@ -167,7 +171,7 @@ function update(interval) {
 
 function update_dec() {
     update(0.1);
-};
+}
 
 update(0);
 
@@ -179,4 +183,4 @@ module.exports = {
     update: update,
     next: next,
     prev: prev
-}
+};

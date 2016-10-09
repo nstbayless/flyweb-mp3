@@ -1,6 +1,6 @@
-var song = {}
+var song = {};
 
-song.Song = function(id) {
+song.Song = function (id) {
     return {
         id: id,
         type: "empty",
@@ -10,9 +10,9 @@ song.Song = function(id) {
         album: "Album",
         path: ""
     }
-}
+};
 
-module.exports = song
+module.exports = song;
 
 //valid "types" are:
 //"empty": plays no sound and skips to next song if possible
