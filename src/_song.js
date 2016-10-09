@@ -1,6 +1,6 @@
 var song = {};
 
-song.Song = function (id) {
+song.Song = function(id) {
     return {
         id: id,
         type: "empty",

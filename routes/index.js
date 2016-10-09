@@ -26,34 +26,39 @@ module.exports = () => {
 
         if (path.length == 0) {
             id = "";
-        }
-        else {
+        } else {
             id = path[0];
         }
-        manager.getPlaylist(id, function (err, pl) {
-            if (path.length <= 1) {  // /add[/{plid}]
-                res.render('add', {title: res.server_name, pl: pl, track: tmp.track});
-            }
-            else {
+        manager.getPlaylist(id, function(err, pl) {
+            if (path.length <= 1) { // /add[/{plid}]
+                res.render('add', {
+                    title: res.server_name,
+                    pl: pl,
+                    track: tmp.track
+                });
+            } else {
                 if (path[1] == "upload") {
                     // /add[/{plid}]/upload
-                    res.render('add-upload', {title: res.server_name, pl: pl, track: tmp.track});
+                    res.render('add-upload', {
+                        title: res.server_name,
+                        pl: pl,
+                        track: tmp.track
+                    });
                 }
             }
         });
     }
 
     /* GET router */
-    router.get(/.*/, function (req, res, next) {
+    router.get(/.*/, function(req, res, next) {
         //parse URL:
         path = req.url.split("/").filter((e) => {
-                return e.length > 0;
+            return e.length > 0;
         });
         if (path.length == 0) {
             //render home page:
             return get_playlist(req, res, next, []);
-        }
-        else {
+        } else {
             if (path[0] == "p") {
                 return get_playlist(req, res, next, path.slice(1));
             }

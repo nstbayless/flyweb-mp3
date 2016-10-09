@@ -32,7 +32,7 @@ function play_file(file, cb) {
     var totalBytesSeen = 0;
 
     var transform = new Stream.Transform({
-        transform: function (chunk, encoding, callback) {
+        transform: function(chunk, encoding, callback) {
             this.push(chunk);
             totalBytesSeen += chunk.length;
             current_timer = totalBytesSeen / (4 * 44100);
@@ -92,7 +92,7 @@ function pause() {
     } else {
         if (current_state === 'playing') {
             current_state = 'paused';
-	          speaker.cork();
+            speaker.cork();
         }
     }
 
@@ -102,13 +102,14 @@ function pause() {
 // takes song metadata, makes playable information for update below
 function play(song) {
     // copy song metadata into realized object:
-    var re = {props: song};
+    var re = {
+        props: song
+    };
     // adjusts re object based on song type:
     if (song.type == "silence" || song.type == "empty") {
         re.props.name = "Nothing Playing";
         re.t_elapsed = 0;
-    }
-    else if (song.type == "upload") {
+    } else if (song.type == "upload") {
         re.t_elapsed = 0;
         console.log("Now playing: " + song.name);
         current_song_duration = song.duration;
@@ -148,8 +149,7 @@ function update(interval) {
             play(Song.Song("-1"));
         }
 
-    }
-    else if (tmp.track.props.type == "silence") {
+    } else if (tmp.track.props.type == "silence") {
         tmp.track.t_elapsed += interval;
         timer += interval;
         if (tmp.track.t_elapsed > tmp.track.props.duration) {
@@ -157,8 +157,7 @@ function update(interval) {
             tmp.track = null;
             update(t_reupdate);
         }
-    }
-    else if (tmp.track.props.type == "upload") {
+    } else if (tmp.track.props.type == "upload") {
         if (tmp.track.state == "finish") {
             // go to next song on queue:
             current_state = "paused";
