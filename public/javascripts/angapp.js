@@ -139,10 +139,12 @@ app.controller('angCon', function ($scope, $http, $timeout) {
             // x image within td:
             imgx = document.createElement("img");
             imgx.setAttribute("src","/images/item_x.png");
-            imgx.onclick = function () {
-                console.log(i);
-                $scope.remove_song(i);
-            }
+            (function () {
+                var capture_i = i;
+                imgx.onclick = function () {
+                    $scope.remove_song(capture_i);
+                }
+            })();
             td.appendChild(imgx);
             td.setAttribute('style', style);
             tr.appendChild(td);
@@ -163,10 +165,10 @@ app.controller('angCon', function ($scope, $http, $timeout) {
     
     // remove song from playlist:
     $scope.remove_song = function (index) {
-        console.log(index);
         $scope.pl.songs.splice(index,1);
         $scope.pl.songIds.splice(index,1);
         var endpoint = "/api/p/" + $scope.pl.id + "/songs/" + index
+        $scope.replace_playlist();
         update_lock++;
         $.ajax({
             type: "DELETE",
@@ -183,10 +185,10 @@ app.controller('angCon', function ($scope, $http, $timeout) {
         $.get(endpoint, (pl) => {
             if (!update_lock) {
                 $scope.pl = pl;
-								// update playlist table if it exists:
-								if (pl_table) {
+				// update playlist table if it exists:
+				if (pl_table) {
 	                $scope.replace_playlist();
-								}
+				}
             }
         });
     };
@@ -202,7 +204,10 @@ app.controller('angCon', function ($scope, $http, $timeout) {
                 else {
                     $scope.pl_track_index = -1;
                 }
-                $scope.replace_playlist();
+                // update playlist table if it exists:
+				if (pl_table) {
+	                $scope.replace_playlist();
+				}
             }
         });
     };

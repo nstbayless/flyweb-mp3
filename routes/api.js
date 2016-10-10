@@ -195,6 +195,7 @@ module.exports = (upload) => {
                                             });
                                         }
                                     });
+                                    return;
                                 } else {
                                     // song index not a number
                                     return api_error(res, 400, "song must be an integer: id in playlist " + plid);
