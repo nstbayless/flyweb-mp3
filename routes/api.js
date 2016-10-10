@@ -133,7 +133,7 @@ module.exports = (upload) => {
                             return api_error(500);
                         }
                         else {
-                            manager.getSong(id, function (s) {
+                            manager.getSong(id, function (err, s) {
                                 s.type = "upload";
                                 s.name = title;
                                 s.duration = metadata.duration;
