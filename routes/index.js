@@ -35,6 +35,10 @@ module.exports = () => {
                     // /add[/{plid}]/upload
                     res.render('add-upload', {title: res.server_name, pl: pl, track: tmp.track});
                 }
+                else if (path[1] == "url") {
+                    // /add[{plid}]/url
+                    res.render('add-url', {title: res.server_name, pl: pl, track: tmp.track});
+                }
             }
         });
     }
