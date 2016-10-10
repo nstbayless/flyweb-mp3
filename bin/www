@@ -12,15 +12,17 @@ var mdns = require('mdns');
 var config;
 var config_file = "config.json";
 try {
-    require.resolve("../" + config_file);
-}
-catch (e) {
-    config = {defaults: {name: "Local Area mp3"}};
-
-    // make new config file:
+    fs.statSync("../" + config_file).isFile();
+} catch (e) {
+    config = {
+        defaults: {
+            name: "Local Area mp3"
+        }
+    }
+    //make new config file:
     var jsonfile = require('jsonfile');
     jsonfile.writeFileSync(config_file, config);
-    console.log("Created file " + config_file);
+    console.log("Created file config.json");
 }
 
 config = require("../" + config_file);
@@ -93,7 +95,6 @@ function onError(error) {
     var bind = typeof port === 'string'
         ? 'Pipe ' + port
         : 'Port ' + port;
-
     // handle specific listen errors with friendly messages
     switch (error.code) {
         case 'EACCES':
@@ -131,7 +132,7 @@ function onClose() {
     fw.stop();
 }
 
-/**add restart/rename feature to app*/
+// add restart/rename feature to app
 app.restart_flyweb = function (name) {
     console.log("restarting server...");
     //kill server

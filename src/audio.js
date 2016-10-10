@@ -59,10 +59,13 @@ function play_file(file, cb) {
         current_state = "paused";
 
         if (!prevFlag) {
-            manager.nextSong(play);
-        }
-        else {
-            manager.prevSong(play);
+            manager.nextSong((err, s) => {
+                play(s)
+            });
+        } else {
+            manager.prevSong((err, s) => {
+                play(s)
+            });
         }
 
         prevFlag = false;
@@ -86,10 +89,11 @@ function pause() {
     if (current_state === 'paused') {
         current_state = 'playing';
         speaker.uncork();
-    }
-    else if (current_state === 'playing') {
-        current_state = 'paused';
-        speaker.cork();
+    } else {
+        if (current_state === 'playing') {
+            current_state = 'paused';
+	          speaker.cork();
+        }
     }
 
     return current_state;
@@ -136,11 +140,10 @@ function update(interval) {
     }
     if (!tmp.track || tmp.track.props.type == "empty") {
         if (manager.queue.songIds.length > 0) {
-            manager.nextSong(function (s) {
+            manager.nextSong(function(err, s) {
                 play(s);
             });
-        }
-        else {
+        } else {
             //if no song, add default empty:
             play(Song.Song("-1"));
         }
@@ -169,6 +172,7 @@ function update(interval) {
 function update_dec() {
     update(0.1);
 }
+
 update(0);
 
 repeat(update_dec).every(100, 'ms').start.now();

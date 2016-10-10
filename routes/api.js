@@ -49,8 +49,8 @@ module.exports = (upload) => {
                 }
 
                 //send list and track index:
-                manager.currentPlaylist(function (list_id) {
-                    manager.currentSongIndex(function (sid) {
+                manager.currentPlaylist(function (err,list_id) {
+                    manager.currentSongIndex(function (err,sid) {
                         res.send(200, {list_id: list_id, index: sid});
                     });
                 });
@@ -61,7 +61,7 @@ module.exports = (upload) => {
                     return api_error(400, "must supply plid");
                 }
                 plid = path[1];
-                manager.getPlaylist(id, function (list) {
+                manager.getPlaylist(plid, function (err,list) {
                     res.send(200, list);
                 });
             }
@@ -86,13 +86,12 @@ module.exports = (upload) => {
             if (metadata.title != "") {
                 title = metadata.title;
             }
-            console.log(title);
             manager.createSong(list, path, function (id, err) {
                 if (err) {
                     return api_error(500);
                 }
                 else {
-                    manager.getSong(id, function (s) {
+                    manager.getSong(id, function (err, s) {
                         s.type = "upload";
                         s.name = title;
                         s.duration = metadata.duration;
