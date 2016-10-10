@@ -26,6 +26,7 @@
     "repeat": "0.0.6",
     "serve-favicon": "~2.3.0",
     "speaker": "^0.3.0",
-    "throttle": "^1.0.3"
+    "throttle": "^1.0.3",
+    "youtube-dl": "~1.11.1"
   }
 }
