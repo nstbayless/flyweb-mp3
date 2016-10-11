@@ -134,18 +134,29 @@ app.controller('angCon', function($scope, $http, $timeout) {
             // add x button
             td = document.createElement("td");
             td.setAttribute('class', "qx");
-            // x image within td:
-            imgx = document.createElement("img");
+            // href within td
+            var hrefx = document.createElement("a");
+            hrefx.style["onmouseover"] = "";
+            hrefx.style["cursor"] = "pointer";
+            //hrefx.setAttribute("href","/");
+            // x image within href:
+            var imgx = document.createElement("img");
             imgx.setAttribute("src", "/images/item_x.png");
+            //on-click to delete:
             (function() {
                 var capture_i = i;
-                imgx.onclick = function() {
+                hrefx.onclick = function() {
                     $scope.remove_song(capture_i);
                 }
             })();
-            td.appendChild(imgx);
+            hrefx.appendChild(imgx);
+            td.appendChild(hrefx);
             td.setAttribute('style', style);
             tr.appendChild(td);
+        }
+        //delete extra rows:
+        for (var i=$scope.list.songs.length;i<pl_table.children.length;i++) {
+            pl_table.removeChild(pl_table.children[i]);
         }
         $scope.repaint_playlist("#ccf", "#eef", true);
     };
