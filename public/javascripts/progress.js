@@ -91,7 +91,7 @@ function submitOnChange(evt) {
                 errorMessage.innerHTML = "Error: " + err;
             }
             if (success) {
-                var redirect = '/p/' + pl.id;
+                var redirect = '/p/' + list.id;
                 window.location.replace(redirect);
             }
         }, uploadProgress);
