@@ -53,22 +53,22 @@ module.exports = (upload) => {
                 }
 
                 // retrieves list index and track index for currently playing song:
-                manager.currentPlaylist(function (err,list_id) {
+                manager.currentPlaylist(function (err,list_listId) {
                     manager.currentSongIndex(function (err,sid) {
-                        res.send(200, {list_id: list_id, index: sid});
+                        res.send(200, {list_id: listId, index: sid});
                     });
                 });
             }
             
             if (path[0] == "p") {
-                // /api/p/{plid}
+                // /api/p/{listId}
                 
                 // retrieves given playlist
                 if (path.length < 2) {
-                    return api_error(400, "must supply plid");
+                    return api_error(400, "must supply listId");
                 }
-                plid = path[1];
-                manager.getPlaylist(plid, function (err,list) {
+                listId = path[1];
+                manager.getPlaylist(listId, function (err,list) {
                     res.send(200, list);
                 });
             }
@@ -82,7 +82,7 @@ module.exports = (upload) => {
 
     // POST a song to the given playlist
     // sends back id of song
-    function post_song_upload(req, res, next, list) {
+    function post_song_upload(req, res, next, listId) {
         assert(!!req.file);
         var path = req.file.destination + req.file.filename;
         var title = req.file.originalname;
@@ -93,7 +93,7 @@ module.exports = (upload) => {
             if (metadata.title != "") {
                 title = metadata.title;
             }
-            manager.createSong(list, path, function (id, err) {
+            manager.createSong(listId, path, function (id, err) {
                 if (err) {
                     return api_error(500);
                 }
@@ -112,7 +112,7 @@ module.exports = (upload) => {
     /**
      * Download a video from the specified URL and save the audio from it.
      */
-    function post_song_url(req, res, next, list) {
+    function post_song_url(req, res, next, listId) {
         assert(!!req.body.url);
         youtubedl.getInfo(req.body.url, [], function(err, info) {
             if (err) {
@@ -135,7 +135,7 @@ module.exports = (upload) => {
                         title = metadata.title;
                     }
                     console.log(title);
-                    manager.createSong(list, path, function (id, err) {
+                    manager.createSong(listId, path, function (id, err) {
                         if (err) {
                             return api_error(500);
                         }
@@ -153,7 +153,7 @@ module.exports = (upload) => {
         });
     }
 
-    function post(req, res, next) {
+    function _post(req, res, next) {
         path = req.url.split("/").filter((e) => {
             return e.length > 0;
         });
@@ -162,13 +162,13 @@ module.exports = (upload) => {
         }
         else {
             // /api/
-            plid = path[0];
+            listId = path[0];
             if (path.length == 1) {
-                // /api/{plid}
-                // TODO: change to /api/p/{plid}
+                // /api/{listId}
+                // TODO: change to /api/p/{listId}
 
                 //rearrange playlist
-                return manager.moveSong(plid, req.body.from, req.body.to, function (err) {
+                return manager.moveSong(listId, req.body.from, req.body.to, function (err) {
                     if (err) {
                         return api_error(400, err);
                     }
@@ -176,25 +176,25 @@ module.exports = (upload) => {
                 });
             }
             if (path[1] == "songs") {
-                // /api/{plid}/songs
-                // TODO: change to /api/p/{plid}/songs
+                // /api/{listId}/songs
+                // TODO: change to /api/p/{listId}/songs
                 if (path.length == 2) {
                     return api_error(400, "Please post to a subpath, such as songs/upload");
                 }
                 else {
                     if (path[2] == "upload") {
-                        // /api/{plid}/songs/upload
+                        // /api/{listId}/songs/upload
                         if (path.length > 3) {
                             return api_error(400);
                         }
-                        return post_song_upload(req, res, next, plid);
+                        return post_song_upload(req, res, next, listId);
                     }
                     else if (path[2] == "url") {
-                        // /api/{plid}/songs/upload
+                        // /api/{listId}/songs/upload
                         if (path.length > 3) {
                             return api_error(400);
                         }
-                        return post_song_url(req, res, next, plid);
+                        return post_song_url(req, res, next, listId);
                     }
                 }
             }
