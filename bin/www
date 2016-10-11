@@ -37,11 +37,10 @@ app.set('port', port);
 var server = http.createServer(app);
 
 /**
- * Socket.io
+ * Attach the HTTP server to app's Socket.io object
  */
 
-var io = app.io;
-io.attach(server);
+app.io.attach(server);
 
 /**
  * Create mDNS advertisement for FlyWeb

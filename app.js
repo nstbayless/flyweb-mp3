@@ -7,8 +7,6 @@ var bodyParser = require('body-parser');
 var fs = require('fs')
 var multer = require('multer');
 
-var audio = require('./src/audio')
-
 //upload directory:
 fs.existsSync("uploads/") || fs.mkdirSync("uploads/");
 var upload = multer({dest:"uploads/"})
@@ -17,7 +15,8 @@ var app = express();
 var io = require('socket.io')();
 app.io = io;
 
-var sockets = require('./src/sockets')(io);
+var audio = require('./src/audio')(io);
+var sockets = require('./src/sockets')(io, audio);
 
 //multer
 app.upload = upload;

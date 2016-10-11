@@ -1,12 +1,15 @@
-module.exports = function(io) {
-  module.updateStatus = function(title, state, duration, time_elapsed) {
-    io.emit('status', {
-      title: title,
-      state: state,
-      duration: duration,
-      time_elapsed: time_elapsed
-    });
-  }
+module.exports = function(io, audio) {
+    io.on('connection', function(socket) {
+        socket.on('pause', function() {
+            audio.pause();
+        });
 
-  return module;
+        socket.on('prev', function() {
+            audio.prev();
+        });
+
+        socket.on('next', function() {
+            audio.next();
+        });
+    });
 }

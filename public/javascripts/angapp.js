@@ -50,18 +50,15 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	}
 
 	$scope.pause_song = function() {
-		var endpoint = "/pause";
-		$.get(endpoint);
+		socket.emit('pause');
 	}
 
 	$scope.prev_song = function() {
-		var endpoint = "/prev";
-		$.get(endpoint);
+		socket.emit('prev');
 	}
 
 	$scope.next_song = function() {
-		var endpoint = "/next";
-		$.get(endpoint);
+		socket.emit('next');
 	}
 
 	//submit form upload
