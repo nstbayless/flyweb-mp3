@@ -3,7 +3,6 @@ module.exports = (upload) => {
     var assert = require('assert');
     var fs = require('fs');
     var mm = require('musicmetadata');
-
     var audio = require('../src/audio');
     var combine = require('merge');
 
@@ -11,7 +10,7 @@ module.exports = (upload) => {
 
     manager = require('../src/playlist_manager');
 
-    function api_error(code, text) {
+    function api_error(res, code, text) {
         if (!text) {
             text = "";
         }
@@ -44,7 +43,7 @@ module.exports = (upload) => {
             if (path[0] == "track") {
                 // /api/track
                 if (path.length > 2) {
-                    return api_error(400);
+                    return api_error(res, 400);
                 }
 
                 //send list and track index:
@@ -57,7 +56,7 @@ module.exports = (upload) => {
             if (path[0] == "p") {
                 // /api/p/{plid}/
                 if (path.length < 2) {
-                    return api_error(400, "must supply plid");
+                    return api_error(res, 400, "must supply plid");
                 }
                 plid = path[1];
                 manager.getPlaylist(plid, function (err,list) {
@@ -78,7 +77,8 @@ module.exports = (upload) => {
         assert(!!req.file);
         var parser = mm(fs.createReadStream(req.file.destination + req.file.filename), {duration: true}, function (err, metadata) {
             if (err) {
-                throw err;
+                console.log("error sent");
+                return api_error(res, 500, "corrupt music")
             }
             if (metadata.title != "") {
                 var title = metadata.title;
@@ -87,7 +87,7 @@ module.exports = (upload) => {
             }
             manager.createSong(list, req.file.destination + req.file.filename, function (id, err) {
                 if (err) {
-                    return api_error(500);
+                    return api_error(res, 500);
                 }
                 else {
                     manager.getSong(id, function (err, s) {
@@ -106,7 +106,7 @@ module.exports = (upload) => {
             return e.length > 0;
         });
         if (path.length < 1) {
-            return api_error(400, "Cannot post to API root");
+            return api_error(res, 400, "Cannot post to API root");
         }
         else {
             // /api/
@@ -118,7 +118,7 @@ module.exports = (upload) => {
                 //rearrange playlist
                 return manager.moveSong(plid, req.body.from, req.body.to, function (err) {
                     if (err) {
-                        return api_error(400, err);
+                        return api_error(res, 400, err);
                     }
                     api_success(res);
                 });
@@ -127,13 +127,13 @@ module.exports = (upload) => {
                 // /api/{plid}/songs
                 // TODO: change to /api/p/{plid}/songs
                 if (path.length == 2) {
-                    return api_error(400, "Please post to a subpath, such as songs/upload");
+                    return api_error(res, 400, "Please post to a subpath, such as songs/upload");
                 }
                 else {
                     if (path[2] == "upload") {
                         // /api/{plid}/songs/upload
                         if (path.length > 3) {
-                            return api_error(400);
+                            return api_error(res, 400);
                         }
                         return post_song_upload(req, res, next, plid);
                     }

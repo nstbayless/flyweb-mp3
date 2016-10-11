@@ -28,22 +28,32 @@ function play_file(file, cb) {
     console.log(file);
 
     var stream = Fs.createReadStream(file);
-
+    var decoder = new Lame.Decoder();
     var totalBytesSeen = 0;
+    var rate = 0;
 
     var transform = new Stream.Transform({
         transform: function (chunk, encoding, callback) {
             this.push(chunk);
             totalBytesSeen += chunk.length;
-            current_timer = totalBytesSeen / (4 * 44100);
+            current_timer = totalBytesSeen / (4 * rate);
             callback();
         }
     });
 
+    decoder.on("format", (format) => {
+        console.log("gaagaghahahha");
+        console.log('MP3 format: %j', format);
+        speaker.channels = format.channels;
+        speaker.bitDepth = format.bitDepth;
+        speaker.sampleRate = format.sampleRate;
+        rate = format.sampleRate;
+    })
+
     speaker = new Speaker({
         channels: 2,
         bitDepth: 16,
-        sampleRate: 44100
+        sampleRate: 10
     });
 
     speaker.on('pipe', () => {
@@ -52,7 +62,7 @@ function play_file(file, cb) {
     });
 
     //stream = stream.pipe(new Throttle(44100));
-    stream.pipe(Lame.Decoder()).pipe(transform).pipe(speaker);
+    stream.pipe(decoder).pipe(transform).pipe(speaker);
 
     speaker.on('finish', () => {
         current_timer = 0;
