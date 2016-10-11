@@ -157,6 +157,10 @@ td.q {
 	padding: 6px 14px;
 }
 
+td .qx {
+  float:right;
+}
+
 th.q {
 	padding: 6px 14px;
 }

@@ -5,64 +5,73 @@ module.exports = () => {
     var audio = require('../src/audio');
     var manager = require('../src/playlist_manager');
 
-    /* GET playlist render; */
-    function get_playlist(req, res, next, path) {
+    // GET view for playlist
+    function getPlaylist(req, res, next, path) {
         if (path.length == 0) {
-            id = "q";
+            listId = "q";
         } else {
-            id = path[0];
+            listId = path[0];
         }
-        manager.getPlaylist(id, function(err, list) {
+        manager.getPlaylist(listId, function(err, list) {
             res.render('playlist', {
                 title: res.server_name,
-                pl: list,
+                list: list,
                 track: tmp.track
             });
         });
     }
 
-    /** GET for adding to playlist or queue */
-    function get_add(req, res, next, path) {
+    // GET view for adding to playlist or queue
+    function getAdd(req, res, next, path) {
 
         if (path.length == 0) {
-            id = "";
+            listId = "";
+        } else {
+            listId = path[0];
         }
-        else {
-            id = path[0];
-        }
-        manager.getPlaylist(id, function (err, pl) {
-            if (path.length <= 1) {  // /add[/{plid}]
-                res.render('add', {title: res.server_name, pl: pl, track: tmp.track});
-            }
-            else {
+        manager.getPlaylist(listId, function(err, list) {
+            if (path.length <= 1) {
+				// /add[/{listId}]
+                res.render('add', {
+                    title: res.server_name,
+                    list: list,
+                    track: tmp.track
+                });
+            } else {
                 if (path[1] == "upload") {
-                    // /add[/{plid}]/upload
-                    res.render('add-upload', {title: res.server_name, pl: pl, track: tmp.track});
+                    // /add[/{listId}]/upload
+                    res.render('add-upload', {
+                        title: res.server_name,
+                        list: list,
+                        track: tmp.track
+                    });
                 }
                 else if (path[1] == "url") {
-                    // /add[{plid}]/url
-                    res.render('add-url', {title: res.server_name, pl: pl, track: tmp.track});
+                    // /add[/{listId}]/url
+                    res.render('add-url', {
+						title: res.server_name,
+						list: list,
+						track: tmp.track});
                 }
             }
         });
     }
 
     /* GET router */
-    router.get(/.*/, function (req, res, next) {
+    router.get(/.*/, function(req, res, next) {
         //parse URL:
         path = req.url.split("/").filter((e) => {
-                return e.length > 0;
+            return e.length > 0;
         });
         if (path.length == 0) {
             //render home page:
-            return get_playlist(req, res, next, []);
-        }
-        else {
+            return getPlaylist(req, res, next, []);
+        } else {
             if (path[0] == "p") {
-                return get_playlist(req, res, next, path.slice(1));
+                return getPlaylist(req, res, next, path.slice(1));
             }
             if (path[0] == "add") {
-                return get_add(req, res, next, path.slice(1));
+                return getAdd(req, res, next, path.slice(1));
             }
             if (path[0] == "status") {
                 res.setHeader('Content-Type', 'application/json');

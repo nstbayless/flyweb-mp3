@@ -1,6 +1,6 @@
 playlist = {};
 
-playlist.Playlist = function (id) {
+playlist.Playlist = function(id) {
     return {
         id: id,
         name: id,
@@ -9,11 +9,11 @@ playlist.Playlist = function (id) {
     };
 };
 
-playlist.addSong = function (list, song) {
+playlist.addSong = function(list, song) {
     list.songs.push(song);
 };
 
-playlist.addSongId = function (list, songId) {
+playlist.addSongId = function(list, songId) {
     list.songIds.push(songId);
 };
 

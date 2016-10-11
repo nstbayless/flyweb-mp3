@@ -1,13 +1,13 @@
 var app = angular.module('angApp', []);
 
-app.controller('angCon', function ($scope, $http, $timeout) {
+app.controller('angCon', function($scope, $http, $timeout) {
     // semaphore for GETting playlist
     update_lock = 0;
 
     // jade input variables:
-    $scope.pl = {};
+    $scope.list = {};
     try {
-        $scope.pl = pl;
+        $scope.list = list;
         $scope.pl_track_index = -1;
 
         // make table rearrangeable:
@@ -15,20 +15,19 @@ app.controller('angCon', function ($scope, $http, $timeout) {
         pl_sortable = new Sortable(pl_table, {
             dataIdAttr: "data",
             animation: 170,
-            onStart: function (evt) {
+            onStart: function(evt) {
                 update_lock++;
                 $scope.repaint_playlist("#eee", "#eee", false);
             },
-            onEnd: function (evt) {
+            onEnd: function(evt) {
                 update_lock--;
                 $scope.move_song(evt.oldIndex, evt.newIndex);
                 $scope.repaint_playlist("#ccf", "#eef", true);
             }
         });
+    } catch (e) {
+        // list might not be supplied on this page; this is okay.
     }
-    catch (e) {
-			// pl might not be supplied on this page; this is okay.
-    } 
 
     $scope.status = {
         title: 'Nothing Playing',
@@ -41,7 +40,7 @@ app.controller('angCon', function ($scope, $http, $timeout) {
         width: "0%"
     };
 
-    $scope.range = function (n) {
+    $scope.range = function(n) {
         var l = [];
         for (var i = 0; i < n; i++) {
             l.push(i);
@@ -50,7 +49,7 @@ app.controller('angCon', function ($scope, $http, $timeout) {
     };
 
     // converts seconds to m:ss time format
-    $scope.pretty_time = function (t) {
+    $scope.pretty_time = function(t) {
         var date = new Date(t * 1000);
         var mm = date.getUTCMinutes();
         var ss = date.getSeconds();
@@ -60,17 +59,17 @@ app.controller('angCon', function ($scope, $http, $timeout) {
         return mm + ":" + ss;
     };
 
-    $scope.pause_song = function () {
+    $scope.pause_song = function() {
         var endpoint = "/pause";
         $.get(endpoint);
     };
 
-    $scope.prev_song = function () {
+    $scope.prev_song = function() {
         var endpoint = "/prev";
         $.get(endpoint);
     };
 
-    $scope.next_song = function () {
+    $scope.next_song = function() {
         var endpoint = "/next";
         $.get(endpoint);
     };
@@ -83,7 +82,7 @@ app.controller('angCon', function ($scope, $http, $timeout) {
     }
 
     // zebra stripes for playlist
-    $scope.repaint_playlist = function (col1, col2, num) {
+    $scope.repaint_playlist = function(col1, col2, num) {
         var rows = pl_table.children;
         for (var i = 0; i < rows.length; i++) {
             rows[i].style["background-color"] = (i % 2 == 0) ? col1 : col2;
@@ -92,16 +91,15 @@ app.controller('angCon', function ($scope, $http, $timeout) {
     };
 
     // replaces playlist table with new one, with new elements
-    $scope.replace_playlist = function () {
+    $scope.replace_playlist = function() {
         // add children:
-        for (var i = 0; i < $scope.pl.songs.length; i++) {
-            var song = $scope.pl.songs[i];
+        for (var i = 0; i < $scope.list.songs.length; i++) {
+            var song = $scope.list.songs[i];
             var tr;
             if (i >= pl_table.children.length) {
                 tr = document.createElement("tr");
                 pl_table.appendChild(tr);
-            }
-            else {
+            } else {
                 tr = pl_table.children[i];
             }
 
@@ -132,53 +130,90 @@ app.controller('angCon', function ($scope, $http, $timeout) {
             td.innerHTML = ($scope.pretty_time(song.duration));
             td.setAttribute('style', style);
             tr.appendChild(td);
+
+            // add x button
+            td = document.createElement("td");
+            td.setAttribute('class', "qx");
+            // x image within td:
+            imgx = document.createElement("img");
+            imgx.setAttribute("src", "/images/item_x.png");
+            (function() {
+                var capture_i = i;
+                imgx.onclick = function() {
+                    $scope.remove_song(capture_i);
+                }
+            })();
+            td.appendChild(imgx);
+            td.setAttribute('style', style);
+            tr.appendChild(td);
         }
         $scope.repaint_playlist("#ccf", "#eef", true);
     };
 
     // edit playlist
-    $scope.move_song = function (index_start, index_end) {
-        move_in_list($scope.pl.songIds, index_start, index_end);
-        move_in_list($scope.pl.songs, index_start, index_end);
-        var endpoint = "/api/" + $scope.pl.id;
+    $scope.move_song = function(index_start, index_end) {
+        move_in_list($scope.list.songIds, index_start, index_end);
+        move_in_list($scope.list.songs, index_start, index_end);
+        var endpoint = "/api/" + $scope.list.id;
         update_lock++;
-        $.post(endpoint, {from: index_start, to: index_end}, () => {
+        $.post(endpoint, {
+            from: index_start,
+            to: index_end
+        }, () => {
             update_lock--;
         });
     };
 
+    // remove song from playlist:
+    $scope.remove_song = function(index) {
+        $scope.list.songs.splice(index, 1);
+        $scope.list.songIds.splice(index, 1);
+        var endpoint = "/api/p/" + $scope.list.id + "/songs/" + index
+        $scope.replace_playlist();
+        update_lock++;
+        $.ajax({
+            type: "DELETE",
+            url: endpoint,
+            success: function() {
+                update_lock--;
+            }
+        });
+    }
+
     // live update playlist:
-    $scope.update_playlist = function () {
-        var endpoint = "/api/p/" + $scope.pl.id;
-        $.get(endpoint, (pl) => {
+    $scope.update_playlist = function() {
+        var endpoint = "/api/p/" + $scope.list.id;
+        $.get(endpoint, (list) => {
             if (!update_lock) {
-                $scope.pl = pl;
-								// update playlist table if it exists:
-								if (pl_table) {
-	                $scope.replace_playlist();
-								}
+                $scope.list = list;
+                // update playlist table if it exists:
+                if (pl_table) {
+                    $scope.replace_playlist();
+                }
             }
         });
     };
 
     // live update current song:
-    $scope.update_currentSong = function () {
+    $scope.update_currentSong = function() {
         var endpoint = "/api/track";
         $.get(endpoint, (track) => {
             if (!update_lock) {
-                if (track.list_id == pl.id) {
+                if (track.list_id == list.id) {
                     $scope.pl_track_index = track.index;
-                }
-                else {
+                } else {
                     $scope.pl_track_index = -1;
                 }
-                $scope.replace_playlist();
+                // update playlist table if it exists:
+                if (pl_table) {
+                    $scope.replace_playlist();
+                }
             }
         });
     };
 
     // live update tracker bar:
-    $scope.update_status = function () {
+    $scope.update_status = function() {
         var endpoint = "/status";
         $.get(endpoint, (status) => {
             var prog_percent = status.time_elapsed / status.duration;
@@ -186,8 +221,7 @@ app.controller('angCon', function ($scope, $http, $timeout) {
 
             if (status.state === 'paused') {
                 $('#controls-play').removeClass('glyphicon-pause').addClass('glyphicon-play');
-            }
-            else if (status.state === 'playing') {
+            } else if (status.state === 'playing') {
                 $('#controls-play').removeClass('glyphicon-play').addClass('glyphicon-pause');
             }
 
@@ -197,15 +231,15 @@ app.controller('angCon', function ($scope, $http, $timeout) {
     };
 
     //grabs updates to page from server
-    $scope.live_update = function () {
-        if ($scope.pl) {
+    $scope.live_update = function() {
+        if ($scope.list) {
             $scope.update_playlist();
             $scope.update_currentSong();
         }
         if ($scope.status) {
             $scope.update_status();
         }
-        $timeout(function () {
+        $timeout(function() {
             $scope.live_update();
         }, 300);
     };

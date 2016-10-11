@@ -4,14 +4,14 @@ block head
 
 block content
     div.q
-        h1 Add to #{pl.name}
+        h1 Add to #{list.name}
         div.add-module-container
             div
-                a(href="/add/#{pl.id}/upload")
+                a(href="/add/#{list.id}/upload")
                     img(src="/images/add_module_upload.png")
                 p Upload from your device
             div
-                a(href="/add/#{pl.id}/url")
+                a(href="/add/#{list.id}/url")
                     img(src="/images/add_module_upload.png")
-                p Upload from a website
+                p Add from a website
             div(ng-repeat = "i in range(2)")

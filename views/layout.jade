@@ -10,9 +10,9 @@ html(ng-app="angApp")
 		script(src="/static/js/jquery.form.min.js" charset="utf-8")
 		script(src="/static/js/angular.min.js" charset="utf-8")
 		script(src="/javascripts/angapp.js")
-		if (pl)
+		if (list)
 			script.
-				var pl = !{JSON.stringify(pl)};
+				var list = !{JSON.stringify(list)};
 	body(ng-controller="angCon")
 		block body
 		header
@@ -22,10 +22,10 @@ html(ng-app="angApp")
 				a(href="/") #{title}
 		div#content
 			block content
-			if (pl)
+			if (list)
 				div#fab
 					block fab
-					a#fab-add(href="/add/#{pl.id}")
+					a#fab-add(href="/add/#{list.id}")
 		footer
 			block footer
 			div#player-song
