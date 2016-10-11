@@ -1,3 +1,6 @@
+// API requests (to be partially phased out by sockets)
+
+// capture upload from app.js to ensure uploads/ folder in root directory
 module.exports = (upload) => {
     var express = require('express');
     var assert = require('assert');
@@ -32,7 +35,8 @@ module.exports = (upload) => {
         res.status(code).send(object);
     }
 
-    function get(req, res, next) {
+    // parses and handles GET requests
+    function _get(req, res, next) {
         path = req.url.split("/").filter((e) => {
             return e.length > 0;
         });
@@ -48,15 +52,18 @@ module.exports = (upload) => {
                     return api_error(400);
                 }
 
-                //send list and track index:
+                // retrieves list index and track index for currently playing song:
                 manager.currentPlaylist(function (err,list_id) {
                     manager.currentSongIndex(function (err,sid) {
                         res.send(200, {list_id: list_id, index: sid});
                     });
                 });
             }
+            
             if (path[0] == "p") {
-                // /api/p/{plid}/
+                // /api/p/{plid}
+                
+                // retrieves given playlist
                 if (path.length < 2) {
                     return api_error(400, "must supply plid");
                 }
@@ -70,7 +77,7 @@ module.exports = (upload) => {
 
     /* GET router */
     router.get(/.*/, function (req, res, next) {
-        get(req, res, next);
+        _get(req, res, next);
     });
 
     // POST a song to the given playlist
