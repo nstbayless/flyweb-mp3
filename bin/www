@@ -7,6 +7,7 @@ var app = require('../app');
 var debug = require('debug')('flyweb-mp3:server');
 var http = require('http');
 var mdns = require('mdns');
+var fs = require('fs');
 
 // try to load config, create new config otherwise
 var config;
@@ -26,6 +27,9 @@ try {
 }
 
 config = require("../" + config_file);
+
+// create uploads/ folder in root
+fs.existsSync("../uploads/") || fs.mkdirSync("../uploads/");
 
 /**
  * Get port from environment and store in Express.

@@ -10,7 +10,6 @@ var multer = require('multer');
 var audio = require('./src/audio');
 
 // upload directory:
-fs.existsSync("uploads/") || fs.mkdirSync("uploads/");
 var upload = multer({dest: "uploads/"});
 
 var app = express();
