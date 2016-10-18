@@ -69,11 +69,13 @@ module.exports = function(io) {
 
             if (!audio_manager.prev_flag) {
                 playlist_manager.nextSong((err, s) => {
-                    play(s)
+                    play(s);
+                    audio_manager.set_current(s);
                 });
             } else {
                 playlist_manager.prevSong((err, s) => {
-                    play(s)
+                    play(s);
+                    audio_manager.set_current(s);
                 });
             }
             audio_manager.prev_flag = false;

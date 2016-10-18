@@ -1,7 +1,7 @@
 module.exports = () => {
     var express = require('express');
     var router = express.Router();
-    var tmp = require('../src/tmp_store');
+    var audio_manager = require('../src/audio_manager');
     var audio = require('../src/audio');
     var manager = require('../src/playlist_manager');
 
@@ -16,7 +16,7 @@ module.exports = () => {
             res.render('playlist', {
                 title: res.server_name,
                 pl: list,
-                track: tmp.track
+                track: audio_manager.current_song
             });
         });
     }
@@ -30,16 +30,16 @@ module.exports = () => {
         }
         manager.getPlaylist(id, function (err, pl) {
             if (path.length <= 1) {  // /add[/{plid}]
-                res.render('add', {title: res.server_name, pl: pl, track: tmp.track});
+                res.render('add', {title: res.server_name, pl: pl, track: audio_manager.current_song});
             }
             else {
                 if (path[1] == "upload") {
                     // /add[/{plid}]/upload
-                    res.render('add-upload', {title: res.server_name, pl: pl, track: tmp.track});
+                    res.render('add-upload', {title: res.server_name, pl: pl, track: audio_manager.current_song});
                 }
                 else if (path[1] == "url") {
                     // /add[{plid}]/url
-                    res.render('add-url', {title: res.server_name, pl: pl, track: tmp.track});
+                    res.render('add-url', {title: res.server_name, pl: pl, track: audio_manager.current_song});
                 }
             }
         });
