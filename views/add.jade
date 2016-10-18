@@ -3,12 +3,15 @@ extends layout
 block head
 
 block content
-	div.q
-		h1 Add to #{pl.name}
-		p Only file upload supported currently
-		div.add-module-container
-			div
-				a(href="/add/#{pl.id}/upload")
-					img(src="/images/add_module_upload.png")
-				p Upload from your device
-			div(ng-repeat = "i in range(3)")
+    div.q
+        h1 Add to #{pl.name}
+        div.add-module-container
+            div
+                a(href="/add/#{pl.id}/upload")
+                    img(src="/images/add_module_upload.png")
+                p Upload from your device
+            div
+                a(href="/add/#{pl.id}/url")
+                    img(src="/images/add_module_url.png")
+                p Upload from a website
+            div(ng-repeat = "i in range(2)")
