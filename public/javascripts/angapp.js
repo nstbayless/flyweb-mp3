@@ -143,35 +143,28 @@ app.controller('angCon', function ($scope, $http, $timeout) {
         });
     };
 
-    // live update playlist:
-    $scope.update_playlist = function () {
-        var endpoint = "/api/p/" + $scope.pl.id;
-        $.get(endpoint, (pl) => {
-            if (!update_lock) {
-                $scope.pl = pl;
-                // update playlist table if it exists:
-                if (pl_table) {
-                    $scope.replace_playlist();
-                }
-            }
-        });
-    };
-
-    // live update current song:
-    $scope.update_currentSong = function () {
-        var endpoint = "/api/track";
-        $.get(endpoint, (track) => {
-            if (!update_lock) {
-                if (track.list_id == pl.id) {
-                    $scope.pl_track_index = track.index;
-                }
-                else {
-                    $scope.pl_track_index = -1;
-                }
+    socket.on('playlist', function(playlist) {
+        if (!update_lock) {
+            $scope.pl = pl;
+            // update playlist table if it exists:
+            if (pl_table) {
                 $scope.replace_playlist();
             }
-        });
-    };
+            $scope.apply();
+        }
+    });
+
+    socket.on('track', function(track) {
+        if (!update_lock) {
+            if (track.list_id == pl.id) {
+                $scope.pl_track_index = track.index;
+            } else {
+                $scope.pl_track_index = -1;
+            }
+            $scope.replace_playlist();
+            $scope.apply();
+        }
+    });
 
     socket.on('status', function(status) {
 		var prog_percent = status.time_elapsed / status.duration;
@@ -187,16 +180,4 @@ app.controller('angCon', function ($scope, $http, $timeout) {
 		$scope.progress_style.width = prog_percent + "%";
 		$scope.$apply();
 	});
-
-    //grabs updates to page from server
-    $scope.live_update = function () {
-        if ($scope.pl) {
-            $scope.update_playlist();
-            $scope.update_currentSong();
-        }
-        $timeout(function () {
-            $scope.live_update();
-        }, 300);
-    };
-    $scope.live_update();
 });

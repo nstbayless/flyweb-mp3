@@ -22,10 +22,35 @@ module.exports = function(io) {
 	var speaker;
 	var prevFlag = false;
 
+	function emitStatus(title, state, duration, time_elapsed) {
+		io.sockets.emit('status', {
+			title: title,
+			state: state,
+			duration: duration,
+			time_elapsed: time_elapsed
+		});
+	}
+
+	function emitTrack() {
+		manager.currentPlaylist(function(err, list_id) {
+			manager.currentSongIndex(function(err, sid) {
+				io.sockets.emit('track', {
+					list_id: list_id,
+					index: sid
+				});
+			});
+		});
+	}
+
+	function emitPlaylist() {
+		manager.getPlaylist('q', function(err, list) {
+			io.sockets.emit('playlist', list);
+		});
+	}
+
 	//plays song with audio pipeline above
 	function play_file(file, cb) {
 		console.log(file);
-
 		var stream = Fs.createReadStream(file);
 
 		var totalBytesSeen = 0;
@@ -35,12 +60,7 @@ module.exports = function(io) {
 				this.push(chunk);
 				totalBytesSeen += chunk.length;
 				current_timer = totalBytesSeen / (4 * 44100);
-				io.sockets.emit('status', {
-					title: tmp.track.props.name,
-					state: current_state,
-					duration: current_song_duration,
-					time_elapsed: current_timer
-				});
+				emitStatus(tmp.track.props.name, current_state, current_song_duration, current_timer);
 				callback();
 			}
 		});
@@ -177,6 +197,9 @@ module.exports = function(io) {
 	repeat(update_dec).every(100, 'ms').start.now();
 
 	var module = {
+		emitStatus: emitStatus,
+		emitTrack: emitTrack,
+		emitPlaylist: emitPlaylist,
 		update: update,
         status: status,
 		pause: pause,
