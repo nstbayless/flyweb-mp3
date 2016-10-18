@@ -145,7 +145,7 @@ app.controller('angCon', function ($scope, $http, $timeout) {
 
     socket.on('playlist', function(playlist) {
         if (!update_lock) {
-            $scope.pl = pl;
+            $scope.pl = playlist;
             // update playlist table if it exists:
             if (pl_table) {
                 $scope.replace_playlist();
