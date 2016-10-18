@@ -143,7 +143,6 @@ app.controller('angCon', function ($scope, $http, $timeout) {
         });
     };
 
-
     socket.on('status', function(status) {
 		var prog_percent = status.time_elapsed / status.duration;
 		prog_percent = isNaN(prog_percent) ? 0 : prog_percent * 100;
@@ -168,6 +167,7 @@ app.controller('angCon', function ($scope, $http, $timeout) {
 	        }
 	        $scope.pl=update.list;
 	        $scope.replace_playlist();
+	        $scope.$apply();
 	    }
 	});
 	
@@ -179,6 +179,7 @@ app.controller('angCon', function ($scope, $http, $timeout) {
 			else
 				$scope.pl_track_index = -1;
 			$scope.replace_playlist();
+			$scope.$apply();
 		} else {
     		console.log("async error: track update");
 		}
