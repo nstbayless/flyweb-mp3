@@ -5,8 +5,8 @@ module.exports = (upload) => {
     var mm = require('musicmetadata');
     var audio = require('../src/audio');
     var combine = require('merge');
-    var youtubedl = require('youtube-dl');
-
+    var outubedl = require('youtube-dl');
+    var mp3length = require('mp3Length');
     var router = express.Router();
 
     manager = require('../src/playlist_manager');
@@ -80,25 +80,44 @@ module.exports = (upload) => {
         var title = req.file.originalname;
         var parser = mm(fs.createReadStream(path), {duration: true}, function (err, metadata) {
             if (err) {
-                console.log("error sent");
-                return api_error(res, 500, "corrupt music")
-            }
-            if (metadata.title != "") {
-                title = metadata.title;
-            }
-            manager.createSong(list, path, function (id, err) {
-                if (err) {
-                    return api_error(res, 500);
+                console.log("### ERROR READING METADATA ###");
+                mp3length(path, function (err, length) {
+                    if (err) {
+                        console.log('### MP3 FILE CORRUPT ###');
+                    } else {
+                        manager.createSong(list, path, function (id, err) {
+                            if (err) {
+                                return api_error(res, 500);
+                            }
+                            else {
+                                manager.getSong(id, function (err, s) {
+                                    s.type = "upload";
+                                    s.name = title;
+                                    s.duration = length;
+                                    return res.status(200).send();
+                                });
+                            }
+                        });
+                    }
+                });
+            } else {
+                if (metadata.title != "") {
+                    title = metadata.title;
                 }
-                else {
-                    manager.getSong(id, function (err, s) {
-                        s.type = "upload";
-                        s.name = title;
-                        s.duration = metadata.duration;
-                        return res.status(200).send();
-                    });
-                }
-            });
+                manager.createSong(list, path, function (id, err) {
+                    if (err) {
+                        return api_error(res, 500);
+                    }
+                    else {
+                        manager.getSong(id, function (err, s) {
+                            s.type = "upload";
+                            s.name = title;
+                            s.duration = metadata.duration;
+                            return res.status(200).send();
+                        });
+                    }
+                });
+            }
         });
     }
 
@@ -122,7 +141,27 @@ module.exports = (upload) => {
                 }
                 var parser = mm(fs.createReadStream(path), {duration: true}, function (err, metadata) {
                     if (err) {
-                        throw err;
+                        console.log("### ERROR READING METADATA ###");
+                        console.log("error sent");
+                        mp3length(path, function (err, length) {
+                            if (err) {
+                                console.log('### MP3 FILE CORRUPT ###');
+                            } else {
+                                manager.createSong(list, path, function (id, err) {
+                                    if (err) {
+                                        return api_error(res, 500);
+                                    }
+                                    else {
+                                        manager.getSong(id, function (err, s) {
+                                            s.type = "upload";
+                                            s.name = title;
+                                            s.duration = length;
+                                            return res.status(200).send();
+                                        });
+                                    }
+                                });
+                            }
+                        });
                     }
                     if (metadata.title != "") {
                         title = metadata.title;
