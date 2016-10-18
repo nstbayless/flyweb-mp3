@@ -1,0 +1,35 @@
+#progbar {
+	width: 80%;
+	height:14px;
+	background: #fcfcfc;
+	outline: #000 solid thin;
+	margin: 32px auto;
+}
+
+#progbarprogress {
+	height: 100%;
+	background: #45e;
+}
+
+.button {
+    position: relative;
+    overflow: hidden;
+    margin: 10px;
+	background-color: #f80;
+}
+
+.button > span {
+	font-size:30px;
+	color:white;
+}
+
+#fi {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 5000px;
+    cursor: pointer;
+    opacity: 0.0;
+}

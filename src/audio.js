@@ -54,7 +54,7 @@ module.exports = function(io) {
 		speaker.on('pipe', () => {
 			console.log("***************************************");
 			current_state = "playing";
-		})
+		});
 
 		//stream = stream.pipe(new Throttle(44100));
 		stream.pipe(Lame.Decoder()).pipe(transform).pipe(speaker);
@@ -63,17 +63,21 @@ module.exports = function(io) {
 			current_timer = 0;
 			current_state = "paused";
 
-			if (!prevFlag) {
-				manager.nextSong(play);
-			} else {
-				manager.prevSong(play);
-			}
+            if (!prevFlag) {
+                manager.nextSong((err, s) => {
+                    play(s)
+                });
+            } else {
+                manager.prevSong((err, s) => {
+                    play(s)
+                });
+            }
 
 			prevFlag = false;
-		})
+		});
 	}
 
-	function prev() {
+    function prev() {
 		prevFlag = true;
 		speaker.end();
 		return current_state;
@@ -104,22 +108,33 @@ module.exports = function(io) {
 		var re = {props:song};
 		//adjusts re object based on song type:
 		if (song.type=="silence" || song.type=="empty") {
-			re.props.name = "Nothing Playing"
+			re.props.name = "Nothing Playing";
 			re.t_elapsed = 0;
 		} else if (song.type=="upload") {
 			re.t_elapsed = 0;
 			console.log("Now playing: " + song.name);
-			current_song_duration = song.duration
+			current_song_duration = song.duration;
 			re.state="play";
 			play_file(song.path, (ev) => {
 				//handle event:
-				if (ev=="finish")
+				if (ev=="finish") {
 					tmp.track.state="finish";
+                }
+
 				update(0);
 			})
 		}
 		tmp.track=re;
 	}
+
+    function status() {
+        return {
+            title: tmp.track.props.name,
+            state: current_state,
+            duration: current_song_duration,
+            time_elapsed: current_timer
+        };
+    }
 
 	// checks if audio paused or stops, takes appropriate action
 	function update (interval) {
@@ -128,11 +143,10 @@ module.exports = function(io) {
 		}
 		if (!tmp.track || tmp.track.props.type == "empty") {
 			if (manager.queue.songIds.length > 0) {
-				manager.nextSong(function(s) {
+				manager.nextSong(function(err, s) {
 					play(s);
 				});
-			}
-			else {
+			} else {
 				//if no song, add default empty:
 				play(Song.Song("-1"));
 			}
@@ -141,7 +155,7 @@ module.exports = function(io) {
 			tmp.track.t_elapsed += interval;
 			timer += interval;
 			if (tmp.track.t_elapsed > tmp.track.props.duration) {
-				t_reupdate = tmp.track.t_elapsed - tmp.track.props.duration
+				t_reupdate = tmp.track.t_elapsed - tmp.track.props.duration;
 				tmp.track = null;
 				update(t_reupdate);
 			}
@@ -160,12 +174,11 @@ module.exports = function(io) {
 	  update(0.1);
 	};
 
-	update(0);
-
 	repeat(update_dec).every(100, 'ms').start.now();
 
 	var module = {
 		update: update,
+        status: status,
 		pause: pause,
 		next: next,
 		prev: prev
