@@ -12,11 +12,15 @@ fs.existsSync("uploads/") || fs.mkdirSync("uploads/");
 var upload = multer({dest:"uploads/"})
 
 var app = express();
+
+//socket dissemination
 var io = require('socket.io')();
 app.io = io;
 
 var audio = require('./src/audio')(io);
 var sockets = require('./src/sockets')(io, audio);
+var playlistManager = require('./src/playlist_manager')
+playlistManager.setSocketIO(io);
 
 //multer
 app.upload = upload;

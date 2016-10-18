@@ -91,6 +91,8 @@ playlist_manager.nextSong = function(callback) {
     if (playlist_manager.songIndex >= playlist_manager.currentList.songIds.length) {
         playlist_manager.songIndex = 0;
     }
+    // alert clients to track change
+    playlist_manager.emitCurrentSong();
     playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(s) {
         if (callback) callback(s);
     });
@@ -106,6 +108,8 @@ playlist_manager.prevSong = function(callback) {
     if (playlist_manager.songIndex < 0) {
         playlist_manager.songIndex = playlist_manager.currentList.songIds.length - 1;
     }
+    // alert clients to track change
+    playlist_manager.emitCurrentSong();
     playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(s) {
         if (callback) callback(s);
     });
@@ -125,6 +129,8 @@ playlist_manager.addSong = function(list, songId, callback) {
         playlist_manager.getSong(songId, function(s) {
             Playlist.addSong(l, s);
             Playlist.addSongId(l, songId);
+            // alert clients about update
+            playlist_manager.emitList(list,l);
         })
     }
     else {
@@ -133,8 +139,6 @@ playlist_manager.addSong = function(list, songId, callback) {
             Playlist.addSongId(l, songId);
         });
     }
-    // alert clients about update
-    playlist_manager.emitList(list,l);
     if (callback) callback();
 };
 
@@ -180,7 +184,6 @@ playlist_manager.replaceList = function(list, songIds, callback) {
  * Sets the socket IO object the playlist will emit updates on.
  * @param {socketIO} io: the IO object for the sockets.
  */
-
 playlist_manager.setSocketIO = function(io) {
     playlist_manager.io=io;
 };
@@ -191,14 +194,14 @@ playlist_manager.setSocketIO = function(io) {
  * @param(optional) {playlist} list: the playlist object to emit
  *                                   (If not provided, it will be retrieved)
 */
-
 playlist_manager.emitList = function(listId,list) {
     var _f_emit = function (listId,list) {
+        console.log("playlist_manager.js: emit");
         // TODO: only emit to clients who are subscribed to the given playlist
-        io.sockets.emit('playlist', {
+        playlist_manager.io.sockets.emit('playlist', {
             //TODO: timestamp
 	        listId: listId,
-            list: list		
+            list: list
         });
     }
     if (!list)
@@ -207,6 +210,17 @@ playlist_manager.emitList = function(listId,list) {
         });
     else
         _f_emit(listId,list);
+};
+
+/** 
+ * Emit updates for the currently playing track
+*/
+playlist_manager.emitCurrentSong = function() {
+    playlist_manager.currentPlaylist(function (listId) {
+        playlist_manager.currentSongIndex(function (songIndex) {
+            playlist_manager.io.sockets.emit('track', {listId:listId,songIndex:songIndex});
+        });
+    });
 };
 
 module.exports = playlist_manager;

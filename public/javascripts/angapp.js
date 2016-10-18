@@ -127,32 +127,6 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		$.post(endpoint,{l:list});
 	}
 
-	//live update playlist:
-	$scope.update_playlist = function() {
-		var endpoint= "/api/p/" + $scope.pl.id;
-		$.get(endpoint, (pl) => {
-			if (!update_lock) {
-				$scope.pl = pl
-				$scope.replace_playlist();
-			}
-		});
-	}
-
-	//live update current song:
-	$scope.update_currentSong = function() {
-		var endpoint= "/api/track";
-		$.get(endpoint, (track) => {
-			console.log(track);
-			if (!update_lock) {
-				if (track.list_id==pl.id)
-					$scope.pl_track_index = track.index
-				else
-					$scope.pl_track_index = -1;
-				$scope.replace_playlist();
-			}
-		});
-	};
-
 	socket.on('status', function(status) {
 		var prog_percent = status.time_elapsed / status.duration;
 		prog_percent = isNaN(prog_percent) ? 0 : prog_percent * 100;
@@ -167,16 +141,29 @@ app.controller('angCon', function($scope, $http, $timeout) {
 		$scope.progress_style.width = prog_percent + "%";
 		$scope.$apply();
 	});
-
-	//grabs updates to page from server
-	$scope.live_update = function() {
-		if ($scope.pl) {
-			$scope.update_playlist();
-			$scope.update_currentSong();
+	
+	//live update playlist
+	socket.on('playlist', function(update) {
+	    if (update.listId===$scope.pl.id) {
+	        if (update_lock) {
+	            return;
+	            console.log("async error: playlist update");
+	        }
+	        $scope.pl=update.list;
+	        $scope.replace_playlist();
+	    }
+	});
+	
+	//live update playlist
+	socket.on('track', function(update) {
+	    if (!update_lock) {
+			if (update.listId==pl.id)
+				$scope.pl_track_index = update.songIndex
+			else
+				$scope.pl_track_index = -1;
+			$scope.replace_playlist();
+		} else {
+    		console.log("async error: track update");
 		}
-		$timeout(function() {
-			$scope.live_update()
-		}, 300)
-	}
-	$scope.live_update();
+	});
 });
