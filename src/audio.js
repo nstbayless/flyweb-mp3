@@ -50,11 +50,11 @@ module.exports = function(io) {
 
 	//plays song with audio pipeline above
 	function play_file(file, cb) {
-		console.log(file);
+		emitTrack();
+		emitPlaylist();
+
 		var stream = Fs.createReadStream(file);
-
 		var totalBytesSeen = 0;
-
 		var transform = new Stream.Transform({
 			transform: function(chunk, encoding, callback) {
 				this.push(chunk);
