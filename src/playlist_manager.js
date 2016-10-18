@@ -10,6 +10,9 @@ playlist_manager.songMap = {};
 playlist_manager.listMap = {"q": playlist_manager.queue};
 playlist_manager.nextId = 0;
 
+// sockets
+playlist_manager.io = {};
+
 /**
  * Get the specified playlist.
  * 
@@ -130,6 +133,8 @@ playlist_manager.addSong = function(list, songId, callback) {
             Playlist.addSongId(l, songId);
         });
     }
+    // alert clients about update
+    playlist_manager.emitList(list,l);
     if (callback) callback();
 };
 
@@ -165,8 +170,43 @@ playlist_manager.replaceList = function(list, songIds, callback) {
         for (var i = 0; i < l.songIds.length; i++) {
             l.songs.push(playlist_manager.songMap[songIds[i]]);
         }
+        // alert clients about update
+        playlist_manager.emitList(list,l);
         if (callback) callback();
     });
+};
+
+/**
+ * Sets the socket IO object the playlist will emit updates on.
+ * @param {socketIO} io: the IO object for the sockets.
+ */
+
+playlist_manager.setSocketIO = function(io) {
+    playlist_manager.io=io;
+};
+
+/** 
+ * Emit updates for the given playlist over all sockets
+ * @param {String} listId: the playlist name
+ * @param(optional) {playlist} list: the playlist object to emit
+ *                                   (If not provided, it will be retrieved)
+*/
+
+playlist_manager.emitList = function(listId,list) {
+    var _f_emit = function (listId,list) {
+        // TODO: only emit to clients who are subscribed to the given playlist
+        io.sockets.emit('playlist', {
+            //TODO: timestamp
+	        listId: listId,
+            list: list		
+        });
+    }
+    if (!list)
+        playlist_manager.getPlaylist(listId, function (list) {
+            _f_emit(listId,list);
+        });
+    else
+        _f_emit(listId,list);
 };
 
 module.exports = playlist_manager;
