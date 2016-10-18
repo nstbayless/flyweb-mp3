@@ -23,11 +23,9 @@ module.exports = () => {
 
     /** GET for adding to playlist or queue */
     function get_add(req, res, next, path) {
-
         if (path.length == 0) {
             id = "";
-        }
-        else {
+        } else {
             id = path[0];
         }
         manager.getPlaylist(id, function (err, pl) {
