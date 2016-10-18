@@ -61,16 +61,16 @@ app.controller('angCon', function ($scope, $http, $timeout) {
     };
 
     $scope.pause_song = function() {
-		socket.emit('pause');
-	};
+    	socket.emit('pause');
+    };
 
-	$scope.prev_song = function() {
-		socket.emit('prev');
-	};
+    $scope.prev_song = function() {
+    	socket.emit('prev');
+    };
 
-	$scope.next_song = function() {
-		socket.emit('next');
-	};
+    $scope.next_song = function() {
+    	socket.emit('next');
+    };
 
     // moves element in list
     function move_in_list(l, from, to) {
