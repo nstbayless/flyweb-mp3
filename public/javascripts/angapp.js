@@ -150,7 +150,7 @@ app.controller('angCon', function ($scope, $http, $timeout) {
             if (pl_table) {
                 $scope.replace_playlist();
             }
-            $scope.apply();
+            $scope.$apply();
         }
     });
 
@@ -162,7 +162,7 @@ app.controller('angCon', function ($scope, $http, $timeout) {
                 $scope.pl_track_index = -1;
             }
             $scope.replace_playlist();
-            $scope.apply();
+            $scope.$apply();
         }
     });
 
