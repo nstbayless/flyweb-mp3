@@ -36,6 +36,11 @@ module.exports = function(io) {
                 this.push(chunk);
                 totalBytesSeen += chunk.length;
                 audio_manager.set_time_elapsed(totalBytesSeen / (4 * rate));
+                emitStatus(audio_manager.get_title(),
+                        audio_manager.get_state(),
+                        audio_manager.get_duration(),
+                        audio_manager.get_time_elapsed()
+                    );
                 callback();
             }
         });

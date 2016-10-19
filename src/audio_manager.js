@@ -21,6 +21,14 @@ audio_manager.is_paused = function() {
     return audio_manager.play_state == 'paused';
 }
 
+audio_manager.get_state = function() {
+    return audio_manager.play_state;
+}
+
+audio_manager.get_title = function() {
+    return audio_manager.current_song.name;
+}
+
 audio_manager.get_duration = function() {
     return audio_manager.current_song.duration;
 }
@@ -35,10 +43,6 @@ audio_manager.set_current = function(song) {
 
 audio_manager.set_time_elapsed = function(time) {
     audio_manager.time_elapsed = time;
-}
-
-audio_manager.set_state = function(state) {
-    audio_manager.play_state = state;
 }
 
 audio_manager.set_state = function(state) {
