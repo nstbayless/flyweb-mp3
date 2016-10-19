@@ -1,0 +1,13 @@
+node_modules
+public/static/js
+app.js
+public/javascripts/angapp.js
+public/javascripts/progress.js
+routes/api.js
+routes/index.js
+src/_playlist.js
+src/_song.js
+src/audio.js
+src/playlist_manager.js
+src/sockets.js
+src/tmp_store.js

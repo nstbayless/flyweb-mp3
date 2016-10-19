@@ -11,7 +11,6 @@ module.exports = function(io) {
 	var Lame = require('lame');
 	var Fs = require('fs');
 	var Stream = require('stream');
-
 	var speaker;
 
 	function emitStatus(title, state, duration, time_elapsed) {
