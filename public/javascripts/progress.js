@@ -1,3 +1,5 @@
+/* globals window, document, XMLHttpRequest, FormData */
+
 // for keeping track of file upload progress
 
 // DOM form element
