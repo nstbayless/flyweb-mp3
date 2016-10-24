@@ -4,7 +4,6 @@ public/static/js
 
 # These are internal files that have not yet been cleaned. Feel free to help reduce the size of this list.
 public/javascripts/angapp.js
-public/javascripts/progress.js
 routes/api.js
 routes/index.js
 src/_playlist.js
