@@ -4,11 +4,10 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var fs = require('fs');
 var multer = require('multer');
 
 // upload directory:
-var upload = multer({dest: "uploads/"});
+var upload = multer({dest: 'uploads/'});
 
 var app = express();
 
@@ -17,8 +16,10 @@ var io = require('socket.io')();
 app.io = io;
 
 var audio = require('./src/audio')(io);
-var sockets = require('./src/sockets')(io, audio);
-var playlistManager = require('./src/playlist_manager')
+
+require('./src/sockets')(io, audio);
+
+var playlistManager = require('./src/playlist_manager');
 playlistManager.setSocketIO(io);
 
 // multer
@@ -60,7 +61,7 @@ app.use(function (req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
+    app.use(function(err, req, res) {
         res.status(err.status || 500);
         res.render('error', {
             message: err.message,
@@ -72,7 +73,7 @@ if (app.get('env') === 'development') {
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function(err, req, res, next) {
+app.use(function(err, req, res) {
     res.status(err.status || 500);
     res.render('error', {
         message: err.message,
