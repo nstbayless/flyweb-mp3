@@ -1,17 +1,29 @@
 extends layout
 
 block head
-
+    link(rel='stylesheet', href='/stylesheets/style_upload.css')
+    script(src="/javascripts/progress.js")
+    
 block content
     div.q
         h1 Add to #{pl.name}
+
+        div#progbarcontainer
+            //- this contains the progress bar which appears when uploading
+            div#progbar
+                div#progbarprogress
+        //- this error message appears when an upload fails.
+        b#errormessage
+        
         div.add-module-container
             div
-                a(href="/add/#{pl.id}/upload")
-                    img(src="/images/add_module_upload.png")
+                div.box.button
+                    form#fform(method="post" enctype="multipart/form-data" onSubmit = "window.location='/p/#{pl.id}'" action = "/api/#{pl.id}/songs/upload")
+                        img(src="/images/add_module_upload.png")
+                        input#fi(type="file" name="song" accept="audio/mpeg")
                 p Upload from your device
             div
-                a(href="/add/#{pl.id}/url")
+                a.box(href="/add/#{pl.id}/url")
                     img(src="/images/add_module_url.png")
                 p Upload from a website
             div(ng-repeat = "i in range(2)")

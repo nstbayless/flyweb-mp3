@@ -1,18 +1,15 @@
 extends layout
 
 block head
-	link(rel='stylesheet', href='/stylesheets/style_upload.css')
-	script(src="/javascripts/progress.js")
+    link(rel='stylesheet', href='/stylesheets/style_upload.css')
+    script(src="/javascripts/progress.js")
 
 block content
-	div.q
-		h1 Upload to #{pl.name}
-		form#fform(method="post" enctype="multipart/form-data" onSubmit = "window.location='/p/#{pl.id}'" action = "/api/#{pl.id}/songs/upload")
-			div.btn.button
-				span Upload
-				input#fi(type="file" name="song" accept="audio/mpeg")
-		div#progbarcontainer
-			div#progbar
-				div#progbarprogress
-		p
-			b#errormessage
+    div.q
+        h1 Upload to #{pl.name}
+        form#fform(method="post" enctype="multipart/form-data" onSubmit = "window.location='/p/#{pl.id}'" action = "/api/#{pl.id}/songs/upload")
+            div.btn.button
+                span Upload
+                input#fi(type="file" name="song" accept="audio/mpeg")
+        p
+            b#errormessage
