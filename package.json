@@ -31,7 +31,7 @@
     "speaker": "^0.3.0",
     "throttle": "^1.0.3",
     "youtube-dl": "^1.11.1",
-    "mp3Length": "^1.0.3"
+    "mp3length": "^1.0.3"
   },
   "pre-commit": [
     "lint",
