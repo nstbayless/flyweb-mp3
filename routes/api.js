@@ -6,7 +6,7 @@ module.exports = (upload) => {
     var audio = require('../src/audio');
     var combine = require('merge');
     var youtubedl = require('youtube-dl');
-    var mp3length = require('mp3Length');
+    var mp3length = require('mp3length');
     var router = express.Router();
 
     manager = require('../src/playlist_manager');
