@@ -1,4 +1,4 @@
-playlist = {};
+var playlist = {};
 
 playlist.Playlist = function (id) {
     return {

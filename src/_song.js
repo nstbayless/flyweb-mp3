@@ -9,7 +9,7 @@ song.Song = function (id) {
         artist: "Artist",
         album: "Album",
         path: ""
-    }
+    };
 };
 
 module.exports = song;
