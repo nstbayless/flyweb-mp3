@@ -12,4 +12,4 @@ module.exports = function(io, audio) {
             audio.next();
         });
     });
-}
+};

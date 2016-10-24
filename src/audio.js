@@ -1,12 +1,12 @@
+// Handles playing sound out of speakers on server.
+
 module.exports = function(io) {
-	// audio and playlist management
 	var repeat = require('repeat');
 	var Song = require ('./_song');
 	var playlist_manager = require('./playlist_manager');
     var audio_manager = require('./audio_manager');
 
 	// audio playing pipeline:
-	var Player = require('player');
 	var Speaker = require('speaker');
 	var Lame = require('lame');
 	var Fs = require('fs');
@@ -45,13 +45,13 @@ module.exports = function(io) {
             }
         });
 
-        decoder.on("format", (format) => {
+        decoder.on('format', (format) => {
             console.log('MP3 format: %j', format);
             speaker.channels = format.channels;
             speaker.bitDepth = format.bitDepth;
             speaker.sampleRate = format.sampleRate;
             rate = format.sampleRate;
-        })
+        });
 
         speaker = new Speaker({
             channels: 2,
@@ -61,7 +61,7 @@ module.exports = function(io) {
 
         speaker.on('pipe', () => {
             console.log('### PIPING ###');
-            audio_manager.play_state = "playing";
+            audio_manager.play_state = 'playing';
         });
 
         //stream = stream.pipe(new Throttle(44100));
@@ -119,10 +119,10 @@ module.exports = function(io) {
 		audio_manager.current_song = song;
         audio_manager.time_elapsed = 0;
 		//adjusts re object based on song type:
-		if (song.type == "empty") {
-			audio_manager.current_song.name = "Nothing Playing";
-		} else if (song.type == "upload") {
-			console.log("Now playing: " + song.name);
+		if (song.type == 'empty') {
+			audio_manager.current_song.name = 'Nothing Playing';
+		} else if (song.type == 'upload') {
+			console.log('Now playing: ' + song.name);
 			audio_manager.set_state('playing');
 			play_file(song.path);
 		}
@@ -138,7 +138,7 @@ module.exports = function(io) {
 				});
 			} else {
 				//if playlist is empty, play a default empty song
-                var empty_song = Song.Song("-1");
+                var empty_song = Song.Song('-1');
 				play(empty_song);
                 audio_manager.set_current(empty_song);
 			}
@@ -157,4 +157,4 @@ module.exports = function(io) {
 	};
 
 	return module;
-}
+};

@@ -6,6 +6,4 @@ public/static/js
 public/javascripts/angapp.js
 routes/api.js
 routes/index.js
-src/audio.js
 src/playlist_manager.js
-src/sockets.js
