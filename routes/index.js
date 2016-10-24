@@ -33,11 +33,7 @@ module.exports = () => {
                 res.render('add', {title: res.server_name, pl: pl, track: audio_manager.current_song});
             }
             else {
-                if (path[1] == "upload") {
-                    // /add[/{plid}]/upload
-                    res.render('add-upload', {title: res.server_name, pl: pl, track: audio_manager.current_song});
-                }
-                else if (path[1] == "url") {
+                if (path[1] == "url") {
                     // /add[{plid}]/url
                     res.render('add-url', {title: res.server_name, pl: pl, track: audio_manager.current_song});
                 }
