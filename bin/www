@@ -29,7 +29,7 @@ try {
 config = require("../" + config_file);
 
 // create uploads/ folder in root
-fs.existsSync("../uploads/") || fs.mkdirSync("../uploads/");
+fs.existsSync("./uploads/") || fs.mkdirSync("./uploads/");
 
 /**
  * Get port from environment and store in Express.
