@@ -98,12 +98,12 @@ footer {
 	width: 64px;
 	height: 64px;
 	display: block;
-	background-image: url('/images/add.png');
+	background-image: url('/images/add_sprite.png');
 	background-size: 100%;
 }
 
 #fab-add:hover {
-	background-image: url('/images/add_hover.png');
+	background-position: bottom;
 }
 
 div.nav {
@@ -148,8 +148,8 @@ div.q {
 }
 
 table.q {
-	width:80%; 
-    margin-left:10%; 
+	width:80%;
+    margin-left:10%;
     margin-right:10%;
 }
 
@@ -201,13 +201,13 @@ p.tracker {
     height: 160px;
     float: left;
 	display:block;
-    background: #eee;   
+    background: #eee;
     margin: 12px;
 }
 
 .add-module-container > div > .box {
 	width: 152px;
-	background: #fff;   
+	background: #fff;
 	height: 130px;
 	display:inline-block;
 	outline: #000 solid 4px;
