@@ -194,25 +194,3 @@ p.footer {
 p.tracker {
 	font-family:'Lucida Console', monospace;
 }
-
-.add-module-container {
-    overflow-y: auto;
-}
-
-.add-module-container > div {
-    width: 160px;
-    height: 160px;
-    float: left;
-	display:block;
-    background: #eee;
-    margin: 12px;
-}
-
-.add-module-container > div > .box {
-	width: 152px;
-	background: #fff;
-	height: 130px;
-	display:inline-block;
-	outline: #000 solid 4px;
-	margin: 4px;
-}
