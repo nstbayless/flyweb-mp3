@@ -46,6 +46,9 @@ footer {
 #player-song {
 	height: 40px;
 	font-size: 1.5em;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 #song-name {
