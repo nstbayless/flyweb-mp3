@@ -160,8 +160,9 @@ td.q {
 	padding: 6px 14px;
 }
 
-td .qx {
+td.qx {
   float:right;
+  padding: 3px 5px;
 }
 
 th.q {

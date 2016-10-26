@@ -1,4 +1,4 @@
-/* globals window, document, XMLHttpRequest, FormData, pl*/
+/* globals window, document, XMLHttpRequest, FormData, list*/
 
 // for keeping track of file upload progress
 
@@ -93,7 +93,7 @@ function submitOnChange(evt) {
                 errorMessage.innerHTML = 'Error: ' + err;
             }
             if (success) {
-                var redirect = '/p/' + pl.id;
+                var redirect = '/p/' + list.id;
                 window.location.replace(redirect);
             }
         }, uploadProgress);

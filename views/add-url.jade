@@ -5,9 +5,9 @@ block head
 
 block content
     div.q
-        h1 Upload to #{pl.name}
-        form(method="post" enctype="multipart/form-data" onSubmit="window.location='/p/#{pl.id}'" action="/api/#{pl.id}/songs/url")
+        h1 Add to #{list.name} from a website
+        form(method="post" enctype="multipart/form-data" onSubmit="window.location='/p/#{list.id}'" action="/api/#{list.id}/songs/url")
             p Video URL:
             input(type="text" name="url")
-            input(type="hidden" name="redirect" value="/p/#{pl.id}")
+            input(type="hidden" name="redirect" value="/p/#{list.id}")
             input(type="submit" value="Submit")

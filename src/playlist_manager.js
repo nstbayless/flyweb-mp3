@@ -211,7 +211,7 @@ playlist_manager.createSong = function(list, path, callback) {
  *          {Boolean} removedCurrentSong: whether the currently playing song was removed
  */
 playlist_manager.removeSong = function (listId, songIndex, callback) {
-    playlist_manager.getPlaylist(listId, function (l) {
+    playlist_manager.getPlaylist(listId, function (err, l) {
         if (songIndex < 0 || songIndex >= l.songIds.length) {
             callback("Index out of range", false);
         }
@@ -230,7 +230,7 @@ playlist_manager.removeSong = function (listId, songIndex, callback) {
         }
         
         // alert clients to change in playlist
-        playlist_manager.emitList(list,l);
+        playlist_manager.emitList(listId,l);
 
         // if playing song was removed, report this
         if (isCurrentSong && callback) {

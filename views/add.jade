@@ -6,7 +6,7 @@ block head
 
 block content
     div.q
-        h1 Add to #{pl.name}
+        h1 Add to #{list.name}
 
         div#progbarcontainer
             //- this contains the progress bar which appears when uploading
@@ -18,10 +18,10 @@ block content
         div.add-module-container
             div.add-module#add-module-upload
                 div.add-module-button
-                    form#fform(method="post" enctype="multipart/form-data" onSubmit = "window.location='/p/#{pl.id}'" action = "/api/#{pl.id}/songs/upload")
+                    form#fform(method="post" enctype="multipart/form-data" onSubmit = "window.location='/p/#{list.id}'" action = "/api/#{list.id}/songs/upload")
                         input#fi(type="file" name="song" accept="audio/mpeg")
                 p.add-module-text Upload from your device
             div.add-module#add-module-url
-                a(href="/add/#{pl.id}/url")
+                a(href="/add/#{list.id}/url")
                     div.add-module-button
                 p.add-module-text Upload from a website
