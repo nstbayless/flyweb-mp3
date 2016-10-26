@@ -11,7 +11,7 @@ var upload = multer({dest: 'uploads/'});
 
 var app = express();
 
-//socket dissemination
+// socket dissemination
 var io = require('socket.io')();
 app.io = io;
 
