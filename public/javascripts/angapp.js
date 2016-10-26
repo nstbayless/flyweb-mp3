@@ -16,7 +16,6 @@ app.controller('angCon', function($scope, $http, $timeout) {
         if (list.id==currentListId)
             $scope.pl_track_index = currentSongIndex;
         
-        console.log($scope.pl_track_index);
 
         // make table rearrangeable:
         pl_table = document.getElementById("pltable");

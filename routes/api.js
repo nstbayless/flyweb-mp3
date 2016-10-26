@@ -7,7 +7,6 @@ module.exports = (upload, audio) => {
     var assert = require('assert');
     var fs = require('fs');
     var mm = require('musicmetadata');
-    var audio = require('../src/audio');
     var combine = require('merge');
     var youtubedl = require('youtube-dl');
     var mp3length = require('mp3length');

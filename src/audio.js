@@ -71,9 +71,11 @@ module.exports = function(io) {
             audio_manager.set_state('paused');
 
             if (audio_manager.jump_index>=0) {
-                playlist_manager.chooseSong(audio_manager.jump_index, (err, s) => {
-                    play(s);
-                    audio_manager.set_current(s);
+                playlist_manager.currentPlaylist(function (err,currentListId) {
+                    playlist_manager.chooseSong(currentListId,audio_manager.jump_index, (err, s) => {
+                        play(s);
+                        audio_manager.set_current(s);
+                    });
                 });
             } else if (!audio_manager.prev_flag) {
                 playlist_manager.nextSong((err, s) => {
