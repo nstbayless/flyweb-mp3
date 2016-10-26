@@ -1,15 +1,15 @@
 module.exports = (upload) => {
-    var express = require('express');
-    var assert = require('assert');
-    var fs = require('fs');
-    var mm = require('musicmetadata');
-    var audio = require('../src/audio');
-    var combine = require('merge');
-    var youtubedl = require('youtube-dl');
-    var mp3length = require('mp3length');
+    var express = require("express");
+    var assert = require("assert");
+    var fs = require("fs");
+    var mm = require("musicmetadata");
+    //var audio = require("../src/audio");
+    //var combine = require("merge");
+    var youtubedl = require("youtube-dl");
+    var mp3length = require("mp3length");
     var router = express.Router();
 
-    manager = require('../src/playlist_manager');
+    var manager = require("../src/playlist_manager");
 
     function api_error(res, code, text) {
         if (!text) {
@@ -25,18 +25,18 @@ module.exports = (upload) => {
         if (!object) {
             object = "success";
         }
-        if (code == undefined) {
+        if (code === undefined) {
             code = 200;
         }
         res.status(code).send(object);
     }
 
     function get(req, res, next) {
-        path = req.url.split("/").filter((e) => {
+        var path = req.url.split("/").filter((e) => {
             return e.length > 0;
         });
 
-        if (path.length == 0) {
+        if (path.length === 0) {
             return res.status(200).send("Welcome to the FlyWeb-mp3 API!");
         }
         else {
@@ -59,8 +59,8 @@ module.exports = (upload) => {
                 if (path.length < 2) {
                     return api_error(res, 400, "must supply plid");
                 }
-                plid = path[1];
-                manager.getPlaylist(plid, function (err,list) {
+                var listId = path[1];
+                manager.getPlaylist(listId, function (err,list) {
                     res.send(200, list);
                 });
             }
@@ -78,12 +78,12 @@ module.exports = (upload) => {
         assert(!!req.file);
         var path = req.file.destination + req.file.filename;
         var title = req.file.originalname;
-        var parser = mm(fs.createReadStream(path), {duration: true}, function (err, metadata) {
+        mm(fs.createReadStream(path), {duration: true}, function (err, metadata) {
             if (err) {
                 console.log("### ERROR READING METADATA ###");
                 mp3length(path, function (err, length) {
                     if (err) {
-                        console.log('### MP3 FILE CORRUPT ###');
+                        console.log("### MP3 FILE CORRUPT ###");
                     } else {
                         manager.createSong(list, path, function (id, err) {
                             if (err) {
@@ -101,7 +101,7 @@ module.exports = (upload) => {
                     }
                 });
             } else {
-                if (metadata.title != "") {
+                if (metadata.title !== "") {
                     title = metadata.title;
                 }
                 manager.createSong(list, path, function (id, err) {
@@ -131,21 +131,22 @@ module.exports = (upload) => {
                 throw err;
             }
             var filename = info.id + ".mp3";
-            var path = 'uploads/' + filename;
+            var path = "uploads/" + filename;
             var title = info.title;
 
             // download video, convert to MP3, and save MP3
-            youtubedl.exec(req.body.url, ['-o', "uploads/%(id)s.%(ext)s", '-x', '--audio-format', 'mp3'], {}, function(err, output) {
+            youtubedl.exec(req.body.url, ["-o", "uploads/%(id)s.%(ext)s", "-x", "--audio-format", "mp3"], {}, function(err, output) {
                 if (err) {
                     throw err;
                 }
-                var parser = mm(fs.createReadStream(path), {duration: true}, function (err, metadata) {
+
+                mm(fs.createReadStream(path), {duration: true}, function (err, metadata) {
                     if (err) {
                         console.log("### ERROR READING METADATA ###");
                         console.log("error sent");
                         mp3length(path, function (err, length) {
                             if (err) {
-                                console.log('### MP3 FILE CORRUPT ###');
+                                console.log("### MP3 FILE CORRUPT ###");
                             } else {
                                 manager.createSong(list, path, function (id, err) {
                                     if (err) {
@@ -163,7 +164,7 @@ module.exports = (upload) => {
                             }
                         });
                     }
-                    if (metadata.title != "") {
+                    if (metadata.title !== "") {
                         title = metadata.title;
                     }
                     console.log(title);
@@ -186,7 +187,7 @@ module.exports = (upload) => {
     }
 
     function post(req, res, next) {
-        path = req.url.split("/").filter((e) => {
+        var path = req.url.split("/").filter((e) => {
             return e.length > 0;
         });
         if (path.length < 1) {
@@ -194,13 +195,13 @@ module.exports = (upload) => {
         }
         else {
             // /api/
-            plid = path[0];
+            var listId = path[0];
             if (path.length == 1) {
                 // /api/{plid}
                 // TODO: change to /api/p/{plid}
 
                 //rearrange playlist
-                return manager.moveSong(plid, req.body.from, req.body.to, function (err) {
+                return manager.moveSong(listId, req.body.from, req.body.to, function (err) {
                     if (err) {
                         return api_error(res, 400, err);
                     }
@@ -219,14 +220,14 @@ module.exports = (upload) => {
                         if (path.length > 3) {
                             return api_error(res, 400);
                         }
-                        return post_song_upload(req, res, next, plid);
+                        return post_song_upload(req, res, next, listId);
                     }
                     else if (path[2] == "url") {
                         // /api/{plid}/songs/upload
                         if (path.length > 3) {
                             return api_error(400);
                         }
-                        return post_song_url(req, res, next, plid);
+                        return post_song_url(req, res, next, listId);
                     }
                 }
             }
@@ -250,4 +251,4 @@ module.exports = (upload) => {
     });
 
     return router;
-}
+};
