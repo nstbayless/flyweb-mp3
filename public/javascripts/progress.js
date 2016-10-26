@@ -1,3 +1,5 @@
+/* globals window, document, XMLHttpRequest, FormData, pl*/
+
 // for keeping track of file upload progress
 
 // DOM form element
@@ -18,18 +20,18 @@ var errorMessage;
 // determines whether progress bar or form is visible
 function setProgressBarVisibility(visible) {
     if (visible) {
-        eltForm.style.display = "none";
-        progressBarContainer.style.display = "inline";
+        eltForm.style.display = 'none';
+        progressBarContainer.style.display = 'inline';
     } else {
-        eltForm.style.display = "inline";
-        progressBarContainer.style.display = "none";
+        eltForm.style.display = 'inline';
+        progressBarContainer.style.display = 'none';
     }
 }
 
 //displays upload portion
 //p: portion uploaded from 0 to 1
 function uploadProgress(p) {
-    var style = ((100 * p) + "%");
+    var style = ((100 * p) + '%');
     console.log(style);
     progressBar.style.width = style;
 }
@@ -41,10 +43,10 @@ function uploadFile(f, url, cb, progress) {
 
     //check for obvious errors:
     if (!xhr.upload) {
-        return cb("Browser does not support uploading");
+        return cb('Browser does not support uploading');
     }
     if (!f.type.match(/^audio\//)) {
-        return cb("Only audio files are allowed");
+        return cb('Only audio files are allowed');
     }
     var fd = new FormData();
 
@@ -52,23 +54,23 @@ function uploadFile(f, url, cb, progress) {
     fd.append('song', f, f.name);
 
     //callback delegation:
-    xhr.upload.addEventListener("progress", function(e) {
+    xhr.upload.addEventListener('progress', function(e) {
         var pc = parseInt(e.loaded / e.total);
         progress(pc);
     }, false);
-    xhr.upload.addEventListener("load", function(e) {
+    xhr.upload.addEventListener('load', function() {
         progress(1);
         cb(null, true);
     }, false);
-    xhr.upload.addEventListener("error", function(e) {
-        cb("Error uploading");
+    xhr.upload.addEventListener('error', function() {
+        cb('Error uploading');
     }, false);
-    xhr.upload.addEventListener("abort", function(e) {
-        cb("Upload aborted", true);
+    xhr.upload.addEventListener('abort', function() {
+        cb('Upload aborted', true);
     }, false);
 
     //do POST to the given endpoint:
-    xhr.open("POST", url, true);
+    xhr.open('POST', url, true);
 
     //begin upload:
     xhr.send(fd);
@@ -82,13 +84,13 @@ function submitOnChange(evt) {
     if (f) {
         //file provided
         setProgressBarVisibility(true);
-        errorMessage.innerHTML = "";
-        var url = eltForm.getAttribute("action")
+        errorMessage.innerHTML = '';
+        var url = eltForm.getAttribute('action');
         uploadFile(f, url, (err, success) => {
             //display form to be re-shown:
             if (err) {
                 setProgressBarVisibility(false);
-                errorMessage.innerHTML = "Error: " + err;
+                errorMessage.innerHTML = 'Error: ' + err;
             }
             if (success) {
                 var redirect = '/p/' + pl.id;
@@ -109,4 +111,4 @@ window.onload = function() {
     progressBar = document.getElementById('progbarprogress');
     errorMessage = document.getElementById('errormessage');
     setProgressBarVisibility(false);
-}
+};

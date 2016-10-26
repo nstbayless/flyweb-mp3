@@ -1,0 +1,9 @@
+# These are external code and therefore should not be linted
+node_modules
+public/static/js
+
+# These are internal files that have not yet been cleaned. Feel free to help reduce the size of this list.
+public/javascripts/angapp.js
+routes/api.js
+routes/index.js
+src/playlist_manager.js

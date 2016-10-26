@@ -1,11 +1,11 @@
 # Local Area MP3 Player
 
-Server that plays music, controlled from firefox by FlyWeb
+Server that plays music, controlled from Firefox by FlyWeb
 
 How to start:
 
 ```
-sudo apt-get install libavahi-compat-libdnssd-dev;
+sudo apt-get install libavahi-compat-libdnssd-dev ffmpeg;
 npm install;
 npm start;
 ```

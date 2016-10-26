@@ -11,25 +11,39 @@
 	background: #45e;
 }
 
-.button {
-    position: relative;
-    overflow: hidden;
-    margin: 10px;
-	background-color: #f80;
+#errormessage {
+	font-weight: bold;
 }
 
-.button > span {
-	font-size:30px;
-	color:white;
+.add-module {
+	margin-right: 15px;
+	display: inline-block;
+}
+
+.add-module-button {
+	width: 180px;
+	height: 180px;
+	border: 5px solid black;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+
+#add-module-upload .add-module-button {
+	background-image: url('/images/add_module_upload.png');
+}
+
+#add-module-url .add-module-button {
+	background-image: url('/images/add_module_url.png');
+}
+
+.add-module-text {
+	text-align: center;
+	margin: 10px 0;
 }
 
 #fi {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 0;
-    padding: 0;
-    font-size: 20px;
-    cursor: pointer;
-    opacity: 0.0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	cursor: pointer;
 }

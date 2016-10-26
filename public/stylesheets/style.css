@@ -46,6 +46,9 @@ footer {
 #player-song {
 	height: 40px;
 	font-size: 1.5em;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 #song-name {
@@ -98,12 +101,12 @@ footer {
 	width: 64px;
 	height: 64px;
 	display: block;
-	background-image: url('/images/add.png');
+	background-image: url('/images/add_sprite.png');
 	background-size: 100%;
 }
 
 #fab-add:hover {
-	background-image: url('/images/add_hover.png');
+	background-position: bottom;
 }
 
 div.nav {
@@ -148,8 +151,8 @@ div.q {
 }
 
 table.q {
-	width:80%; 
-    margin-left:10%; 
+	width:80%;
+    margin-left:10%;
     margin-right:10%;
 }
 
@@ -194,26 +197,4 @@ p.footer {
 
 p.tracker {
 	font-family:'Lucida Console', monospace;
-}
-
-.add-module-container {
-    overflow-y: auto;
-}
-
-.add-module-container > div {
-    width: 160px;
-    height: 160px;
-    float: left;
-	display:block;
-    background: #eee;   
-    margin: 12px;
-}
-
-.add-module-container > div > a {
-	width: 152px;
-	background: #fff;   
-	height: 130px;
-	display:inline-block;
-	outline: #000 solid 4px;
-	margin: 4px;
 }

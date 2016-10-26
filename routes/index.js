@@ -1,7 +1,7 @@
 module.exports = () => {
     var express = require('express');
     var router = express.Router();
-    var tmp = require('../src/tmp_store');
+    var audio_manager = require('../src/audio_manager');
     var audio = require('../src/audio');
     var manager = require('../src/playlist_manager');
 
@@ -16,14 +16,13 @@ module.exports = () => {
             res.render('playlist', {
                 title: res.server_name,
                 pl: list,
-                track: tmp.track
+                track: audio_manager.current_song
             });
         });
     }
 
     /** GET for adding to playlist or queue */
     function get_add(req, res, next, path) {
-
         if (path.length == 0) {
             id = "";
         } else {
@@ -31,20 +30,21 @@ module.exports = () => {
         }
         manager.getPlaylist(id, function(err, pl) {
             if (path.length <= 1) { // /add[/{plid}]
-                res.render('add', {
+                return res.render('add', {
                     title: res.server_name,
                     pl: pl,
-                    track: tmp.track
+                    track: audio_manager.current_song
                 });
             } else {
-                if (path[1] == "upload") {
-                    // /add[/{plid}]/upload
-                    res.render('add-upload', {
+                if (path[1] == "url") {
+                    // /add[/{plid}]/url
+                    return res.render('add-url', {
                         title: res.server_name,
                         pl: pl,
-                        track: tmp.track
+                        track: audio_manager.current_song
                     });
                 }
+                return next();
             }
         });
     }
@@ -64,35 +64,6 @@ module.exports = () => {
             }
             if (path[0] == "add") {
                 return get_add(req, res, next, path.slice(1));
-            }
-            if (path[0] == "status") {
-                res.setHeader('Content-Type', 'application/json');
-                res.send(JSON.stringify(audio.status()));
-                return;
-            }
-            if (path[0] == "pause") {
-                var state = audio.pause();
-                res.setHeader('Content-Type', 'application/json');
-                res.send(JSON.stringify({
-                    state: state
-                }));
-                return;
-            }
-            if (path[0] == 'next') {
-                var state = audio.next();
-                res.setHeader('Content-Type', 'application/json');
-                res.send(JSON.stringify({
-                    state: state
-                }));
-                return;
-            }
-            if (path[0] == 'prev') {
-                var state = audio.prev();
-                res.setHeader('Content-Type', 'application/json');
-                res.send(JSON.stringify({
-                    state: state
-                }));
-                return;
             }
         }
         next();

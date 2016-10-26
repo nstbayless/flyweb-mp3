@@ -1,4 +1,5 @@
 var app = angular.module('angApp', []);
+var socket = io();
 
 app.controller('angCon', function ($scope, $http, $timeout) {
     // semaphore for GETting playlist
@@ -25,10 +26,9 @@ app.controller('angCon', function ($scope, $http, $timeout) {
                 $scope.repaint_playlist("#ccf", "#eef", true);
             }
         });
-    }
-    catch (e) {
+    } catch (e) {
 			// pl might not be supplied on this page; this is okay.
-    } 
+    }
 
     $scope.status = {
         title: 'Nothing Playing',
@@ -60,19 +60,16 @@ app.controller('angCon', function ($scope, $http, $timeout) {
         return mm + ":" + ss;
     };
 
-    $scope.pause_song = function () {
-        var endpoint = "/pause";
-        $.get(endpoint);
+    $scope.pause_song = function() {
+    	socket.emit('pause');
     };
 
-    $scope.prev_song = function () {
-        var endpoint = "/prev";
-        $.get(endpoint);
+    $scope.prev_song = function() {
+    	socket.emit('prev');
     };
 
-    $scope.next_song = function () {
-        var endpoint = "/next";
-        $.get(endpoint);
+    $scope.next_song = function() {
+    	socket.emit('next');
     };
 
     // moves element in list
@@ -100,8 +97,7 @@ app.controller('angCon', function ($scope, $http, $timeout) {
             if (i >= pl_table.children.length) {
                 tr = document.createElement("tr");
                 pl_table.appendChild(tr);
-            }
-            else {
+            } else {
                 tr = pl_table.children[i];
             }
 
@@ -179,70 +175,46 @@ app.controller('angCon', function ($scope, $http, $timeout) {
         });
     }
 
-    // live update playlist:
-    $scope.update_playlist = function () {
-        var endpoint = "/api/p/" + $scope.pl.id;
-        $.get(endpoint, (pl) => {
-            if (!update_lock) {
-                $scope.pl = pl;
-				// update playlist table if it exists:
-				if (pl_table) {
-	                $scope.replace_playlist();
-				}
-            }
-        });
-    };
+    // live update status for current song
+    socket.on('status', function(status) {
+		var prog_percent = status.time_elapsed / status.duration;
+		prog_percent = isNaN(prog_percent) ? 0 : prog_percent * 100;
 
-    // live update current song:
-    $scope.update_currentSong = function () {
-        var endpoint = "/api/track";
-        $.get(endpoint, (track) => {
-            if (!update_lock) {
-                if (track.list_id == pl.id) {
-                    $scope.pl_track_index = track.index;
-                }
-                else {
-                    $scope.pl_track_index = -1;
-                }
-                // update playlist table if it exists:
-				if (pl_table) {
-	                $scope.replace_playlist();
-				}
-            }
-        });
-    };
+		if (status.state === 'paused') {
+			$('#controls-play').removeClass('glyphicon-pause').addClass('glyphicon-play');
+		} else if (status.state === 'playing') {
+			$('#controls-play').removeClass('glyphicon-play').addClass('glyphicon-pause');
+		}
 
-    // live update tracker bar:
-    $scope.update_status = function () {
-        var endpoint = "/status";
-        $.get(endpoint, (status) => {
-            var prog_percent = status.time_elapsed / status.duration;
-            prog_percent = isNaN(prog_percent) ? 0 : prog_percent * 100;
-
-            if (status.state === 'paused') {
-                $('#controls-play').removeClass('glyphicon-pause').addClass('glyphicon-play');
-            }
-            else if (status.state === 'playing') {
-                $('#controls-play').removeClass('glyphicon-play').addClass('glyphicon-pause');
-            }
-
-            $scope.status = status;
-            $scope.progress_style.width = prog_percent + "%";
-        });
-    };
-
-    //grabs updates to page from server
-    $scope.live_update = function () {
-        if ($scope.pl) {
-            $scope.update_playlist();
-            $scope.update_currentSong();
-        }
-        if ($scope.status) {
-            $scope.update_status();
-        }
-        $timeout(function () {
-            $scope.live_update();
-        }, 300);
-    };
-    $scope.live_update();
+		$scope.status = status;
+		$scope.progress_style.width = prog_percent + "%";
+		$scope.$apply();
+	});
+	
+	// live update playlist
+	socket.on('playlist', function(update) {
+	    if (update.listId===$scope.pl.id) {
+	        if (update_lock) {
+	            return;
+	            console.log("async error: playlist update");
+	        }
+	        $scope.pl=update.list;
+	        $scope.replace_playlist();
+	        $scope.$apply();
+	    }
+	});
+	
+	// live update currently-playing song on playlist
+	socket.on('track', function(update) {
+	    if (!update_lock) {
+			if (update.listId==pl.id)
+				$scope.pl_track_index = update.songIndex
+			else
+				$scope.pl_track_index = -1;
+			$scope.replace_playlist();
+			$scope.$apply();
+		} else {
+    		console.log("async error: track update");
+		}
+	});
 });
