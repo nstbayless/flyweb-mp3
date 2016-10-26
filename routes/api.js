@@ -1,4 +1,4 @@
-module.exports = (upload) => {
+module.exports = (upload,audio) => {
     var express = require('express');
     var assert = require('assert');
     var fs = require('fs');
@@ -46,11 +46,11 @@ module.exports = (upload) => {
                 }
 
                 //send list and track index:
-                manager.currentPlaylist(function(err, list_id) {
-                    manager.currentSongIndex(function(err, sid) {
+                manager.currentPlaylist(function(err, listId) {
+                    manager.currentSongIndex(function(err, songIndex) {
                         res.send(200, {
-                            list_id: list_id,
-                            index: sid
+                            list_id: listId,
+                            index: songIndex
                         });
                     });
                 });
@@ -258,36 +258,35 @@ module.exports = (upload) => {
             if (path[0] == "p") {
                 // /api/p            
                 if (path.length >= 2) {
-                    // /api/p/{plid}
-                    var plid = path[1];
+                    // /api/p/{listId}
+                    var listId = path[1];
                     if (path.length >= 3) {
                         if (path[2] == "songs") {
-                            // /api/p/{plid}/songs
+                            // /api/p/{listId}/songs
                             if (path.length >= 4) {
-                                // /api/p/{plid}/songs/{sid}
-                                sid = parseInt(path[3]);
-                                if (sid) {
-                                    if (sid < 0) {
+                                // /api/p/{listId}/songs/{songIndex}
+                                songIndex = parseInt(path[3]);
+                                if (songIndex) {
+                                    if (songIndex < 0) {
                                         return api_error(res, 400, "index cannot be negative");
                                     }
                                     // TODO: use actual delete method, when implemented
-                                    manager.getPlaylist(plid, function(err, pl) {
+                                    manager.getPlaylist(listId, function (err, list) {
                                         if (err) {
                                             return api_error(res, 500, err);
                                         } else {
-                                            if (sid >= pl.songIds.length) {
-                                                return api_error(res, 400, "index " + sid + " exceeds " +
-                                                    plid + " with length " + pl.songIds.length);
-                                            }
-                                            var newPlaylist = pl.songIds.slice(0);
-                                            newPlaylist.splice(sid, 1);
-                                            manager.replaceList(plid, newPlaylist, function(err) {
+                                            manager.removeSong(listId,songIndex, function (err,removedCurrentSong) {
                                                 if (err) {
-                                                    return api_error(res, 500, err);
+                                                    res.status(500).send(err);
                                                 } else {
-                                                    return api_success(res);
+                                                    if (removedCurrentSong) {
+                                                        // gets the next song after the one removed to start playing
+                                                        // can't use next() because current song deleted. This is a hack.
+                                                        audio.jumpTo(songIndex);
+                                                    }
+                                                    return res.status(200).send("removed song");
                                                 }
-                                            });
+                                            })
                                         }
                                     });
                                     return;

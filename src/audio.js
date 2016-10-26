@@ -70,7 +70,12 @@ module.exports = function(io) {
             audio_manager.set_time_elapsed(0);
             audio_manager.set_state('paused');
 
-            if (!audio_manager.prev_flag) {
+            if (audio_manager.jump_index>=0) {
+                playlist_manager.chooseSong(audio_manager.jump_index, (err, s) => {
+                    play(s);
+                    audio_manager.set_current(s);
+                });
+            } else if (!audio_manager.prev_flag) {
                 playlist_manager.nextSong((err, s) => {
                     play(s);
                     audio_manager.set_current(s);
@@ -82,9 +87,16 @@ module.exports = function(io) {
                 });
             }
             audio_manager.prev_flag = false;
+            audio_manager.jump_index = -1;
             console.log('speaker finished');
 
         });
+    }
+    
+    function jumpTo(songIndex) {
+        audio_manager.jump_index= songIndex;
+        speaker.end();
+        return audio_manager.play_state;
     }
 
     function prev() {
@@ -152,7 +164,8 @@ module.exports = function(io) {
 		check_start: check_start,
 		pause: pause,
 		next: next,
-		prev: prev
+		prev: prev,
+		jumpTo: jumpTo
 	};
 
 	return module;

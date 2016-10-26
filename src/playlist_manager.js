@@ -228,6 +228,9 @@ playlist_manager.removeSong = function (listId, songIndex, callback) {
         if (isLastSong) {
             playlist_manager.songIndex = START_OF_LIST;
         }
+        
+        // alert clients to change in playlist
+        playlist_manager.emitList(list,l);
 
         // if playing song was removed, report this
         if (isCurrentSong && callback) {
@@ -285,6 +288,11 @@ playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
         if (playlist_manager.songIndex == oldIndex) {
             playlist_manager.songIndex = newIndex;
         }
+        
+        // alert clients to change in list
+        playlist_manager.emitList(list,l);
+        playlist_manager.emitCurrentSong();
+        
         if (callback) {
             callback(null);
         }

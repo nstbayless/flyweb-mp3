@@ -4,7 +4,12 @@ var audio_manager = {};
 audio_manager.current_song = null;
 audio_manager.time_elapsed = 0;
 audio_manager.play_state = 'paused';
+
+// when playback halts (e.g. user skips), prev flag indicate jump to previous track instead of next
 audio_manager.prev_flag = false;
+
+// when playback halts, if this is non-negative, jump to the given track. (Overrides prev flag.)
+audio_manager.jump_index = -1;
 
 audio_manager.current_is_empty = function() {
     return !audio_manager.current_song || audio_manager.current_song.type == 'empty';
