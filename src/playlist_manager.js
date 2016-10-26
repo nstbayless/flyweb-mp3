@@ -1,7 +1,6 @@
-START_OF_LIST = -1;
-
-var Playlist = require('./_playlist');
-var Song = require('./_song');
+var START_OF_LIST = -1;
+var Playlist = require("./_playlist");
+var Song = require("./_song");
 var playlist_manager = {};
 playlist_manager.queue = Playlist.Playlist("q");
 playlist_manager.queue.name = "Play Queue";
@@ -168,13 +167,19 @@ playlist_manager.addSong = function (list, songId, callback) {
             Playlist.addSongId(l, songId);
             // alert clients about update
             playlist_manager.emitList(list,l);
-        })
-    } else {
-        playlist_manager.getPlaylist(list, function(s) {
-            Playlist.addSong(l, s);
-            Playlist.addSongId(l, songId);
         });
     }
+    else {
+        playlist_manager.getPlaylist(list, function(err, l) {
+            playlist_manager.getSong(songId, function(err, s) {
+                Playlist.addSong(l, s);
+                Playlist.addSongId(l, songId);
+                // alert clients about update
+                playlist_manager.emitList(list,l);
+            });
+        });
+    }
+
     if (callback) {
         callback(null);
     }
@@ -308,7 +313,7 @@ playlist_manager.setSocketIO = function(io) {
 playlist_manager.emitList = function(listId, list) {
     var _f_emit = function (listId,list) {
         // TODO: only emit to clients who are subscribed to the given playlist
-        playlist_manager.io.sockets.emit('playlist', {
+        playlist_manager.io.sockets.emit("playlist", {
             //TODO: timestamp
 	        listId: listId,
             list: list
@@ -330,7 +335,7 @@ playlist_manager.emitList = function(listId, list) {
 playlist_manager.emitCurrentSong = function() {
     playlist_manager.currentPlaylist(function (err,listId) {
         playlist_manager.currentSongIndex(function (err,songIndex) {
-            playlist_manager.io.sockets.emit('track', {listId:listId,songIndex:songIndex});
+            playlist_manager.io.sockets.emit("track", {listId:listId,songIndex:songIndex});
         });
     });
 };
