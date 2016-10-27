@@ -182,6 +182,8 @@ app.controller('angCon', function($scope, $http, $timeout) {
     $scope.remove_song = function(index) {
         $scope.list.songs.splice(index, 1);
         $scope.list.songIds.splice(index, 1);
+        if ($scope.pl_track_index > index)
+            $scope.pl_track_index--;
         var endpoint = "/api/p/" + $scope.list.id + "/songs/" + index
         $scope.replace_playlist();
         $.ajax({

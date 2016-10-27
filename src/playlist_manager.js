@@ -217,20 +217,20 @@ playlist_manager.removeSong = function (listId, songIndex, callback) {
         }
 
         // last (bottom) song in list or only song
-        var isLastSong = (songIndex === l.songIds.length - 1);
         var isCurrentSong = (songIndex === playlist_manager.songIndex);
 
         // remove song
         l.songIds.splice(songIndex, 1);
         l.songs.splice(songIndex, 1);
-
-        // next song will be top of list or no song if empty
-        if (isLastSong) {
-            playlist_manager.songIndex = START_OF_LIST;
-        }
         
         // alert clients to change in playlist
         playlist_manager.emitList(listId,l);
+
+        // move current song if necessary:
+        if (songIndex < playlist_manager.songIndex) {
+            playlist_manager.songIndex--;
+            playlist_manager.emitCurrentSong();
+        }
 
         // if playing song was removed, report this
         if (isCurrentSong && callback) {
