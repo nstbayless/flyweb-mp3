@@ -276,8 +276,13 @@ playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
             callback("Index out of range");
         }
         
-        console.log("oldIndex: " + oldIndex);
-        console.log("newIndex: " + newIndex);
+        // do nothing if oldIndex == newIndex
+        if (oldIndex == newIndex) {
+            if (callback) {
+                callback(null);
+            }
+            return;
+        }
 
         // remove song
         var id = l.songIds.splice(oldIndex, 1);
@@ -286,11 +291,21 @@ playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
         // re-add song
         l.songIds.splice(newIndex, 0, id[0]);
         l.songs.splice(newIndex, 0, song[0]);
-
-        // update index if playing song was moved
-        if (playlist_manager.songIndex == oldIndex) {
-            console.log("*-> " + newIndex);
-            playlist_manager.songIndex = newIndex;
+        
+        // update current song index if current song was moved
+        minIndex = Math.min(oldIndex,newIndex);
+        maxIndex = Math.max(oldIndex,newIndex);
+        if (playlist_manager.songIndex >= minIndex && playlist_manager.songIndex<=maxIndex) {
+            // new value of songIndex depends on nature of move
+            if (playlist_manager.songIndex == oldIndex) {
+                playlist_manager.songIndex = newIndex;
+            } else if (newIndex<oldIndex) {
+                playlist_manager.songIndex++;
+            } else if (newIndex>oldIndex) {
+                playlist_manager.songIndex--;
+            } else {
+                assert(false);
+            }
         }
         
         // alert clients to change in list
