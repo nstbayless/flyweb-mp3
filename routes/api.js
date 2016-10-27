@@ -92,48 +92,51 @@ module.exports = (upload, audio) => {
         // When all requests succeed, response sent.
         resSuccessCount = 0;
         
-        console.log(req.files.length);
+        console.log(req.files);
         
         for (var i=0;i<req.files.length;i++) {
             // process each file uploaded
-            var file = req.files[i];
-            var path = file.destination + file.filename;
-            var title = file.originalname;
-            var parser = mm(fs.createReadStream(path), {
-                duration: true
-            }, function(err, metadata) {
-                if (err) {
-                    throw err;
-                }
-                if (metadata.title != "") {
-                    title = metadata.title;
-                }
-                manager.createSong(listId, path, function (id, err) {
-                    if (err && !resErr) {
-                        // only send at most one error.
-                        resErr=true;
-                        apiError(res, 500);
-                    } else {
-                        manager.getSong(id, function(err, s) {
-                            if (err && !resErr) {
-                                // only send at most one error.
-                                resErr=true;
-                                return apiError(res, 500);
-                            } else {
-                                s.type = "upload";
-                                s.name = title;
-                                s.duration = metadata.duration;
-                                if (!resErr) {
-                                    assert(resSuccessCount<req.files.length);
-                                    resSuccessCount++;
-                                    if (resSuccessCount==req.files.length)
-                                        res.status(200).send();
-                                }
-                            }
-                        });
+            ((_capture_i)=>{
+                var i = _capture_i;
+                var file = req.files[i];
+                var path = file.destination + file.filename;
+                var title = file.originalname;
+                var parser = mm(fs.createReadStream(path), {
+                    duration: true
+                }, function(err, metadata) {
+                    if (err) {
+                        throw err;
                     }
+                    if (metadata.title != "") {
+                        title = metadata.title;
+                    }
+                    manager.createSong(listId, path, function (id, err) {
+                        if (err && !resErr) {
+                            // only send at most one error.
+                            resErr=true;
+                            apiError(res, 500);
+                        } else {
+                            manager.getSong(id, function(err, s) {
+                                if (err && !resErr) {
+                                    // only send at most one error.
+                                    resErr=true;
+                                    return apiError(res, 500);
+                                } else {
+                                    s.type = "upload";
+                                    s.name = title;
+                                    s.duration = metadata.duration;
+                                    if (!resErr) {
+                                        assert(resSuccessCount<req.files.length);
+                                        resSuccessCount++;
+                                        if (resSuccessCount==req.files.length)
+                                            res.status(200).send();
+                                    }
+                                }
+                            });
+                        }
+                    });
                 });
-            });
+            })(i);
         }
     }
 
@@ -251,7 +254,7 @@ module.exports = (upload, audio) => {
     /* POST router, song upload.
     
        Multer a router for uploading files separate from the standard one. */
-    router.post(/.*\/songs\/upload\/?$/, upload.array("song",12), function(req, res, next) {
+    router.post(/.*\/songs\/upload\/?$/, upload.array("song[]",12), function(req, res, next) {
         _post(req, res, next);
     });
 

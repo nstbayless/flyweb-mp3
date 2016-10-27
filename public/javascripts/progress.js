@@ -57,7 +57,7 @@ function uploadFiles(files, url, cb, progress) {
     //add song file to form data:
     for (i=0;i<files.length;i++) {
         f = files[i];
-        fd.append('song', f, f.name);
+        fd.append('song[]', f, f.name);
     }
 
     //callback delegation:
