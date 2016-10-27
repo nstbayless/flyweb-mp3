@@ -252,8 +252,7 @@ module.exports = (upload, audio) => {
     }
 
     /* POST router, song upload.
-    
-       Multer a router for uploading files separate from the standard one. */
+       Multer requires a router for uploading files separate from the standard one. */
     router.post(/.*\/songs\/upload\/?$/, upload.array("song[]",12), function(req, res, next) {
         _post(req, res, next);
     });
