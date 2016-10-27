@@ -275,6 +275,9 @@ playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
             newIndex < 0 || newIndex >= l.songIds.length) {
             callback("Index out of range");
         }
+        
+        console.log("oldIndex: " + oldIndex);
+        console.log("newIndex: " + newIndex);
 
         // remove song
         var id = l.songIds.splice(oldIndex, 1);
@@ -286,6 +289,7 @@ playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
 
         // update index if playing song was moved
         if (playlist_manager.songIndex == oldIndex) {
+            console.log("*-> " + newIndex);
             playlist_manager.songIndex = newIndex;
         }
         

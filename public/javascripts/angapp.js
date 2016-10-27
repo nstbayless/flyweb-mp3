@@ -2,9 +2,6 @@ var app = angular.module('angApp', []);
 var socket = io();
 
 app.controller('angCon', function($scope, $http, $timeout) {
-    // semaphore for GETting playlist
-    update_lock = 0;
-
     pl_table = undefined;
 
     // jade input variables:
@@ -23,11 +20,9 @@ app.controller('angCon', function($scope, $http, $timeout) {
             dataIdAttr: "data",
             animation: 170,
             onStart: function(evt) {
-                update_lock++;
                 $scope.repaint_playlist("#eee", "#eee", false);
             },
             onEnd: function(evt) {
-                update_lock--;
                 $scope.move_song(evt.oldIndex, evt.newIndex);
                 $scope.repaint_playlist("#ccf", "#eef", true);
             }
@@ -177,12 +172,9 @@ app.controller('angCon', function($scope, $http, $timeout) {
         move_in_list($scope.list.songIds, index_start, index_end);
         move_in_list($scope.list.songs, index_start, index_end);
         var endpoint = "/api/" + $scope.list.id;
-        update_lock++;
         $.post(endpoint, {
             from: index_start,
             to: index_end
-        }, () => {
-            update_lock--;
         });
     };
 
@@ -192,13 +184,9 @@ app.controller('angCon', function($scope, $http, $timeout) {
         $scope.list.songIds.splice(index, 1);
         var endpoint = "/api/p/" + $scope.list.id + "/songs/" + index
         $scope.replace_playlist();
-        update_lock++;
         $.ajax({
             type: "DELETE",
             url: endpoint,
-            success: function() {
-                update_lock--;
-            }
         });
     }
 
@@ -221,10 +209,6 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	// live update playlist
 	socket.on('playlist', function(update) {
 	    if (update.listId===$scope.list.id) {
-	        if (update_lock) {
-	        	console.log("async error: playlist update");
-	            return;
-	        }
 	        $scope.list=update.list;
 	        $scope.replace_playlist();
 	        $scope.$apply();
@@ -233,15 +217,11 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	
 	// live update currently-playing song on playlist
 	socket.on('track', function(update) {
-	    if (!update_lock) {
-			if (update.listId==list.id)
-				$scope.pl_track_index = update.songIndex
-			else
-				$scope.pl_track_index = -1;
-			$scope.replace_playlist();
-			$scope.$apply();
-		} else {
-    		console.log("async error: track update");
-		}
+		if (update.listId==list.id)
+			$scope.pl_track_index = update.songIndex
+		else
+			$scope.pl_track_index = -1;
+		$scope.replace_playlist();
+		$scope.$apply();
 	});
 });
