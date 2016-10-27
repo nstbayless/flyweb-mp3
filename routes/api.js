@@ -83,31 +83,58 @@ module.exports = (upload, audio) => {
     // POST a song to the given playlist
     // sends back id of song
     function postSongUpload(req, res, next, listId) {
-        assert(!!req.file);
-        var path = req.file.destination + req.file.filename;
-        var title = req.file.originalname;
-        var parser = mm(fs.createReadStream(path), {
-            duration: true
-        }, function(err, metadata) {
-            if (err) {
-                throw err;
-            }
-            if (metadata.title != "") {
-                title = metadata.title;
-            }
-            manager.createSong(listId, path, function (id, err) {
+        assert(!!req.files);
+        
+        // true if any asynchronous call to manager returns an error.
+        resErr = false;
+        
+        // counts asychronous successes to manager.
+        // When all requests succeed, response sent.
+        resSuccessCount = 0;
+        
+        console.log(req.files.length);
+        
+        for (var i=0;i<req.files.length;i++) {
+            // process each file uploaded
+            var file = req.files[i];
+            var path = file.destination + file.filename;
+            var title = file.originalname;
+            var parser = mm(fs.createReadStream(path), {
+                duration: true
+            }, function(err, metadata) {
                 if (err) {
-                    return apiError(res, 500);
-                } else {
-                    manager.getSong(id, function(err, s) {
-                        s.type = "upload";
-                        s.name = title;
-                        s.duration = metadata.duration;
-                        return res.status(200).send();
-                    });
+                    throw err;
                 }
+                if (metadata.title != "") {
+                    title = metadata.title;
+                }
+                manager.createSong(listId, path, function (id, err) {
+                    if (err && !resErr) {
+                        // only send at most one error.
+                        resErr=true;
+                        apiError(res, 500);
+                    } else {
+                        manager.getSong(id, function(err, s) {
+                            if (err && !resErr) {
+                                // only send at most one error.
+                                resErr=true;
+                                return apiError(res, 500);
+                            } else {
+                                s.type = "upload";
+                                s.name = title;
+                                s.duration = metadata.duration;
+                                if (!resErr) {
+                                    assert(resSuccessCount<req.files.length);
+                                    resSuccessCount++;
+                                    if (resSuccessCount==req.files.length)
+                                        res.status(200).send();
+                                }
+                            }
+                        });
+                    }
+                });
             });
-        });
+        }
     }
 
     /**
@@ -209,7 +236,7 @@ module.exports = (upload, audio) => {
                         return postSongUpload(req, res, next, listId);
                     }
                     else if (path[2] == "url") {
-                        // /api/{listId}/songs/upload
+                        // /api/{listId}/songs/url
                         if (path.length > 3) {
                             return apiError(res, 400);
                         }
@@ -221,13 +248,10 @@ module.exports = (upload, audio) => {
         next();
     }
 
-    /* POST router, song upload */
-    router.post(/.*\/songs\/upload\/?$/, upload.single("song"), function(req, res, next) {
-        _post(req, res, next);
-    });
-
-    /* POST router, song url */
-    router.post(/.*\/songs\/url\/?$/, upload.single("song"), function (req, res, next) {
+    /* POST router, song upload.
+    
+       Multer a router for uploading files separate from the standard one. */
+    router.post(/.*\/songs\/upload\/?$/, upload.array("song",12), function(req, res, next) {
         _post(req, res, next);
     });
 

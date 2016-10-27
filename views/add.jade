@@ -19,7 +19,7 @@ block content
             div.add-module#add-module-upload
                 div.add-module-button
                     form#fform(method="post" enctype="multipart/form-data" onSubmit = "window.location='/p/#{list.id}'" action = "/api/#{list.id}/songs/upload")
-                        input#fi(type="file" name="song" accept="audio/mpeg")
+                        input#fi(type="file" name="song" accept="audio/mpeg" multiple)
                 p.add-module-text Upload from your device
             div.add-module#add-module-url
                 a(href="/add/#{list.id}/url")

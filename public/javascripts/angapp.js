@@ -96,6 +96,8 @@ app.controller('angCon', function($scope, $http, $timeout) {
 
     // replaces playlist table with new one, with new elements
     $scope.replace_playlist = function() {
+        if (!pl_table)
+            return;
         // add children:
         for (var i = 0; i < $scope.list.songs.length; i++) {
             var song = $scope.list.songs[i];
@@ -220,8 +222,8 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	socket.on('playlist', function(update) {
 	    if (update.listId===$scope.list.id) {
 	        if (update_lock) {
+	        	console.log("async error: playlist update");
 	            return;
-	            console.log("async error: playlist update");
 	        }
 	        $scope.list=update.list;
 	        $scope.replace_playlist();
