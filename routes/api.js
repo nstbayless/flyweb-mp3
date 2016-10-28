@@ -3,16 +3,16 @@
 // capture upload from app.js to ensure uploads/ folder in root directory
 // capture audio due to audio having special require() rules
 module.exports = (upload, audio) => {
-    var express = require('express');
-    var assert = require('assert');
-    var fs = require('fs');
-    var mm = require('musicmetadata');
-    var combine = require('merge');
-    var youtubedl = require('youtube-dl');
-    var mp3length = require('mp3length');
+    var express = require("express");
+    var assert = require("assert");
+    var fs = require("fs");
+    var mm = require("musicmetadata");
+    var combine = require("merge");
+    var youtubedl = require("youtube-dl");
+    var mp3length = require("mp3length");
     var router = express.Router();
 
-    manager = require('../src/playlist_manager');
+    var manager = require("../src/playlist_manager");
 
     function apiError(res, code, text) {
         if (!text) {
@@ -27,7 +27,7 @@ module.exports = (upload, audio) => {
         if (!object) {
             object = "success";
         }
-        if (code == undefined) {
+        if (code === undefined) {
             code = 200;
         }
         res.status(code).send(object);
@@ -35,11 +35,11 @@ module.exports = (upload, audio) => {
 
     // parses and handles GET requests
     function _get(req, res, next) {
-        path = req.url.split("/").filter((e) => {
+        var path = req.url.split("/").filter((e) => {
             return e.length > 0;
         });
 
-        if (path.length == 0) {
+        if (path.length === 0) {
             return res.status(200).send("Welcome to the FlyWeb-mp3 API!");
         } else {
             // /api/
@@ -67,9 +67,9 @@ module.exports = (upload, audio) => {
                 if (path.length < 2) {
                     return apiError(res, 400, "must supply listId");
                 }
-                listId = path[1];
-                manager.getPlaylist(listId, function(err, listId) {
-                    res.send(200, listId);
+                var listId = path[1];
+                manager.getPlaylist(listId, function(err, list) {
+                    res.send(200, list);
                 });
             }
         }
@@ -150,21 +150,22 @@ module.exports = (upload, audio) => {
                 throw err;
             }
             var filename = info.id + ".mp3";
-            var path = 'uploads/' + filename;
+            var path = "uploads/" + filename;
             var title = info.title;
 
             // download video, convert to MP3, and save MP3
-            youtubedl.exec(req.body.url, ['-o', "uploads/%(id)s.%(ext)s", '-x', '--audio-format', 'mp3'], {}, function(err, output) {
+            youtubedl.exec(req.body.url, ["-o", "uploads/%(id)s.%(ext)s", "-x", "--audio-format", "mp3"], {}, function(err, output) {
                 if (err) {
                     throw err;
                 }
-                var parser = mm(fs.createReadStream(path), {duration: true}, function (err, metadata) {
+
+                mm(fs.createReadStream(path), {duration: true}, function (err, metadata) {
                     if (err) {
                         console.log("### ERROR READING METADATA ###");
                         console.log("error sent");
                         mp3length(path, function (err, length) {
                             if (err) {
-                                console.log('### MP3 FILE CORRUPT ###');
+                                console.log("### MP3 FILE CORRUPT ###");
                             } else {
                                 manager.createSong(list, path, function (id, err) {
                                     if (err) {
@@ -182,7 +183,7 @@ module.exports = (upload, audio) => {
                             }
                         });
                     }
-                    if (metadata.title != "") {
+                    if (metadata.title !== "") {
                         title = metadata.title;
                     }
                     console.log(title);
@@ -205,7 +206,7 @@ module.exports = (upload, audio) => {
     }
 
     function _post(req, res, next) {
-        path = req.url.split("/").filter((e) => {
+        var path = req.url.split("/").filter((e) => {
             return e.length > 0;
         });
         if (path.length < 1) {
@@ -295,7 +296,7 @@ module.exports = (upload, audio) => {
                                                 } else {
                                                     if (removedCurrentSong) {
                                                         // gets the next song after the one removed to start playing
-                                                        // can't use next() because current song deleted. This is a hack.
+                                                        // can"t use next() because current song deleted. This is a hack.
                                                         audio.jumpTo(songIndex);
                                                     }
                                                     return res.status(200).send("removed song");
@@ -323,4 +324,4 @@ module.exports = (upload, audio) => {
     });
 
     return router;
-}
+};

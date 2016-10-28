@@ -1,8 +1,7 @@
-var app = angular.module('angApp', []);
+var app = angular.module("angApp", []);
 var socket = io();
 
-app.controller('angCon', function($scope, $http, $timeout) {
-    pl_table = undefined;
+app.controller("angCon", function ($scope, $http, $timeout) {
 
     // jade input variables:
     $scope.list = {};
@@ -15,8 +14,8 @@ app.controller('angCon', function($scope, $http, $timeout) {
         
 
         // make table rearrangeable:
-        pl_table = document.getElementById("pltable");
-        pl_sortable = new Sortable(pl_table, {
+        var pl_table = document.getElementById("pltable");
+        var pl_sortable = new Sortable(pl_table, {
             dataIdAttr: "data",
             animation: 170,
             onStart: function(evt) {
@@ -32,8 +31,8 @@ app.controller('angCon', function($scope, $http, $timeout) {
     }
 
     $scope.status = {
-        title: 'Nothing Playing',
-        state: 'paused',
+        title: "Nothing Playing",
+        state: "paused",
         duration: 0,
         time_elapsed: 0
     };
@@ -62,15 +61,15 @@ app.controller('angCon', function($scope, $http, $timeout) {
     };
 
     $scope.pause_song = function() {
-    	socket.emit('pause');
+    	socket.emit("pause");
     };
 
     $scope.prev_song = function() {
-    	socket.emit('prev');
+    	socket.emit("prev");
     };
 
     $scope.next_song = function() {
-    	socket.emit('next');
+    	socket.emit("next");
     };
 
     // moves element in list
@@ -84,7 +83,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
     $scope.repaint_playlist = function(col1, col2, num) {
         var rows = pl_table.children;
         for (var i = 0; i < rows.length; i++) {
-            rows[i].style["background-color"] = (i % 2 == 0) ? col1 : col2;
+            rows[i].style["background-color"] = (i % 2 === 0) ? col1 : col2;
             rows[i].childNodes[0].innerHTML = (num) ? String(i + 1) : "";
         }
     };
@@ -109,32 +108,32 @@ app.controller('angCon', function($scope, $http, $timeout) {
             }
             tr.setAttribute("data", song.id);
             // TODO: bold if playing.
-            var style = "font-weight:" + ((i == $scope.pl_track_index) ? 'bold' : 'normal') + ';';
+            var style = "font-weight:" + ((i == $scope.pl_track_index) ? "bold" : "normal") + ";";
 
             // add number cell:
             var td = document.createElement("td");
-            td.setAttribute('class', "q num");
-            td.setAttribute('style', style);
+            td.setAttribute("class", "q num");
+            td.setAttribute("style", style);
             td.innerHTML = (i + 1);
             tr.appendChild(td);
 
             // add name cell
             td = document.createElement("td");
-            td.setAttribute('class', "q");
-            td.setAttribute('style', style);
+            td.setAttribute("class", "q");
+            td.setAttribute("style", style);
             td.innerHTML = song.name;
             tr.appendChild(td);
 
             // add duration cell
             td = document.createElement("td");
-            td.setAttribute('class', "q");
+            td.setAttribute("class", "q");
             td.innerHTML = ($scope.pretty_time(song.duration));
-            td.setAttribute('style', style);
+            td.setAttribute("style", style);
             tr.appendChild(td);
 
             // add x button
             td = document.createElement("td");
-            td.setAttribute('class', "qx");
+            td.setAttribute("class", "qx");
             // href within td
             var hrefx = document.createElement("a");
             hrefx.style["onmouseover"] = "";
@@ -152,7 +151,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
             })();
             hrefx.appendChild(imgx);
             td.appendChild(hrefx);
-            td.setAttribute('style', style);
+            td.setAttribute("style", style);
             tr.appendChild(td);
         }
         //delete extra rows:
@@ -193,14 +192,14 @@ app.controller('angCon', function($scope, $http, $timeout) {
     }
 
     // live update status for current song
-    socket.on('status', function(status) {
+    socket.on("status", function(status) {
 		var prog_percent = status.time_elapsed / status.duration;
 		prog_percent = isNaN(prog_percent) ? 0 : prog_percent * 100;
 
-		if (status.state === 'paused') {
-			$('#controls-play').removeClass('glyphicon-pause').addClass('glyphicon-play');
-		} else if (status.state === 'playing') {
-			$('#controls-play').removeClass('glyphicon-play').addClass('glyphicon-pause');
+		if (status.state === "paused") {
+			$("#controls-play").removeClass("glyphicon-pause").addClass("glyphicon-play");
+		} else if (status.state === "playing") {
+			$("#controls-play").removeClass("glyphicon-play").addClass("glyphicon-pause");
 		}
 
 		$scope.status = status;
@@ -209,7 +208,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	});
 	
 	// live update playlist
-	socket.on('playlist', function(update) {
+	socket.on("playlist", function(update) {
 	    if (update.listId===$scope.list.id) {
 	        $scope.list=update.list;
 	        $scope.replace_playlist();
@@ -218,7 +217,7 @@ app.controller('angCon', function($scope, $http, $timeout) {
 	});
 	
 	// live update currently-playing song on playlist
-	socket.on('track', function(update) {
+	socket.on("track", function(update) {
 		if (update.listId==list.id)
 			$scope.pl_track_index = update.songIndex
 		else

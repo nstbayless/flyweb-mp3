@@ -1,21 +1,20 @@
 module.exports = () => {
-    var express = require('express');
+    var express = require("express");
     var router = express.Router();
-    var audio_manager = require('../src/audio_manager');
-    var audio = require('../src/audio');
-    var manager = require('../src/playlist_manager');
+    var audio_manager = require("../src/audio_manager");
+    //var audio = require("../src/audio");
+    var manager = require("../src/playlist_manager");
 
     // GET view for playlist
     function getPlaylist(req, res, next, path) {
-        if (path.length == 0) {
-            listId = "q";
-        } else {
+        var listId = "q";
+        if (path.length > 0) {
             listId = path[0];
         }
         manager.currentSongIndex(function (err,currentSongIndex) {
             manager.currentPlaylist(function (err, currentListId) {
                 manager.getPlaylist(listId, function (err, list) {
-                    res.render('playlist', {
+                    res.render("playlist", {
                         title: res.server_name,
                         list: list,
                         track: audio_manager.current_song,
@@ -29,15 +28,13 @@ module.exports = () => {
 
     // GET view for adding to playlist or queue
     function getAdd(req, res, next, path) {
-
-        if (path.length == 0) {
-            listId = "";
-        } else {
+        var listId = "";
+        if (path.length > 0) {
             listId = path[0];
         }
         manager.getPlaylist(listId, function (err, list) {
             if (path.length <= 1) { // /add[/{plid}]
-                return res.render('add', {
+                return res.render("add", {
                     title: res.server_name,
                     list: list,
                     track: audio_manager.current_song
@@ -45,7 +42,7 @@ module.exports = () => {
             } else {
                 if (path[1] == "url") {
                     // /add[/{plid}]/url
-                    return res.render('add-url', {
+                    return res.render("add-url", {
                         title: res.server_name,
                         list: list,
                         track: audio_manager.current_song
@@ -59,10 +56,10 @@ module.exports = () => {
     /* GET router */
     router.get(/.*/, function(req, res, next) {
         //parse URL:
-        path = req.url.split("/").filter((e) => {
+        var path = req.url.split("/").filter((e) => {
             return e.length > 0;
         });
-        if (path.length == 0) {
+        if (path.length === 0) {
             //render home page:
             return getPlaylist(req, res, next, []);
         } else {
@@ -77,4 +74,4 @@ module.exports = () => {
     });
 
     return router;
-}
+};

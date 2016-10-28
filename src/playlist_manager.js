@@ -1,7 +1,11 @@
-START_OF_LIST = -1;
+// stores, retrieves, and modifies playlists, including the play queue.
 
-var Playlist = require('./_playlist');
-var Song = require('./_song');
+var assert = require("assert");
+
+var Playlist = require("./_playlist");
+var Song = require("./_song");
+
+var START_OF_LIST = -1;
 var playlist_manager = {};
 playlist_manager.queue = Playlist.Playlist("q");
 playlist_manager.queue.name = "Play Queue";
@@ -168,13 +172,19 @@ playlist_manager.addSong = function(list, songId, callback) {
             Playlist.addSongId(l, songId);
             // alert clients about update
             playlist_manager.emitList(list,l);
-        })
-    } else {
-        playlist_manager.getPlaylist(list, function(s) {
-            Playlist.addSong(l, s);
-            Playlist.addSongId(l, songId);
         });
     }
+    else {
+        playlist_manager.getPlaylist(list, function(err, l) {
+            playlist_manager.getSong(songId, function(err, s) {
+                Playlist.addSong(l, s);
+                Playlist.addSongId(l, songId);
+                // alert clients about update
+                playlist_manager.emitList(list,l);
+            });
+        });
+    }
+
     if (callback) {
         callback(null);
     }
@@ -293,8 +303,8 @@ playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
         l.songs.splice(newIndex, 0, song[0]);
         
         // update current song index if current song was moved
-        minIndex = Math.min(oldIndex,newIndex);
-        maxIndex = Math.max(oldIndex,newIndex);
+        var minIndex = Math.min(oldIndex,newIndex);
+        var maxIndex = Math.max(oldIndex,newIndex);
         if (playlist_manager.songIndex >= minIndex && playlist_manager.songIndex<=maxIndex) {
             // new value of songIndex depends on nature of move
             if (playlist_manager.songIndex == oldIndex) {
@@ -335,7 +345,7 @@ playlist_manager.setSocketIO = function(io) {
 playlist_manager.emitList = function(listId, list) {
     var _f_emit = function (listId,list) {
         // TODO: only emit to clients who are subscribed to the given playlist
-        playlist_manager.io.sockets.emit('playlist', {
+        playlist_manager.io.sockets.emit("playlist", {
             //TODO: timestamp
 	        listId: listId,
             list: list
@@ -357,7 +367,7 @@ playlist_manager.emitList = function(listId, list) {
 playlist_manager.emitCurrentSong = function() {
     playlist_manager.currentPlaylist(function (err,listId) {
         playlist_manager.currentSongIndex(function (err,songIndex) {
-            playlist_manager.io.sockets.emit('track', {listId:listId,songIndex:songIndex});
+            playlist_manager.io.sockets.emit("track", {listId:listId,songIndex:songIndex});
         });
     });
 };
