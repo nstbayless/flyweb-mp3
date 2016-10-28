@@ -7,7 +7,6 @@ module.exports = (upload, audio) => {
     var assert = require("assert");
     var fs = require("fs");
     var mm = require("musicmetadata");
-    var combine = require("merge");
     var youtubedl = require("youtube-dl");
     var mp3length = require("mp3length");
     var router = express.Router();
@@ -72,6 +71,8 @@ module.exports = (upload, audio) => {
                     res.send(200, list);
                 });
             }
+            
+            next();
         }
     }
 
@@ -85,58 +86,61 @@ module.exports = (upload, audio) => {
     function postSongUpload(req, res, next, listId) {
         assert(!!req.files);
         
-        // true if any asynchronous call to manager returns an error.
-        resErr = false;
-        
-        // counts asychronous successes to manager.
-        // When all requests succeed, response sent.
-        resSuccessCount = 0;
+        var shared = {
+            // true if any asynchronous call to manager returns an error.
+            resErr: false,
+            
+            // counts asychronous successes to manager.
+            // When all requests succeed, response sent.
+            resSuccessCount: 0
+        };
         
         console.log(req.files);
         
         for (var i=0;i<req.files.length;i++) {
             // process each file uploaded
-            ((_capture_i)=>{
+            ((_capture_i,shared)=>{
                 var i = _capture_i;
                 var file = req.files[i];
                 var path = file.destination + file.filename;
                 var title = file.originalname;
-                var parser = mm(fs.createReadStream(path), {
+                mm(fs.createReadStream(path), {
                     duration: true
                 }, function(err, metadata) {
                     if (err) {
                         throw err;
                     }
-                    if (metadata.title != "") {
+                    if (metadata.title !== "") {
                         title = metadata.title;
                     }
                     manager.createSong(listId, path, function (id, err) {
-                        if (err && !resErr) {
+                        if (err && !shared.resErr) {
                             // only send at most one error.
-                            resErr=true;
+                            shared.resErr=true;
                             apiError(res, 500);
                         } else {
                             manager.getSong(id, function(err, s) {
-                                if (err && !resErr) {
+                                if (err && !shared.resErr) {
                                     // only send at most one error.
-                                    resErr=true;
+                                    shared.resErr=true;
                                     return apiError(res, 500);
                                 } else {
                                     s.type = "upload";
                                     s.name = title;
                                     s.duration = metadata.duration;
-                                    if (!resErr) {
-                                        assert(resSuccessCount<req.files.length);
-                                        resSuccessCount++;
-                                        if (resSuccessCount==req.files.length)
+                                    if (!shared.resErr) {
+                                        assert(shared.resSuccessCount<req.files.length);
+                                        shared.resSuccessCount++;
+                                        if (shared.resSuccessCount==req.files.length) {
                                             res.status(200).send();
+                                        }
                                     }
                                 }
                             });
                         }
                     });
                 });
-            })(i);
+            })(i,shared);
         }
     }
 
@@ -154,7 +158,7 @@ module.exports = (upload, audio) => {
             var title = info.title;
 
             // download video, convert to MP3, and save MP3
-            youtubedl.exec(req.body.url, ["-o", "uploads/%(id)s.%(ext)s", "-x", "--audio-format", "mp3"], {}, function(err, output) {
+            youtubedl.exec(req.body.url, ["-o", "uploads/%(id)s.%(ext)s", "-x", "--audio-format", "mp3"], {}, function(err) {
                 if (err) {
                     throw err;
                 }
@@ -167,9 +171,9 @@ module.exports = (upload, audio) => {
                             if (err) {
                                 console.log("### MP3 FILE CORRUPT ###");
                             } else {
-                                manager.createSong(list, path, function (id, err) {
+                                manager.createSong(listId, path, function (id, err) {
                                     if (err) {
-                                        return api_error(res, 500);
+                                        return apiError(res, 500);
                                     }
                                     else {
                                         manager.getSong(id, function (err, s) {
@@ -213,7 +217,7 @@ module.exports = (upload, audio) => {
             return apiError(res, 400, "Cannot post to API root");
         } else {
             // /api/
-            listId = path[0];
+            var listId = path[0];
             if (path.length == 1) {
                 // /api/{listId}
                 // TODO: change to /api/p/{listId}
@@ -264,7 +268,7 @@ module.exports = (upload, audio) => {
     });
 
     function _delete(req, res, next) {
-        path = req.url.split("/").filter((e) => {
+        var path = req.url.split("/").filter((e) => {
             return e.length > 0;
         });
         if (path.length < 1) {
@@ -280,28 +284,21 @@ module.exports = (upload, audio) => {
                             // /api/p/{listId}/songs
                             if (path.length >= 4) {
                                 // /api/p/{listId}/songs/{songIndex}
-                                songIndex = parseInt(path[3]);
+                                var songIndex = parseInt(path[3]);
                                 if (songIndex || songIndex===0 ) {
                                     if (songIndex < 0) {
-                                        return api_error(res, 400, "index cannot be negative");
+                                        return apiError(res, 400, "index cannot be negative");
                                     }
-                                    // TODO: use actual delete method, when implemented
-                                    manager.getPlaylist(listId, function (err, list) {
+                                    manager.removeSong(listId,songIndex, function (err,removedCurrentSong) {
                                         if (err) {
-                                            return apiError(res, 500, err);
+                                            res.status(500).send(err);
                                         } else {
-                                            manager.removeSong(listId,songIndex, function (err,removedCurrentSong) {
-                                                if (err) {
-                                                    res.status(500).send(err);
-                                                } else {
-                                                    if (removedCurrentSong) {
-                                                        // gets the next song after the one removed to start playing
-                                                        // can"t use next() because current song deleted. This is a hack.
-                                                        audio.jumpTo(songIndex);
-                                                    }
-                                                    return res.status(200).send("removed song");
-                                                }
-                                            })
+                                            if (removedCurrentSong) {
+                                                // gets the next song after the one removed to start playing
+                                                // can"t use next() because current song deleted. This is a hack.
+                                                audio.jumpTo(songIndex);
+                                            }
+                                            return res.status(200).send("removed song");
                                         }
                                     });
                                     return;
