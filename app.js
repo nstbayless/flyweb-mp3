@@ -26,7 +26,7 @@ playlistManager.setSocketIO(io);
 app.upload = upload;
 
 var routes = require('./routes/index')();
-var route_api = require('./routes/api')(upload);
+var route_api = require('./routes/api')(upload,audio);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

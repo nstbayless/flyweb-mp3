@@ -5,58 +5,72 @@ module.exports = () => {
     var audio = require('../src/audio');
     var manager = require('../src/playlist_manager');
 
-    /* GET playlist render; */
-    function get_playlist(req, res, next, path) {
+    // GET view for playlist
+    function getPlaylist(req, res, next, path) {
         if (path.length == 0) {
-            id = "q";
+            listId = "q";
         } else {
-            id = path[0];
+            listId = path[0];
         }
-        manager.getPlaylist(id, function(err, list) {
-            res.render('playlist', {
-                title: res.server_name,
-                pl: list,
-                track: audio_manager.current_song
+        manager.currentSongIndex(function (err,currentSongIndex) {
+            manager.currentPlaylist(function (err, currentListId) {
+                manager.getPlaylist(listId, function (err, list) {
+                    res.render('playlist', {
+                        title: res.server_name,
+                        list: list,
+                        track: audio_manager.current_song,
+                        currentSongIndex: currentSongIndex,
+                        currentListId: currentListId
+                    });
+                });
             });
         });
     }
 
-    /** GET for adding to playlist or queue */
-    function get_add(req, res, next, path) {
+    // GET view for adding to playlist or queue
+    function getAdd(req, res, next, path) {
+
         if (path.length == 0) {
-            id = "";
+            listId = "";
         } else {
-            id = path[0];
+            listId = path[0];
         }
-        manager.getPlaylist(id, function (err, pl) {
-            if (path.length <= 1) {  // /add[/{plid}]
-                res.render('add', {title: res.server_name, pl: pl, track: audio_manager.current_song});
-            }
-            else {
+        manager.getPlaylist(listId, function (err, list) {
+            if (path.length <= 1) { // /add[/{plid}]
+                return res.render('add', {
+                    title: res.server_name,
+                    list: list,
+                    track: audio_manager.current_song
+                });
+            } else {
                 if (path[1] == "url") {
-                    // /add[{plid}]/url
-                    res.render('add-url', {title: res.server_name, pl: pl, track: audio_manager.current_song});
+                    // /add[/{plid}]/url
+                    return res.render('add-url', {
+                        title: res.server_name,
+                        list: list,
+                        track: audio_manager.current_song
+                    });
                 }
+                return next();
             }
         });
     }
 
     /* GET router */
-    router.get(/.*/, function (req, res, next) {
+    router.get(/.*/, function(req, res, next) {
         //parse URL:
         path = req.url.split("/").filter((e) => {
-                return e.length > 0;
+            return e.length > 0;
         });
         if (path.length == 0) {
             //render home page:
-            return get_playlist(req, res, next, []);
-        }
-        else {
+            return getPlaylist(req, res, next, []);
+        } else {
             if (path[0] == "p") {
-                return get_playlist(req, res, next, path.slice(1));
+                return getPlaylist(req, res, next, path.slice(1));
             }
             if (path[0] == "add") {
-                return get_add(req, res, next, path.slice(1));
+                return getAdd(req, res, next, path.slice(1));
             }
         }
         next();

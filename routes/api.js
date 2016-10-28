@@ -1,9 +1,12 @@
-module.exports = (upload) => {
+// API requests (to be partially phased out by sockets)
+
+// capture upload from app.js to ensure uploads/ folder in root directory
+// capture audio due to audio having special require() rules
+module.exports = (upload, audio) => {
     var express = require('express');
     var assert = require('assert');
     var fs = require('fs');
     var mm = require('musicmetadata');
-    var audio = require('../src/audio');
     var combine = require('merge');
     var youtubedl = require('youtube-dl');
     var mp3length = require('mp3length');
@@ -11,17 +14,16 @@ module.exports = (upload) => {
 
     manager = require('../src/playlist_manager');
 
-    function api_error(res, code, text) {
+    function apiError(res, code, text) {
         if (!text) {
             text = "";
-        }
-        else {
+        } else {
             text += "\n\n";
         }
         res.status(code).send(text + "API error occurred.");
     }
 
-    function api_success(res, code, object) {
+    function apiSuccess(res, code, object) {
         if (!object) {
             object = "success";
         }
@@ -31,37 +33,43 @@ module.exports = (upload) => {
         res.status(code).send(object);
     }
 
-    function get(req, res, next) {
+    // parses and handles GET requests
+    function _get(req, res, next) {
         path = req.url.split("/").filter((e) => {
             return e.length > 0;
         });
 
         if (path.length == 0) {
             return res.status(200).send("Welcome to the FlyWeb-mp3 API!");
-        }
-        else {
+        } else {
             // /api/
             if (path[0] == "track") {
                 // /api/track
                 if (path.length > 2) {
-                    return api_error(res, 400);
+                    return apiError(res, 400);
                 }
 
                 //send list and track index:
-                manager.currentPlaylist(function (err,list_id) {
-                    manager.currentSongIndex(function (err,sid) {
-                        res.send(200, {list_id: list_id, index: sid});
+                manager.currentPlaylist(function(err, listId) {
+                    manager.currentSongIndex(function(err, songIndex) {
+                        res.send(200, {
+                            list_id: listId,
+                            index: songIndex
+                        });
                     });
                 });
             }
+            
             if (path[0] == "p") {
-                // /api/p/{plid}/
+                // /api/p/{listId}
+                
+                // retrieves given playlist
                 if (path.length < 2) {
-                    return api_error(res, 400, "must supply plid");
+                    return apiError(res, 400, "must supply listId");
                 }
-                plid = path[1];
-                manager.getPlaylist(plid, function (err,list) {
-                    res.send(200, list);
+                listId = path[1];
+                manager.getPlaylist(listId, function(err, listId) {
+                    res.send(200, listId);
                 });
             }
         }
@@ -69,62 +77,73 @@ module.exports = (upload) => {
 
     /* GET router */
     router.get(/.*/, function (req, res, next) {
-        get(req, res, next);
+        _get(req, res, next);
     });
 
     // POST a song to the given playlist
     // sends back id of song
-    function post_song_upload(req, res, next, list) {
-        assert(!!req.file);
-        var path = req.file.destination + req.file.filename;
-        var title = req.file.originalname;
-        var parser = mm(fs.createReadStream(path), {duration: true}, function (err, metadata) {
-            if (err) {
-                console.log("### ERROR READING METADATA ###");
-                mp3length(path, function (err, length) {
+    function postSongUpload(req, res, next, listId) {
+        assert(!!req.files);
+        
+        // true if any asynchronous call to manager returns an error.
+        resErr = false;
+        
+        // counts asychronous successes to manager.
+        // When all requests succeed, response sent.
+        resSuccessCount = 0;
+        
+        console.log(req.files);
+        
+        for (var i=0;i<req.files.length;i++) {
+            // process each file uploaded
+            ((_capture_i)=>{
+                var i = _capture_i;
+                var file = req.files[i];
+                var path = file.destination + file.filename;
+                var title = file.originalname;
+                var parser = mm(fs.createReadStream(path), {
+                    duration: true
+                }, function(err, metadata) {
                     if (err) {
-                        console.log('### MP3 FILE CORRUPT ###');
-                    } else {
-                        manager.createSong(list, path, function (id, err) {
-                            if (err) {
-                                return api_error(res, 500);
-                            }
-                            else {
-                                manager.getSong(id, function (err, s) {
+                        throw err;
+                    }
+                    if (metadata.title != "") {
+                        title = metadata.title;
+                    }
+                    manager.createSong(listId, path, function (id, err) {
+                        if (err && !resErr) {
+                            // only send at most one error.
+                            resErr=true;
+                            apiError(res, 500);
+                        } else {
+                            manager.getSong(id, function(err, s) {
+                                if (err && !resErr) {
+                                    // only send at most one error.
+                                    resErr=true;
+                                    return apiError(res, 500);
+                                } else {
                                     s.type = "upload";
                                     s.name = title;
-                                    s.duration = length;
-                                    return res.status(200).send();
-                                });
-                            }
-                        });
-                    }
+                                    s.duration = metadata.duration;
+                                    if (!resErr) {
+                                        assert(resSuccessCount<req.files.length);
+                                        resSuccessCount++;
+                                        if (resSuccessCount==req.files.length)
+                                            res.status(200).send();
+                                    }
+                                }
+                            });
+                        }
+                    });
                 });
-            } else {
-                if (metadata.title != "") {
-                    title = metadata.title;
-                }
-                manager.createSong(list, path, function (id, err) {
-                    if (err) {
-                        return api_error(res, 500);
-                    }
-                    else {
-                        manager.getSong(id, function (err, s) {
-                            s.type = "upload";
-                            s.name = title;
-                            s.duration = metadata.duration;
-                            return res.status(200).send();
-                        });
-                    }
-                });
-            }
-        });
+            })(i);
+        }
     }
 
     /**
      * Download a video from the specified URL and save the audio from it.
      */
-    function post_song_url(req, res, next, list) {
+    function postSongUrl(req, res, next, listId) {
         assert(!!req.body.url);
         youtubedl.getInfo(req.body.url, [], function(err, info) {
             if (err) {
@@ -167,9 +186,9 @@ module.exports = (upload) => {
                         title = metadata.title;
                     }
                     console.log(title);
-                    manager.createSong(list, path, function (id, err) {
+                    manager.createSong(listId, path, function (id, err) {
                         if (err) {
-                            return api_error(500);
+                            return apiError(500);
                         }
                         else {
                             manager.getSong(id, function (err, s) {
@@ -185,48 +204,46 @@ module.exports = (upload) => {
         });
     }
 
-    function post(req, res, next) {
+    function _post(req, res, next) {
         path = req.url.split("/").filter((e) => {
             return e.length > 0;
         });
         if (path.length < 1) {
-            return api_error(res, 400, "Cannot post to API root");
-        }
-        else {
+            return apiError(res, 400, "Cannot post to API root");
+        } else {
             // /api/
-            plid = path[0];
+            listId = path[0];
             if (path.length == 1) {
-                // /api/{plid}
-                // TODO: change to /api/p/{plid}
+                // /api/{listId}
+                // TODO: change to /api/p/{listId}
 
                 //rearrange playlist
-                return manager.moveSong(plid, req.body.from, req.body.to, function (err) {
+                return manager.moveSong(listId, req.body.from, req.body.to, function (err) {
                     if (err) {
-                        return api_error(res, 400, err);
+                        return apiError(res, 400, err);
                     }
-                    api_success(res);
+                    apiSuccess(res);
                 });
             }
             if (path[1] == "songs") {
-                // /api/{plid}/songs
-                // TODO: change to /api/p/{plid}/songs
+                // /api/{listId}/songs
+                // TODO: change to /api/p/{listId}/songs
                 if (path.length == 2) {
-                    return api_error(res, 400, "Please post to a subpath, such as songs/upload");
-                }
-                else {
+                    return apiError(res, 400, "Please post to a subpath, such as songs/upload");
+                } else {
                     if (path[2] == "upload") {
-                        // /api/{plid}/songs/upload
+                        // /api/{listId}/songs/upload
                         if (path.length > 3) {
-                            return api_error(res, 400);
+                            return apiError(400);
                         }
-                        return post_song_upload(req, res, next, plid);
+                        return postSongUpload(req, res, next, listId);
                     }
                     else if (path[2] == "url") {
-                        // /api/{plid}/songs/upload
+                        // /api/{listId}/songs/url
                         if (path.length > 3) {
-                            return api_error(400);
+                            return apiError(res, 400);
                         }
-                        return post_song_url(req, res, next, plid);
+                        return postSongUrl(req, res, next, listId);
                     }
                 }
             }
@@ -234,19 +251,75 @@ module.exports = (upload) => {
         next();
     }
 
-    /* POST router, song upload */
-    router.post(/.*\/songs\/upload\/?$/, upload.single("song"), function (req, res, next) {
-        post(req, res, next);
-    });
-
-    /* POST router, song url */
-    router.post(/.*\/songs\/url\/?$/, upload.single("song"), function (req, res, next) {
-        post(req, res, next);
+    /* POST router, song upload.
+       Multer requires a router for uploading files separate from the standard one. */
+    router.post(/.*\/songs\/upload\/?$/, upload.array("song[]",12), function(req, res, next) {
+        _post(req, res, next);
     });
 
     /* POST router, non-file-upload */
-    router.post(/.*/, function (req, res, next) {
-        post(req, res, next);
+    router.post(/.*/, function(req, res, next) {
+        _post(req, res, next);
+    });
+
+    function _delete(req, res, next) {
+        path = req.url.split("/").filter((e) => {
+            return e.length > 0;
+        });
+        if (path.length < 1) {
+            return apiError(res, 400, "Cannot delete API root");
+        } else {
+            if (path[0] == "p") {
+                // /api/p            
+                if (path.length >= 2) {
+                    // /api/p/{listId}
+                    var listId = path[1];
+                    if (path.length >= 3) {
+                        if (path[2] == "songs") {
+                            // /api/p/{listId}/songs
+                            if (path.length >= 4) {
+                                // /api/p/{listId}/songs/{songIndex}
+                                songIndex = parseInt(path[3]);
+                                if (songIndex || songIndex===0 ) {
+                                    if (songIndex < 0) {
+                                        return api_error(res, 400, "index cannot be negative");
+                                    }
+                                    // TODO: use actual delete method, when implemented
+                                    manager.getPlaylist(listId, function (err, list) {
+                                        if (err) {
+                                            return apiError(res, 500, err);
+                                        } else {
+                                            manager.removeSong(listId,songIndex, function (err,removedCurrentSong) {
+                                                if (err) {
+                                                    res.status(500).send(err);
+                                                } else {
+                                                    if (removedCurrentSong) {
+                                                        // gets the next song after the one removed to start playing
+                                                        // can't use next() because current song deleted. This is a hack.
+                                                        audio.jumpTo(songIndex);
+                                                    }
+                                                    return res.status(200).send("removed song");
+                                                }
+                                            })
+                                        }
+                                    });
+                                    return;
+                                } else {
+                                    // song index not a number
+                                    return apiError(res, 400, "song must be an integer: id in playlist " + listId);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        next();
+    }
+
+    /* DELETE router */
+    router.delete(/.*/, function(req, res, next) {
+        _delete(req, res, next);
     });
 
     return router;
