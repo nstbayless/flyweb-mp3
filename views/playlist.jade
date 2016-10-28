@@ -1,26 +1,28 @@
 extends layout
 
 block head
-	script(src="/static/js/sortable.js" charset="utf-8")
+    script(src="/static/js/sortable.js" charset="utf-8")
 
 block content
-	div.q
-		h1=pl.name
-		div(ng-show="pl.songs.length>0")
-			table.q
-				tr
-					th.q
-					th.q Name
-					th.q Duration
-				tbody#pltable
-					- for (var i=0; i<pl.songIds.length; i++)
-						tr(style="background-color: #{(i%2)?'#eef':'#ccf'};" data=pl.songIds[i])
-							td.q.num #{i+1}
-							td.q(style="font-weight:#{(i==0)?'bold':'normal'};") #{pl.songs[i].name}
-							td.q {{pretty_time(pl.songs[#{i}].duration)}}
-		div(ng-show="pl.songs.length==0")
-			center
-				p
-					| It looks like this queue is empty. Feel free to 
-					a(href='/add/#{pl.id}') add to it
-					| !
+    div.q
+        h1=list.name
+        div(ng-show="list.songs.length>0")
+            table.q
+                tr
+                    th.q
+                    th.q Name
+                    th.q Duration
+                tbody#pltable
+                    - for (var i=0; i<list.songIds.length; i++)
+                        tr(style="background-color: #{(i%2)?'#eef':'#ccf'};" data=list.songIds[i])
+                            td.q.num #{i+1}
+                            td.q(style="font-weight:#{(i==0)?'bold':'normal'};") #{list.songs[i].name}
+                            td.q {{pretty_time(list.songs[#{i}].duration)}}
+                                td.qx
+                                    img(src="/images/item_x.png")
+        div(ng-show="list.songs.length==0")
+            center
+                p
+                    | It looks like this queue is empty. Feel free to 
+                    a(href='/add/#{list.id}') add to it
+                    | !

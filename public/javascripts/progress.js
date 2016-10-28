@@ -1,4 +1,4 @@
-/* globals window, document, XMLHttpRequest, FormData, pl*/
+/* globals window, document, XMLHttpRequest, FormData, list*/
 
 // for keeping track of file upload progress
 
@@ -38,20 +38,27 @@ function uploadProgress(p) {
 
 //POST the given file to the given url
 //cb: (err,success)=>(void)
-function uploadFile(f, url, cb, progress) {
+function uploadFiles(files, url, cb, progress) {
     var xhr = new XMLHttpRequest();
 
     //check for obvious errors:
     if (!xhr.upload) {
         return cb('Browser does not support uploading');
     }
-    if (!f.type.match(/^audio\//)) {
-        return cb('Only audio files are allowed');
+    var f;
+    for (var i=0;i<files.length;i++) {
+        f = files[i];
+        if (!f.type.match(/^audio\//)) {
+            return cb('Only audio files are allowed');
+        }
     }
     var fd = new FormData();
-
+    
     //add song file to form data:
-    fd.append('song', f, f.name);
+    for (i=0;i<files.length;i++) {
+        f = files[i];
+        fd.append('song[]', f, f.name);
+    }
 
     //callback delegation:
     xhr.upload.addEventListener('progress', function(e) {
@@ -80,20 +87,20 @@ function uploadFile(f, url, cb, progress) {
 //called when a file uploaded or upload dialogue cancelled
 function submitOnChange(evt) {
     //retrieve uploaded file
-    var f = evt.target.files[0];
+    var f = evt.target.files;
     if (f) {
         //file provided
         setProgressBarVisibility(true);
         errorMessage.innerHTML = '';
         var url = eltForm.getAttribute('action');
-        uploadFile(f, url, (err, success) => {
+        uploadFiles(f, url, (err, success) => {
             //display form to be re-shown:
             if (err) {
                 setProgressBarVisibility(false);
                 errorMessage.innerHTML = 'Error: ' + err;
             }
             if (success) {
-                var redirect = '/p/' + pl.id;
+                var redirect = '/p/' + list.id;
                 window.location.replace(redirect);
             }
         }, uploadProgress);

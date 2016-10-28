@@ -1,6 +1,11 @@
-var START_OF_LIST = -1;
+// stores, retrieves, and modifies playlists, including the play queue.
+
+var assert = require("assert");
+
 var Playlist = require("./_playlist");
 var Song = require("./_song");
+
+var START_OF_LIST = -1;
 var playlist_manager = {};
 playlist_manager.queue = Playlist.Playlist("q");
 playlist_manager.queue.name = "Play Queue";
@@ -24,7 +29,7 @@ playlist_manager.io = {};
  *          {Object} err: the error if exists
  *          {Object} result: the playlist object
  */
-playlist_manager.getPlaylist = function (list, callback) {
+playlist_manager.getPlaylist = function(list, callback) {
     var l = playlist_manager.queue;
     if (list in playlist_manager.listMap) {
         l = playlist_manager.listMap[list];
@@ -70,7 +75,7 @@ playlist_manager.currentSongIndex = function(callback) {
  *          {Object} err: the error if exists
  *          {Song} result: the song object
  */
-playlist_manager.getSong = function (songId, callback) {
+playlist_manager.getSong = function(songId, callback) {
     var s = null;
     if (songId in playlist_manager.songMap) {
         s = playlist_manager.songMap[songId];
@@ -117,7 +122,7 @@ playlist_manager.chooseSong = function (listId, songIndex, callback) {
  *          {Object} err: the error if exists
  *          {Song} result: the next song to be played
  */
-playlist_manager.nextSong = function (callback) {
+playlist_manager.nextSong = function(callback) {
     playlist_manager.songIndex++;
     if (playlist_manager.songIndex >= playlist_manager.currentList.songIds.length) {
         playlist_manager.songIndex = 0;
@@ -137,7 +142,7 @@ playlist_manager.nextSong = function (callback) {
  *          {Object} err: the error if exists
  *          {Song} result: the previous song to be played
  */
-playlist_manager.prevSong = function (callback) {
+playlist_manager.prevSong = function(callback) {
     playlist_manager.songIndex--;
     if (playlist_manager.songIndex < 0) {
         playlist_manager.songIndex = playlist_manager.currentList.songIds.length - 1;
@@ -157,7 +162,7 @@ playlist_manager.prevSong = function (callback) {
  * @param {Number} songId: the song ID
  * @param {Function} callback(err): the callback function, with error if exists
  */
-playlist_manager.addSong = function (list, songId, callback) {
+playlist_manager.addSong = function(list, songId, callback) {
     // get the list object to add to
     var l = null;
     if (list === "q") {
@@ -193,14 +198,14 @@ playlist_manager.addSong = function (list, songId, callback) {
  {Number} id: the song ID
  {Object} err: error produced
  */
-playlist_manager.createSong = function (list, path, callback) {
+playlist_manager.createSong = function(list, path, callback) {
     var id = playlist_manager.nextId;
     playlist_manager.nextId++;
     var s = Song.Song(id);
     s.path = path;
     s.type = "upload";
     playlist_manager.songMap[id] = s;
-    playlist_manager.addSong(list, id, function () {
+    playlist_manager.addSong(list, id, function() {
         if (callback) {
             callback(id, false);
         }
@@ -216,22 +221,25 @@ playlist_manager.createSong = function (list, path, callback) {
  *          {Boolean} removedCurrentSong: whether the currently playing song was removed
  */
 playlist_manager.removeSong = function (listId, songIndex, callback) {
-    playlist_manager.getPlaylist(listId, function (l) {
+    playlist_manager.getPlaylist(listId, function (err, l) {
         if (songIndex < 0 || songIndex >= l.songIds.length) {
             callback("Index out of range", false);
         }
 
         // last (bottom) song in list or only song
-        var isLastSong = (songIndex === l.songIds.length - 1);
         var isCurrentSong = (songIndex === playlist_manager.songIndex);
 
         // remove song
         l.songIds.splice(songIndex, 1);
         l.songs.splice(songIndex, 1);
+        
+        // alert clients to change in playlist
+        playlist_manager.emitList(listId,l);
 
-        // next song will be top of list or no song if empty
-        if (isLastSong) {
-            playlist_manager.songIndex = START_OF_LIST;
+        // move current song if necessary:
+        if (songIndex < playlist_manager.songIndex) {
+            playlist_manager.songIndex--;
+            playlist_manager.emitCurrentSong();
         }
 
         // if playing song was removed, report this
@@ -277,6 +285,14 @@ playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
             newIndex < 0 || newIndex >= l.songIds.length) {
             callback("Index out of range");
         }
+        
+        // do nothing if oldIndex == newIndex
+        if (oldIndex == newIndex) {
+            if (callback) {
+                callback(null);
+            }
+            return;
+        }
 
         // remove song
         var id = l.songIds.splice(oldIndex, 1);
@@ -285,11 +301,27 @@ playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
         // re-add song
         l.songIds.splice(newIndex, 0, id[0]);
         l.songs.splice(newIndex, 0, song[0]);
-
-        // update index if playing song was moved
-        if (playlist_manager.songIndex == oldIndex) {
-            playlist_manager.songIndex = newIndex;
+        
+        // update current song index if current song was moved
+        var minIndex = Math.min(oldIndex,newIndex);
+        var maxIndex = Math.max(oldIndex,newIndex);
+        if (playlist_manager.songIndex >= minIndex && playlist_manager.songIndex<=maxIndex) {
+            // new value of songIndex depends on nature of move
+            if (playlist_manager.songIndex == oldIndex) {
+                playlist_manager.songIndex = newIndex;
+            } else if (newIndex<oldIndex) {
+                playlist_manager.songIndex++;
+            } else if (newIndex>oldIndex) {
+                playlist_manager.songIndex--;
+            } else {
+                assert(false);
+            }
         }
+        
+        // alert clients to change in list
+        playlist_manager.emitList(list,l);
+        playlist_manager.emitCurrentSong();
+        
         if (callback) {
             callback(null);
         }

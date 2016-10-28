@@ -13,7 +13,7 @@ var fs = require('fs');
 var config;
 var config_file = "config.json";
 try {
-    fs.statSync("../" + config_file).isFile();
+    fs.statSync(config_file).isFile();
 } catch (e) {
     config = {
         defaults: {
@@ -22,7 +22,7 @@ try {
     }
     //make new config file:
     var jsonfile = require('jsonfile');
-    jsonfile.writeFileSync(config_file, config);
+    jsonfile.writeFileSync(config_file, config, {spaces: 4});
     console.log("Created file config.json");
 }
 

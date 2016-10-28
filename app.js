@@ -11,7 +11,7 @@ var upload = multer({dest: 'uploads/'});
 
 var app = express();
 
-//socket dissemination
+// socket dissemination
 var io = require('socket.io')();
 app.io = io;
 
@@ -26,7 +26,7 @@ playlistManager.setSocketIO(io);
 app.upload = upload;
 
 var routes = require('./routes/index')();
-var route_api = require('./routes/api')(upload);
+var route_api = require('./routes/api')(upload,audio);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
