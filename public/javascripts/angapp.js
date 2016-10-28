@@ -1,24 +1,26 @@
+/* globals document, $, Sortable, angular, io, list, currentListId, currentSongIndex */
 var app = angular.module("angApp", []);
 var socket = io();
 
-app.controller("angCon", function ($scope, $http, $timeout) {
+app.controller("angCon", function ($scope) {
 
     // jade input variables:
     $scope.list = {};
+    var pl_table; 
     try {
         $scope.list = list;
         $scope.pl_track_index = -1;
         
-        if (list.id==currentListId)
+        if (list.id==currentListId) {
             $scope.pl_track_index = currentSongIndex;
-        
+        }
 
         // make table rearrangeable:
-        var pl_table = document.getElementById("pltable");
-        var pl_sortable = new Sortable(pl_table, {
+        pl_table = document.getElementById("pltable");
+        new Sortable(pl_table, {
             dataIdAttr: "data",
             animation: 170,
-            onStart: function(evt) {
+            onStart: function() {
                 $scope.repaint_playlist("#eee", "#eee", false);
             },
             onEnd: function(evt) {
@@ -61,15 +63,15 @@ app.controller("angCon", function ($scope, $http, $timeout) {
     };
 
     $scope.pause_song = function() {
-    	socket.emit("pause");
+        socket.emit("pause");
     };
 
     $scope.prev_song = function() {
-    	socket.emit("prev");
+        socket.emit("prev");
     };
 
     $scope.next_song = function() {
-    	socket.emit("next");
+        socket.emit("next");
     };
 
     // moves element in list
@@ -90,8 +92,9 @@ app.controller("angCon", function ($scope, $http, $timeout) {
 
     // replaces playlist table with new one, with new elements
     $scope.replace_playlist = function() {
-        if (!pl_table)
+        if (!pl_table) {
             return;
+        }
         // add children:
         for (var i = 0; i < $scope.list.songs.length; i++) {
             var song = $scope.list.songs[i];
@@ -136,18 +139,17 @@ app.controller("angCon", function ($scope, $http, $timeout) {
             td.setAttribute("class", "qx");
             // href within td
             var hrefx = document.createElement("a");
-            hrefx.style["onmouseover"] = "";
-            hrefx.style["cursor"] = "pointer";
-            //hrefx.setAttribute("href","/");
+            hrefx.style.onmouseover = "";
+            hrefx.style.cursor = "pointer";
             // x image within href:
             var imgx = document.createElement("img");
             imgx.setAttribute("src", "/images/item_x.png");
             //on-click to delete:
             (function() {
                 var capture_i = i;
-                hrefx.onclick = function() {
+                hrefx.onclick = function () {
                     $scope.remove_song(capture_i);
-                }
+                };
             })();
             hrefx.appendChild(imgx);
             td.appendChild(hrefx);
@@ -155,7 +157,7 @@ app.controller("angCon", function ($scope, $http, $timeout) {
             tr.appendChild(td);
         }
         //delete extra rows:
-        for (var i=$scope.list.songs.length;i<pl_table.children.length;i++) {
+        for (i=$scope.list.songs.length;i<pl_table.children.length;i++) {
             pl_table.removeChild(pl_table.children[i]);
         }
         $scope.repaint_playlist("#ccf", "#eef", true);
@@ -181,48 +183,51 @@ app.controller("angCon", function ($scope, $http, $timeout) {
     $scope.remove_song = function(index) {
         $scope.list.songs.splice(index, 1);
         $scope.list.songIds.splice(index, 1);
-        if ($scope.pl_track_index > index)
+        if ($scope.pl_track_index > index) {
             $scope.pl_track_index--;
-        var endpoint = "/api/p/" + $scope.list.id + "/songs/" + index
+        }
+        var endpoint = "/api/p/" + $scope.list.id + "/songs/" + index;
         $scope.replace_playlist();
         $.ajax({
             type: "DELETE",
             url: endpoint,
         });
-    }
+    };
 
     // live update status for current song
     socket.on("status", function(status) {
-		var prog_percent = status.time_elapsed / status.duration;
-		prog_percent = isNaN(prog_percent) ? 0 : prog_percent * 100;
+        var prog_percent = status.time_elapsed / status.duration;
+        prog_percent = isNaN(prog_percent) ? 0 : prog_percent * 100;
 
-		if (status.state === "paused") {
-			$("#controls-play").removeClass("glyphicon-pause").addClass("glyphicon-play");
-		} else if (status.state === "playing") {
-			$("#controls-play").removeClass("glyphicon-play").addClass("glyphicon-pause");
-		}
+        if (status.state === "paused") {
+            $("#controls-play").removeClass("glyphicon-pause").addClass("glyphicon-play");
+        } else if (status.state === "playing") {
+            $("#controls-play").removeClass("glyphicon-play").addClass("glyphicon-pause");
+        }
 
-		$scope.status = status;
-		$scope.progress_style.width = prog_percent + "%";
-		$scope.$apply();
-	});
-	
-	// live update playlist
-	socket.on("playlist", function(update) {
-	    if (update.listId===$scope.list.id) {
-	        $scope.list=update.list;
-	        $scope.replace_playlist();
-	        $scope.$apply();
-	    }
-	});
-	
-	// live update currently-playing song on playlist
-	socket.on("track", function(update) {
-		if (update.listId==list.id)
-			$scope.pl_track_index = update.songIndex
-		else
-			$scope.pl_track_index = -1;
-		$scope.replace_playlist();
-		$scope.$apply();
-	});
+        $scope.status = status;
+        $scope.progress_style.width = prog_percent + "%";
+        $scope.$apply();
+    });
+    
+    // live update playlist
+    socket.on("playlist", function(update) {
+        if (update.listId===$scope.list.id) {
+            $scope.list=update.list;
+            $scope.replace_playlist();
+            $scope.$apply();
+        }
+    });
+    
+    // live update currently-playing song on playlist
+    socket.on("track", function(update) {
+        if (update.listId==list.id) {
+            $scope.pl_track_index = update.songIndex;
+        }
+        else {
+            $scope.pl_track_index = -1;
+        }
+        $scope.replace_playlist();
+        $scope.$apply();
+    });
 });
