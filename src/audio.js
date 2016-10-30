@@ -1,23 +1,25 @@
 // Handles playing sound out of speakers on server.
 
 module.exports = function(io) {
-	var repeat = require('repeat');
-	var Song = require ('./_song');
-	var playlist_manager = require('./playlist_manager');
-    var audio_manager = require('./audio_manager');
+	var repeat = require("repeat");
+	var Song = require ("./_song");
+	var playlist_manager = require("./playlist_manager");
+    var audio_manager = require("./audio_manager");
 
 	// audio playing pipeline:
-	var Speaker = require('speaker');
-	var Lame = require('lame');
-	var Wav = require('wav');
-	var Fs = require('fs');
-	var Stream = require('stream');
-	var assert = require('assert');
+	var Speaker = require("speaker");
+	var Lame = require("lame");
+	var Wav = require("wav");
+	var Ogg = require("ogg");
+	var Vorbis = require("vorbis");
+	var Fs = require("fs");
+	var Stream = require("stream");
+	var assert = require("assert");
 	
 	var speaker;
 
 	function emitStatus(title, state, duration, time_elapsed) {
-		io.sockets.emit('status', {
+		io.sockets.emit("status", {
 			title: title,
 			state: state,
 			duration: duration,
@@ -32,58 +34,99 @@ module.exports = function(io) {
         var stream = Fs.createReadStream(file);
         var totalBytesSeen = 0;
         var rate = 0;
-
         var transform = new Stream.Transform({
             transform: function (chunk, encoding, callback) {
                 this.push(chunk);
                 totalBytesSeen += chunk.length;
+                
                 audio_manager.set_time_elapsed(totalBytesSeen / (4 * rate));
                 emitStatus(audio_manager.get_title(),
-                        audio_manager.get_state(),
-                        audio_manager.get_duration(),
-                        audio_manager.get_time_elapsed()
-                    );
+                    audio_manager.get_state(),
+                    audio_manager.get_duration(),
+                    audio_manager.get_time_elapsed()
+                );
+                
                 callback();
             }
         });
-        var decoder;
-        if (song.format === 'mp3') {
-            decoder = new Lame.Decoder();
-            decoder.on('format', (format) => {
-                console.log('MP3 format: %j', format);
-                speaker.channels = format.channels;
-                speaker.bitDepth = format.bitDepth;
-                speaker.sampleRate = format.sampleRate;
-                rate = format.sampleRate;
-            });
-        } else if (song.format === 'wav') {
-           decoder = new Wav.Reader();
-            decoder.on('format', (format) => {
-                console.log('Wav format: %j', format);
-                speaker.channels = format.channels;
-                speaker.bitDepth = format.bitDepth;
-                speaker.sampleRate = format.sampleRate;
-                rate = format.sampleRate;
-            }); 
-        }
 
+        // pick audio decoder
+        var decoder_read;
+        var decoder_write;
+        var decoder;
+        
+        console.log("Format: " + song.format);
+        
         speaker = new Speaker({
             channels: 2,
             bitDepth: 16,
             sampleRate: 10
         });
 
-        speaker.on('pipe', () => {
-            console.log('### PIPING ###');
-            audio_manager.play_state = 'playing';
+        //TODO: refactor decoder picking into its own function
+        if (song.format === "mp3") {
+            decoder = new Lame.Decoder();
+            decoder.on("format", (format) => {
+                console.log("MP3 format: %j", format);
+                speaker.channels = format.channels;
+                speaker.bitDepth = format.bitDepth;
+                speaker.sampleRate = format.sampleRate;
+                rate = format.sampleRate;
+            });
+            
+            // duplex stream
+            decoder_read = decoder;
+            decoder_write = decoder;
+        } else if (song.format === "ogg") {
+            decoder_write = new Stream.PassThrough();
+            var od = new Ogg.Decoder();
+            od.on("stream", (stream) => {
+                var vd = new Vorbis.Decoder();
+                vd.on("format", (format) => {
+                    console.log("Ogg format: %j", format);
+                    for (var prop in format) {
+                        speaker[prop]=format[prop];
+                    }
+                    
+                    // TODO: why is the sample rate twice stated?
+                    rate = format.sampleRate*2;
+                });
+                
+                vd.on("error", function (err) {
+                    console.log(err);
+                });
+                
+                stream.pipe(vd);
+                vd.pipe(decoder_write);
+            });
+            decoder_read = od;
+        } else if (song.format === "wav") {
+           decoder = new Wav.Reader();
+           decoder.on("format", (format) => {
+                console.log("Wav format: %j", format);
+                speaker.channels = format.channels;
+                speaker.bitDepth = format.bitDepth;
+                speaker.sampleRate = format.sampleRate;
+                rate = format.sampleRate;
+            }); 
+            
+            // duplex stream
+            decoder_read = decoder;
+            decoder_write = decoder;
+        }
+
+        speaker.on("pipe", () => {
+            console.log("### PIPING ###");
+            audio_manager.play_state = "playing";
         });
 
         //stream = stream.pipe(new Throttle(44100));
-        stream.pipe(decoder).pipe(transform).pipe(speaker);
+        stream.pipe(decoder_read);
+        decoder_write.pipe(transform).pipe(speaker);
 
-        speaker.on('finish', () => {
+        speaker.on("finish", () => {
             audio_manager.set_time_elapsed(0);
-            audio_manager.set_state('paused');
+            audio_manager.set_state("paused");
 
             if (audio_manager.jump_index>=0) {
                 playlist_manager.currentPlaylist(function (err,currentListId) {
@@ -105,8 +148,7 @@ module.exports = function(io) {
             }
             audio_manager.prev_flag = false;
             audio_manager.jump_index = -1;
-            console.log('speaker finished');
-
+            console.log("speaker finished");
         });
     }
     
@@ -131,10 +173,10 @@ module.exports = function(io) {
 	//pauses the song
 	function pause() {
 		if (audio_manager.is_paused()) {
-			audio_manager.set_state('playing');
+			audio_manager.set_state("playing");
 			speaker.uncork();
 		} else if (audio_manager.is_playing()) {
-			audio_manager.set_state('paused');
+			audio_manager.set_state("paused");
 			speaker.cork();
 		}
 
@@ -147,11 +189,11 @@ module.exports = function(io) {
 		audio_manager.current_song = song;
         audio_manager.time_elapsed = 0;
 		//adjusts re object based on song type:
-		if (song.type == 'empty') {
-			audio_manager.current_song.name = 'Nothing Playing';
-		} else if (song.type == 'upload') {
-			console.log('Now playing: ' + song.name);
-			audio_manager.set_state('playing');
+		if (song.type == "empty") {
+			audio_manager.current_song.name = "Nothing Playing";
+		} else if (song.type == "upload") {
+			console.log("Now playing: " + song.name);
+			audio_manager.set_state("playing");
 			play_file(song);
 		}
 	}
@@ -166,7 +208,7 @@ module.exports = function(io) {
 				});
 			} else {
 				//if playlist is empty, play a default empty song
-                var empty_song = Song.Song('-1');
+                var empty_song = Song.Song("-1");
 				play(empty_song);
                 audio_manager.set_current(empty_song);
 			}
@@ -174,7 +216,7 @@ module.exports = function(io) {
 		}
 	}
 
-	repeat(check_start).every(2000, 'ms').start.now();
+	repeat(check_start).every(2000, "ms").start.now();
 
 	var module = {
 		emitStatus: emitStatus,
