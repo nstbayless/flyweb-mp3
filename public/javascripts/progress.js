@@ -48,9 +48,6 @@ function uploadFiles(files, url, cb, progress) {
     var f;
     for (var i=0;i<files.length;i++) {
         f = files[i];
-        if (!f.type.match(/^audio\//)) {
-            return cb('Only audio files are allowed');
-        }
     }
     var fd = new FormData();
     

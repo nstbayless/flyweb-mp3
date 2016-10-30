@@ -4,6 +4,7 @@ song.Song = function(id) {
     return {
         id: id,
         type: "empty",
+        format: "unknown",
         name: "No song",
         duration: 0,
         artist: "Artist",

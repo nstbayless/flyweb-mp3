@@ -9,8 +9,11 @@ module.exports = function(io) {
 	// audio playing pipeline:
 	var Speaker = require('speaker');
 	var Lame = require('lame');
+	var Wav = require('wav');
 	var Fs = require('fs');
 	var Stream = require('stream');
+	var assert = require('assert');
+	
 	var speaker;
 
 	function emitStatus(title, state, duration, time_elapsed) {
@@ -23,11 +26,10 @@ module.exports = function(io) {
 	}
 
 	//plays song with audio pipeline above
-    function play_file(file) {
-        console.log(file);
-
+    function play_file(song) {
+        assert(song.path);
+        var file = song.path;
         var stream = Fs.createReadStream(file);
-        var decoder = new Lame.Decoder();
         var totalBytesSeen = 0;
         var rate = 0;
 
@@ -44,13 +46,26 @@ module.exports = function(io) {
                 callback();
             }
         });
-        decoder.on('format', (format) => {
-            console.log('MP3 format: %j', format);
-            speaker.channels = format.channels;
-            speaker.bitDepth = format.bitDepth;
-            speaker.sampleRate = format.sampleRate;
-            rate = format.sampleRate;
-        });
+        var decoder;
+        if (song.format === 'mp3') {
+            decoder = new Lame.Decoder();
+            decoder.on('format', (format) => {
+                console.log('MP3 format: %j', format);
+                speaker.channels = format.channels;
+                speaker.bitDepth = format.bitDepth;
+                speaker.sampleRate = format.sampleRate;
+                rate = format.sampleRate;
+            });
+        } else if (song.format === 'wav') {
+           decoder = new Wav.Reader();
+            decoder.on('format', (format) => {
+                console.log('Wav format: %j', format);
+                speaker.channels = format.channels;
+                speaker.bitDepth = format.bitDepth;
+                speaker.sampleRate = format.sampleRate;
+                rate = format.sampleRate;
+            }); 
+        }
 
         speaker = new Speaker({
             channels: 2,
@@ -137,7 +152,7 @@ module.exports = function(io) {
 		} else if (song.type == 'upload') {
 			console.log('Now playing: ' + song.name);
 			audio_manager.set_state('playing');
-			play_file(song.path);
+			play_file(song);
 		}
 	}
 

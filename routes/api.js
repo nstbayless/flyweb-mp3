@@ -8,6 +8,8 @@ module.exports = (upload, audio) => {
     var fs = require("fs");
     var mm = require("musicmetadata");
     var youtubedl = require("youtube-dl");
+    var Path = require("path");
+    var WavFileInfo = require("wav-file-info");
     var mp3length = require("mp3length");
     var router = express.Router();
 
@@ -95,8 +97,6 @@ module.exports = (upload, audio) => {
             resSuccessCount: 0
         };
         
-        console.log(req.files);
-        
         for (var i=0;i<req.files.length;i++) {
             // process each file uploaded
             ((_capture_i,shared)=>{
@@ -104,11 +104,18 @@ module.exports = (upload, audio) => {
                 var file = req.files[i];
                 var path = file.destination + file.filename;
                 var title = file.originalname;
+                var extension = Path.extname(title).substring(1);
+                console.log(extension);
                 mm(fs.createReadStream(path), {
                     duration: true
                 }, function(err, metadata) {
-                    if (err) {
-                        throw err;
+                    if (err && ! shared.resErr) {
+                        if (extension != "wav") {
+                            // TODO: use avprobe to decide this is a wav file
+                            console.log(err);
+                            shared.resErr=true;
+                            return res.status(500).send(err);
+                        }
                     }
                     if (metadata.title !== "") {
                         title = metadata.title;
@@ -117,7 +124,8 @@ module.exports = (upload, audio) => {
                         if (err && !shared.resErr) {
                             // only send at most one error.
                             shared.resErr=true;
-                            apiError(res, 500);
+                            console.log(err);
+                            return res.status(500).send(err);
                         } else {
                             manager.getSong(id, function(err, s) {
                                 if (err && !shared.resErr) {
@@ -126,15 +134,43 @@ module.exports = (upload, audio) => {
                                     return apiError(res, 500);
                                 } else {
                                     s.type = "upload";
-                                    s.name = title;
-                                    s.duration = metadata.duration;
-                                    if (!shared.resErr) {
-                                        assert(shared.resSuccessCount<req.files.length);
-                                        shared.resSuccessCount++;
-                                        if (shared.resSuccessCount==req.files.length) {
-                                            res.status(200).send();
-                                        }
+                                    s.format = "mp3";
+                                    if (["ogg","wav","flac","mp4"].indexOf(extension) >= 0) {
+                                        // some other formats  supported
+                                        // TODO: use avprobe to determine format, not extension.
+                                        s.format=extension;
                                     }
+                                    
+                                    s.name = title;
+                                    
+                                    var success = (shared)=>{
+                                        // return success to client
+                                        if (!shared.resErr) {
+                                            assert(shared.resSuccessCount<req.files.length);
+                                            shared.resSuccessCount++;
+                                            if (shared.resSuccessCount==req.files.length) {
+                                                res.status(200).send();
+                                            }
+                                        }
+                                    };
+                                    
+                                    if (metadata.duration) {
+                                        s.duration = metadata.duration;
+                                        success(shared);
+                                    } else if (s.format=="wav") {
+                                        WavFileInfo.infoByFilename(file.path, function(err, info){
+                                            if (err) {
+                                                if (shared.resErr) {
+                                                    shared.resErr=true;
+                                                    return apiError(res, 500);
+                                                }
+                                            } else {
+                                                s.duration = info.duration;
+                                                success(shared);
+                                            }
+                                        });
+                                    }
+                                    
                                 }
                             });
                         }
@@ -178,6 +214,7 @@ module.exports = (upload, audio) => {
                                     else {
                                         manager.getSong(id, function (err, s) {
                                             s.type = "upload";
+                                            s.format = "mp3";
                                             s.name = title;
                                             s.duration = length;
                                             return res.status(200).send();
