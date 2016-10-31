@@ -5,6 +5,7 @@ var socket = io();
 app.controller("angCon", function ($scope) {
 
     // jade input variables:
+    
     $scope.list = {};
     var pl_table; 
     try {
@@ -26,7 +27,7 @@ app.controller("angCon", function ($scope) {
             onEnd: function(evt) {
                 $scope.move_song(evt.oldIndex, evt.newIndex);
                 $scope.repaint_playlist("#ccf", "#eef", true);
-            }
+            },
         });
     } catch (e) {
         // list might not be supplied on this page; this is okay.
@@ -113,11 +114,19 @@ app.controller("angCon", function ($scope) {
             // TODO: bold if playing.
             var style = "font-weight:" + ((i == $scope.pl_track_index) ? "bold" : "normal") + ";";
 
+            var play_song;
+            ((i)=>{
+                play_song = function() {
+                    socket.emit("jump",{listId: list.id, songIndex: i});
+                };
+            })(i);
+            
             // add number cell:
             var td = document.createElement("td");
             td.setAttribute("class", "q num");
             td.setAttribute("style", style);
             td.innerHTML = (i + 1);
+            $(td).mouseup(play_song);
             tr.appendChild(td);
 
             // add name cell
@@ -125,6 +134,7 @@ app.controller("angCon", function ($scope) {
             td.setAttribute("class", "q");
             td.setAttribute("style", style);
             td.innerHTML = song.name;
+            $(td).mouseup(play_song);
             tr.appendChild(td);
 
             // add duration cell
@@ -132,6 +142,7 @@ app.controller("angCon", function ($scope) {
             td.setAttribute("class", "q");
             td.innerHTML = ($scope.pretty_time(song.duration));
             td.setAttribute("style", style);
+            $(td).mouseup(play_song);
             tr.appendChild(td);
 
             // add x button

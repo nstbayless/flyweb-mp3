@@ -152,8 +152,10 @@ module.exports = function(io) {
         });
     }
     
-    function jumpTo(songIndex) {
+    function jumpTo(listId,songIndex) {
+        //TODO: listId ignored, multiple playlists not implemented
         audio_manager.jump_index= songIndex;
+        
         speaker.end();
         return audio_manager.play_state;
     }

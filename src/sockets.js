@@ -11,5 +11,9 @@ module.exports = function(io, audio) {
         socket.on('next', function() {
             audio.next();
         });
+        
+        socket.on('jump', function(spec) {
+            audio.jumpTo(spec.listId, spec.songIndex);
+        });
     });
 };

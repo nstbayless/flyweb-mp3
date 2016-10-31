@@ -333,7 +333,7 @@ module.exports = (upload, audio) => {
                                             if (removedCurrentSong) {
                                                 // gets the next song after the one removed to start playing
                                                 // can"t use next() because current song deleted. This is a hack.
-                                                audio.jumpTo(songIndex);
+                                                audio.jumpTo(listId,songIndex);
                                             }
                                             return res.status(200).send("removed song");
                                         }
