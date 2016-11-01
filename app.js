@@ -17,10 +17,10 @@ app.io = io;
 
 var audio = require('./src/audio')(io);
 
-require('./src/sockets')(io, audio);
-
 var playlistManager = require('./src/playlist_manager');
 playlistManager.setSocketIO(io);
+
+require('./src/sockets')(io, audio, playlistManager);
 
 // multer
 app.upload = upload;

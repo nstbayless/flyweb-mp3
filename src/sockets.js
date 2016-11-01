@@ -1,5 +1,15 @@
-module.exports = function(io, audio) {
+module.exports = function(io, audio, playlistManager) {
     io.on('connection', function(socket) {
+        socket.on('seek', function(data) {
+            audio.seek(data.time);
+        });
+
+        socket.on('updateRequest', function() {
+            playlistManager.emitCurrentSong();
+            playlistManager.emitList();
+            audio.emitStatus();
+        });
+
         socket.on('pause', function() {
             audio.pause();
         });
@@ -10,6 +20,10 @@ module.exports = function(io, audio) {
 
         socket.on('next', function() {
             audio.next();
+        });
+
+        socket.on('jump', function(spec) {
+            audio.jumpTo(spec.listId, spec.songIndex);
         });
     });
 };

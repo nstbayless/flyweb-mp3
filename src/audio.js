@@ -32,17 +32,26 @@ module.exports = function(io) {
 	
 	var speaker;
 
-	function emitStatus(title, state, duration, time_elapsed) {
+	function emitStatus() {
 		io.sockets.emit("status", {
-			title: title,
-			state: state,
-			duration: duration,
-			time_elapsed: time_elapsed
+			title: audio_manager.get_title(),
+			state: audio_manager.get_state(),
+			duration: audio_manager.get_duration(),
+			time_elapsed: audio_manager.get_time_elapsed()
 		});
 	}
 
+	function seek(time) {
+		if (speaker) {
+			audio_manager.seek_time = time;
+			speaker.end();
+
+			return audio_manager.get_state();
+		}
+	}
+
 	//plays song with audio pipeline above
-    function play_file(song) {
+    function play_file(song, seekTime) {
         assert(song.path);
         var file = song.path;
         var stream = Fs.createReadStream(file);
@@ -50,16 +59,15 @@ module.exports = function(io) {
         var rate = 0;
         var transform = new Stream.Transform({
             transform: function (chunk, encoding, callback) {
-                this.push(chunk);
-                totalBytesSeen += chunk.length;
-                
-                audio_manager.set_time_elapsed(totalBytesSeen / (4 * rate));
-                emitStatus(audio_manager.get_title(),
-                    audio_manager.get_state(),
-                    audio_manager.get_duration(),
-                    audio_manager.get_time_elapsed()
-                );
-                
+				totalBytesSeen += chunk.length;
+
+				if (!seekTime || audio_manager.get_time_elapsed() >= seekTime) {
+					this.push(chunk);
+	                emitStatus();
+				}
+
+				audio_manager.set_time_elapsed(totalBytesSeen / (4 * rate));
+
                 callback();
             }
         });
@@ -68,9 +76,9 @@ module.exports = function(io) {
         var decoder_read;
         var decoder_write;
         var decoder;
-        
+
         console.log("Format: " + song.format);
-        
+
         speaker = new Speaker({
             channels: 2,
             bitDepth: 16,
@@ -87,7 +95,7 @@ module.exports = function(io) {
                 speaker.sampleRate = format.sampleRate;
                 rate = format.sampleRate;
             });
-            
+
             // duplex stream
             decoder_read = decoder;
             decoder_write = decoder;
@@ -101,15 +109,15 @@ module.exports = function(io) {
                     for (var prop in format) {
                         speaker[prop]=format[prop];
                     }
-                    
+
                     // TODO: why is the sample rate twice stated?
                     rate = format.sampleRate*2;
                 });
-                
+
                 vd.on("error", function (err) {
                     console.log(err);
                 });
-                
+
                 stream.pipe(vd);
                 vd.pipe(decoder_write);
             });
@@ -122,8 +130,8 @@ module.exports = function(io) {
                 speaker.bitDepth = format.bitDepth;
                 speaker.sampleRate = format.sampleRate;
                 rate = format.sampleRate;
-            }); 
-            
+            });
+
             // duplex stream
             decoder_read = decoder;
             decoder_write = decoder;
@@ -144,7 +152,9 @@ module.exports = function(io) {
             audio_manager.set_time_elapsed(0);
             audio_manager.set_state("paused");
 
-            if (audio_manager.jump_index>=0) {
+			if (audio_manager.seek_time !== 0) {
+				play(song, audio_manager.seek_time);
+			} else if (audio_manager.jump_index>=0) {
                 playlist_manager.currentPlaylist(function (err,currentListId) {
                     playlist_manager.chooseSong(currentListId,audio_manager.jump_index, (err, s) => {
                         play(s);
@@ -162,55 +172,65 @@ module.exports = function(io) {
                     audio_manager.set_current(s);
                 });
             }
-            audio_manager.prev_flag = false;
+			audio_manager.seek_time = 0;
             audio_manager.jump_index = -1;
+			audio_manager.prev_flag = false;
             console.log("speaker finished");
         });
     }
-    
-    function jumpTo(songIndex) {
+
+    function jumpTo(listId,songIndex) {
+        //TODO: listId ignored, multiple playlists not implemented
         audio_manager.jump_index= songIndex;
+
         speaker.end();
         return audio_manager.play_state;
     }
 
     function prev() {
-		audio_manager.prev_flag = true;
-		speaker.end();
-		return audio_manager.play_state;
+		if (speaker) {
+			audio_manager.prev_flag = true;
+			speaker.end();
+			return audio_manager.play_state;
+		}
 	}
 
 	function next() {
-		audio_manager.prev_flag = false;
-		speaker.end();
-		return audio_manager.play_state;
+		if (speaker) {
+			audio_manager.prev_flag = false;
+			speaker.end();
+			return audio_manager.play_state;
+		}
 	}
 
 	//pauses the song
 	function pause() {
-		if (audio_manager.is_paused()) {
-			audio_manager.set_state("playing");
-			speaker.uncork();
-		} else if (audio_manager.is_playing()) {
-			audio_manager.set_state("paused");
-			speaker.cork();
-		}
+		if (speaker) {
+			if (audio_manager.is_paused()) {
+				audio_manager.set_state("playing");
+				speaker.uncork();
+			} else if (audio_manager.is_playing()) {
+				audio_manager.set_state("paused");
+				speaker.cork();
+			}
 
-		return audio_manager.play_state;
+			return audio_manager.play_state;
+		}
 	}
 
 	//takes song metadata, makes playable information for update below
-	function play(song) {
+	function play(song, seekTime) {
 		//copy song metadata into realized object:
-		audio_manager.current_song = song;
-        audio_manager.time_elapsed = 0;
+		audio_manager.set_current(song);
+        audio_manager.set_time_elapsed(seekTime ? seekTime : 0);
+
 		//adjusts re object based on song type:
 		if (song.type == "empty") {
 			audio_manager.current_song.name = "Nothing Playing";
 		} else if (song.type == "upload") {
 			console.log("Now playing: " + song.name);
 			audio_manager.set_state("playing");
-			play_file(song);
+			play_file(song, seekTime);
 		}
 	}
 
@@ -240,7 +260,8 @@ module.exports = function(io) {
 		pause: pause,
 		next: next,
 		prev: prev,
-		jumpTo: jumpTo
+		jumpTo: jumpTo,
+		seek: seek
 	};
 
 	return module;
