@@ -4,14 +4,16 @@ var socket = io();
 
 app.controller("angCon", function ($scope) {
 
+    socket.emit("updateRequest");
+
     // jade input variables:
-    
+
     $scope.list = {};
-    var pl_table; 
+    var pl_table;
     try {
         $scope.list = list;
         $scope.pl_track_index = -1;
-        
+
         if (list.id==currentListId) {
             $scope.pl_track_index = currentSongIndex;
         }
@@ -120,7 +122,7 @@ app.controller("angCon", function ($scope) {
                     socket.emit("jump",{listId: list.id, songIndex: i});
                 };
             })(i);
-            
+
             // add number cell:
             var td = document.createElement("td");
             td.setAttribute("class", "q num");
@@ -173,7 +175,7 @@ app.controller("angCon", function ($scope) {
         }
         $scope.repaint_playlist("#ccf", "#eef", true);
     };
-    
+
     if (pl_table !== undefined) {
         // replace playlist on startup
         $scope.replace_playlist();
@@ -220,7 +222,7 @@ app.controller("angCon", function ($scope) {
         $scope.progress_style.width = prog_percent + "%";
         $scope.$apply();
     });
-    
+
     // live update playlist
     socket.on("playlist", function(update) {
         if (update.listId===$scope.list.id) {
@@ -229,7 +231,7 @@ app.controller("angCon", function ($scope) {
             $scope.$apply();
         }
     });
-    
+
     // live update currently-playing song on playlist
     socket.on("track", function(update) {
         if (update.listId==list.id) {
