@@ -1,8 +1,9 @@
 module.exports = function(io, audio, playlistManager) {
     io.on('connection', function(socket) {
-        
+
         socket.on('updateRequest', function() {
             playlistManager.emitCurrentSong();
+            playlistManager.emitList();
         });
 
         socket.on('pause', function() {
