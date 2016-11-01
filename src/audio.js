@@ -1,20 +1,34 @@
 // Handles playing sound out of speakers on server.
 
 module.exports = function(io) {
+
 	var repeat = require("repeat");
 	var Song = require ("./_song");
 	var playlist_manager = require("./playlist_manager");
     var audio_manager = require("./audio_manager");
 
 	// audio playing pipeline:
+	var Optional = require("optional");
 	var Speaker = require("speaker");
 	var Lame = require("lame");
-	var Wav = require("wav");
-	var Ogg = require("ogg");
-	var Vorbis = require("vorbis");
 	var Fs = require("fs");
 	var Stream = require("stream");
 	var assert = require("assert");
+	
+	// optional dependencies:
+	var Wav = Optional("wav");
+	var Ogg = Optional("ogg");
+	var Vorbis = Optional("vorbis");
+	
+    function warn(pkg,name) {
+        if (!pkg) {
+            console.log("Optional dependency missing: " + name);
+        }
+    }
+    
+    warn(Wav,"wav");
+    warn(Ogg,"ogg");
+    warn(Vorbis,"vorbis");
 	
 	var speaker;
 
@@ -77,7 +91,7 @@ module.exports = function(io) {
             // duplex stream
             decoder_read = decoder;
             decoder_write = decoder;
-        } else if (song.format === "ogg") {
+        } else if (song.format === "ogg" && Ogg && Vorbis) {
             decoder_write = new Stream.PassThrough();
             var od = new Ogg.Decoder();
             od.on("stream", (stream) => {
@@ -100,7 +114,7 @@ module.exports = function(io) {
                 vd.pipe(decoder_write);
             });
             decoder_read = od;
-        } else if (song.format === "wav") {
+        } else if (song.format === "wav" && Wav) {
            decoder = new Wav.Reader();
            decoder.on("format", (format) => {
                 console.log("Wav format: %j", format);
@@ -113,6 +127,8 @@ module.exports = function(io) {
             // duplex stream
             decoder_read = decoder;
             decoder_write = decoder;
+        } else {
+            throw "Cannot read file format: " + song.format;
         }
 
         speaker.on("pipe", () => {

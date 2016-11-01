@@ -14,6 +14,19 @@ module.exports = (upload, audio) => {
     var router = express.Router();
 
     var manager = require("../src/playlist_manager");
+    
+    var Optional = require("optional");
+    
+    // audio types recognized
+    var audio_default = "mp3";
+    var audio_optional = [audio_default];    
+        
+    if (Optional("wav")) {
+        audio_optional.push("wav");
+    }
+    if (Optional("ogg") && Optional("vorbis")) {
+        audio_optional.push("ogg");
+    }
 
     function apiError(res, code, text) {
         if (!text) {
@@ -110,7 +123,7 @@ module.exports = (upload, audio) => {
                     duration: true
                 }, function(err, metadata) {
                     if (err && ! shared.resErr) {
-                        if (extension != "wav") {
+                        if (extension != "wav" && audio_optional.indexOf("wav")>=0) {
                             // TODO: use avprobe to decide this is a wav file
                             console.log(err);
                             shared.resErr=true;
@@ -134,8 +147,8 @@ module.exports = (upload, audio) => {
                                     return apiError(res, 500);
                                 } else {
                                     s.type = "upload";
-                                    s.format = "mp3";
-                                    if (["ogg","wav","flac","mp4"].indexOf(extension) >= 0) {
+                                    s.format = audio_default;
+                                    if (audio_optional.indexOf(extension) >= 0) {
                                         // some other formats  supported
                                         // TODO: use avprobe to determine format, not extension.
                                         s.format=extension;
