@@ -27,8 +27,17 @@ module.exports = function(io) {
 		});
 	}
 
+	function seek(time) {
+		if (speaker) {
+			audio_manager.seek_time = time;
+			speaker.end();
+
+			return audio_manager.get_state();
+		}
+	}
+
 	//plays song with audio pipeline above
-    function play_file(song) {
+    function play_file(song, seekTime) {
         assert(song.path);
         var file = song.path;
         var stream = Fs.createReadStream(file);
@@ -36,15 +45,18 @@ module.exports = function(io) {
         var rate = 0;
         var transform = new Stream.Transform({
             transform: function (chunk, encoding, callback) {
-                this.push(chunk);
-                totalBytesSeen += chunk.length;
+				totalBytesSeen += chunk.length;
 
-                audio_manager.set_time_elapsed(totalBytesSeen / (4 * rate));
-                emitStatus(audio_manager.get_title(),
-                    audio_manager.get_state(),
-                    audio_manager.get_duration(),
-                    audio_manager.get_time_elapsed()
-                );
+				if (!seekTime || audio_manager.get_time_elapsed() >= seekTime) {
+					this.push(chunk);
+	                emitStatus(audio_manager.get_title(),
+	                    audio_manager.get_state(),
+	                    audio_manager.get_duration(),
+	                    audio_manager.get_time_elapsed()
+	                );
+				}
+
+				audio_manager.set_time_elapsed(totalBytesSeen / (4 * rate));
 
                 callback();
             }
@@ -128,7 +140,9 @@ module.exports = function(io) {
             audio_manager.set_time_elapsed(0);
             audio_manager.set_state("paused");
 
-            if (audio_manager.jump_index>=0) {
+			if (audio_manager.seek_time !== 0) {
+				play(song, audio_manager.seek_time);
+			} else if (audio_manager.jump_index>=0) {
                 playlist_manager.currentPlaylist(function (err,currentListId) {
                     playlist_manager.chooseSong(currentListId,audio_manager.jump_index, (err, s) => {
                         play(s);
@@ -146,8 +160,9 @@ module.exports = function(io) {
                     audio_manager.set_current(s);
                 });
             }
-            audio_manager.prev_flag = false;
+			audio_manager.seek_time = 0;
             audio_manager.jump_index = -1;
+			audio_manager.prev_flag = false;
             console.log("speaker finished");
         });
     }
@@ -192,17 +207,18 @@ module.exports = function(io) {
 	}
 
 	//takes song metadata, makes playable information for update below
-	function play(song) {
+	function play(song, seekTime) {
 		//copy song metadata into realized object:
-		audio_manager.current_song = song;
-        audio_manager.time_elapsed = 0;
+		audio_manager.set_current(song);
+        audio_manager.set_time_elapsed(seekTime ? 0 : seekTime);
+
 		//adjusts re object based on song type:
 		if (song.type == "empty") {
 			audio_manager.current_song.name = "Nothing Playing";
 		} else if (song.type == "upload") {
 			console.log("Now playing: " + song.name);
 			audio_manager.set_state("playing");
-			play_file(song);
+			play_file(song, seekTime);
 		}
 	}
 
@@ -232,7 +248,8 @@ module.exports = function(io) {
 		pause: pause,
 		next: next,
 		prev: prev,
-		jumpTo: jumpTo
+		jumpTo: jumpTo,
+		seek: seek
 	};
 
 	return module;

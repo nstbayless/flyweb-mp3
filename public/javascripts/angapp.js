@@ -6,6 +6,12 @@ app.controller("angCon", function ($scope) {
 
     socket.emit("updateRequest");
 
+    $("#progress-bar").click(function(e) {
+        socket.emit("seek", {
+            time: Math.floor(((e.pageX - $(this).offset().left) / $(this).width()) * $scope.status.duration)
+        });
+    });
+
     // jade input variables:
 
     $scope.list = {};

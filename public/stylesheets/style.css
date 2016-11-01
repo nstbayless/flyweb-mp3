@@ -79,7 +79,7 @@ footer {
 	display: inline-block;
 	vertical-align: middle;
 	width: 50%;
-	height: 5px;
+	height: 10px;
 	margin: 0 15px;
 	background-color: #fff;
 }
@@ -87,7 +87,7 @@ footer {
 #progress-bar-elapsed {
 	width: 0%;
 	max-width: 100%;
-	height: 5px;
+	height: 100%;
 	background-color: #8088eb;
 }
 

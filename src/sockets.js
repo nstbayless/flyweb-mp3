@@ -1,5 +1,8 @@
 module.exports = function(io, audio, playlistManager) {
     io.on('connection', function(socket) {
+        socket.on('seek', function(data) {
+            audio.seek(data.time);
+        });
 
         socket.on('updateRequest', function() {
             playlistManager.emitCurrentSong();

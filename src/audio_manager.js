@@ -5,6 +5,8 @@ audio_manager.current_song = null;
 audio_manager.time_elapsed = 0;
 audio_manager.play_state = 'paused';
 
+audio_manager.seek_time = 0;
+
 // when playback halts (e.g. user skips), prev flag indicate jump to previous track instead of next
 audio_manager.prev_flag = false;
 
