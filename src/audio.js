@@ -18,12 +18,12 @@ module.exports = function(io) {
 
 	var speaker;
 
-	function emitStatus(title, state, duration, time_elapsed) {
+	function emitStatus() {
 		io.sockets.emit("status", {
-			title: title,
-			state: state,
-			duration: duration,
-			time_elapsed: time_elapsed
+			title: audio_manager.get_title(),
+			state: audio_manager.get_state(),
+			duration: audio_manager.get_duration(),
+			time_elapsed: audio_manager.get_time_elapsed()
 		});
 	}
 
@@ -49,11 +49,7 @@ module.exports = function(io) {
 
 				if (!seekTime || audio_manager.get_time_elapsed() >= seekTime) {
 					this.push(chunk);
-	                emitStatus(audio_manager.get_title(),
-	                    audio_manager.get_state(),
-	                    audio_manager.get_duration(),
-	                    audio_manager.get_time_elapsed()
-	                );
+	                emitStatus();
 				}
 
 				audio_manager.set_time_elapsed(totalBytesSeen / (4 * rate));
@@ -210,7 +206,7 @@ module.exports = function(io) {
 	function play(song, seekTime) {
 		//copy song metadata into realized object:
 		audio_manager.set_current(song);
-        audio_manager.set_time_elapsed(seekTime ? 0 : seekTime);
+        audio_manager.set_time_elapsed(seekTime ? seekTime : 0);
 
 		//adjusts re object based on song type:
 		if (song.type == "empty") {

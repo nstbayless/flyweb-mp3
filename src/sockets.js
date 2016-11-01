@@ -7,6 +7,7 @@ module.exports = function(io, audio, playlistManager) {
         socket.on('updateRequest', function() {
             playlistManager.emitCurrentSong();
             playlistManager.emitList();
+            audio.emitStatus();
         });
 
         socket.on('pause', function() {
