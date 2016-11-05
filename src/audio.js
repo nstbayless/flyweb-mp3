@@ -14,22 +14,22 @@ module.exports = function(io) {
 	var Fs = require("fs");
 	var Stream = require("stream");
 	var assert = require("assert");
-	
+
 	// optional dependencies:
 	var Wav = Optional("wav");
 	var Ogg = Optional("ogg");
 	var Vorbis = Optional("vorbis");
-	
+
     function warn(pkg,name) {
         if (!pkg) {
             console.log("Optional dependency missing: " + name);
         }
     }
-    
+
     warn(Wav,"wav");
     warn(Ogg,"ogg");
     warn(Vorbis,"vorbis");
-	
+
 	var speaker;
 
 	function emitStatus() {
@@ -39,15 +39,6 @@ module.exports = function(io) {
 			duration: audio_manager.get_duration(),
 			time_elapsed: audio_manager.get_time_elapsed()
 		});
-	}
-
-	function seek(time) {
-		if (speaker) {
-			audio_manager.seek_time = time;
-			speaker.end();
-
-			return audio_manager.get_state();
-		}
 	}
 
 	//plays song with audio pipeline above
@@ -139,7 +130,7 @@ module.exports = function(io) {
             throw "Cannot read file format: " + song.format;
         }
 
-        speaker.on("pipe", () => {
+        speaker.on("open", () => {
             console.log("### PIPING ###");
             audio_manager.play_state = "playing";
         });
@@ -148,28 +139,16 @@ module.exports = function(io) {
         stream.pipe(decoder_read);
         decoder_write.pipe(transform).pipe(speaker);
 
-        speaker.on("finish", () => {
+        speaker.on("flush", () => {
             audio_manager.set_time_elapsed(0);
             audio_manager.set_state("paused");
 
-			if (audio_manager.seek_time !== 0) {
-				play(song, audio_manager.seek_time);
-			} else if (audio_manager.jump_index>=0) {
+			if (audio_manager.jump_index>=0) {
                 playlist_manager.currentPlaylist(function (err,currentListId) {
                     playlist_manager.chooseSong(currentListId,audio_manager.jump_index, (err, s) => {
                         play(s);
                         audio_manager.set_current(s);
                     });
-                });
-            } else if (!audio_manager.prev_flag) {
-                playlist_manager.nextSong((err, s) => {
-                    play(s);
-                    audio_manager.set_current(s);
-                });
-            } else {
-                playlist_manager.prevSong((err, s) => {
-                    play(s);
-                    audio_manager.set_current(s);
                 });
             }
 			audio_manager.seek_time = 0;
@@ -183,14 +162,27 @@ module.exports = function(io) {
         //TODO: listId ignored, multiple playlists not implemented
         audio_manager.jump_index= songIndex;
 
-        speaker.end();
+        speaker.cork();
         return audio_manager.play_state;
     }
+
+    function seek(time) {
+		if (speaker) {
+			audio_manager.seek_time = time;
+			speaker.cork();
+            play(audio_manager.current_song, audio_manager.seek_time);
+			return audio_manager.get_state();
+		}
+	}
 
     function prev() {
 		if (speaker) {
 			audio_manager.prev_flag = true;
-			speaker.end();
+			speaker.cork();
+            playlist_manager.prevSong((err, s) => {
+                play(s);
+                audio_manager.set_current(s);
+            });
 			return audio_manager.play_state;
 		}
 	}
@@ -198,7 +190,11 @@ module.exports = function(io) {
 	function next() {
 		if (speaker) {
 			audio_manager.prev_flag = false;
-			speaker.end();
+			speaker.cork();
+            playlist_manager.nextSong((err, s) => {
+                play(s);
+                audio_manager.set_current(s);
+            });
 			return audio_manager.play_state;
 		}
 	}
@@ -252,7 +248,7 @@ module.exports = function(io) {
 		}
 	}
 
-	repeat(check_start).every(2000, "ms").start.now();
+	repeat(check_start).every(500, "ms").start.now();
 
 	var module = {
 		emitStatus: emitStatus,
