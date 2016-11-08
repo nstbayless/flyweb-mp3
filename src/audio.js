@@ -222,7 +222,6 @@ module.exports = function(io) {
 	function play(song, seekTime) {
 		//copy song metadata into realized object:
 		audio_manager.set_current(song);
-        audio_manager.set_time_elapsed(seekTime ? seekTime : 0);
 
 		//adjusts re object based on song type:
 		if (song.type == "empty") {

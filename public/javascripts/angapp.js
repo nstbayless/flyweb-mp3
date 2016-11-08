@@ -44,6 +44,7 @@ app.controller("angCon", function ($scope) {
         percent = percent < 0 ? 0 : percent;
         percent = percent > 1 ? 1 : percent;
 
+        $scope.status.time_elapsed = Math.floor($scope.status.duration * percent);
         $scope.progress_style.width = percent * 100 + "%";
         $("#progress-bar-handle").offset({
             top: bar.offset().top + bar.height() / 2 - handle.height() / 2,
