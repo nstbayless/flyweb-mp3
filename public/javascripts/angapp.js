@@ -1,16 +1,56 @@
+/* jslint browser: true */
 /* globals document, $, Sortable, angular, io, list, currentListId, currentSongIndex */
 var app = angular.module("angApp", []);
 var socket = io();
 
 app.controller("angCon", function ($scope) {
+    var dragEnabled = false;
+
+    $("#progress-bar-handle").mousedown(function(e) {
+        e.preventDefault();
+        dragEnabled = true;
+    });
+
+    $("body").mouseup(function(e) {
+        if (dragEnabled) {
+            var bar = $("#progress-bar");
+            
+            socket.emit("seek", {
+                time: Math.floor(((e.pageX - bar.offset().left) / bar.width()) * $scope.status.duration)
+            });
+        }
+
+        dragEnabled = false;
+    });
+
+    $("body").mousemove(function(e) {
+        if (dragEnabled) {
+            var bar = $("#progress-bar");
+            var percent = (e.pageX - bar.offset().left) / bar.width();
+            percent = percent < 0 ? 0 : percent;
+            percent = percent > 1 ? 1 : percent;
+
+            $scope.updateProgress(percent);
+        }
+    });
+
+    $(window).resize(function() {
+        $scope.updateProgress($scope.status.time_elapsed / $scope.status.duration);
+    });
+
+    $scope.updateProgress = function(percent) {
+        var bar = $("#progress-bar");
+        var handle = $("#progress-bar-handle");
+
+        $scope.progress_style.width = percent * 100 + "%";
+        $("#progress-bar-handle").offset({
+            top: bar.offset().top + bar.height() / 2 - handle.height() / 2,
+            left: bar.offset().left - handle.width() / 2 + bar.width() * percent
+        });
+        $scope.$apply();
+    };
 
     socket.emit("updateRequest");
-
-    $("#progress-bar").click(function(e) {
-        socket.emit("seek", {
-            time: Math.floor(((e.pageX - $(this).offset().left) / $(this).width()) * $scope.status.duration)
-        });
-    });
 
     // jade input variables:
 
@@ -216,7 +256,7 @@ app.controller("angCon", function ($scope) {
     // live update status for current song
     socket.on("status", function(status) {
         var prog_percent = status.time_elapsed / status.duration;
-        prog_percent = isNaN(prog_percent) ? 0 : prog_percent * 100;
+        prog_percent = isNaN(prog_percent) ? 0 : prog_percent;
 
         if (status.state === "paused") {
             $("#controls-play").removeClass("glyphicon-pause").addClass("glyphicon-play");
@@ -225,8 +265,9 @@ app.controller("angCon", function ($scope) {
         }
 
         $scope.status = status;
-        $scope.progress_style.width = prog_percent + "%";
-        $scope.$apply();
+        if (!dragEnabled) {
+            $scope.updateProgress(prog_percent);
+        }
     });
 
     // live update playlist
