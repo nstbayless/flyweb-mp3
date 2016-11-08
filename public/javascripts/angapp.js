@@ -27,8 +27,6 @@ app.controller("angCon", function ($scope) {
         if (dragEnabled) {
             var bar = $("#progress-bar");
             var percent = (e.pageX - bar.offset().left) / bar.width();
-            percent = percent < 0 ? 0 : percent;
-            percent = percent > 1 ? 1 : percent;
 
             $scope.updateProgress(percent);
         }
@@ -41,6 +39,10 @@ app.controller("angCon", function ($scope) {
     $scope.updateProgress = function(percent) {
         var bar = $("#progress-bar");
         var handle = $("#progress-bar-handle");
+
+        percent = isNaN(percent) ? 0 : percent;
+        percent = percent < 0 ? 0 : percent;
+        percent = percent > 1 ? 1 : percent;
 
         $scope.progress_style.width = percent * 100 + "%";
         $("#progress-bar-handle").offset({
@@ -255,18 +257,18 @@ app.controller("angCon", function ($scope) {
 
     // live update status for current song
     socket.on("status", function(status) {
-        var prog_percent = status.time_elapsed / status.duration;
-        prog_percent = isNaN(prog_percent) ? 0 : prog_percent;
-
         if (status.state === "paused") {
             $("#controls-play").removeClass("glyphicon-pause").addClass("glyphicon-play");
         } else if (status.state === "playing") {
             $("#controls-play").removeClass("glyphicon-play").addClass("glyphicon-pause");
         }
 
+        status.time_elapsed = status.time_elapsed > status.duration ? status.duration : status.time_elapsed;
+
         $scope.status = status;
+
         if (!dragEnabled) {
-            $scope.updateProgress(prog_percent);
+            $scope.updateProgress(status.time_elapsed / status.duration);
         }
     });
 
