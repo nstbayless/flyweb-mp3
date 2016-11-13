@@ -1,29 +1,36 @@
-module.exports = function(io, audio, playlistManager) {
+var PlaylistManager = require('./playlist_manager');
+var Audio = require('./audio');
+
+function setIo(io) {
     io.on('connection', function(socket) {
-        socket.on('seek', function(data) {
-            audio.seek(data.time);
-        });
+            socket.on('seek', function(data) {
+                Audio.seek(data.time);
+            });
 
-        socket.on('updateRequest', function() {
-            playlistManager.emitCurrentSong();
-            playlistManager.emitList();
-            audio.emitStatus();
-        });
+            socket.on('updateRequest', function() {
+                PlaylistManager.emitCurrentSong();
+                PlaylistManager.emitList();
+                Audio.emitStatus();
+            });
 
-        socket.on('pause', function() {
-            audio.pause();
-        });
+            socket.on('pause', function() {
+                Audio.pause();
+            });
 
-        socket.on('prev', function() {
-            audio.prev();
-        });
+            socket.on('prev', function() {
+                Audio.prev();
+            });
 
-        socket.on('next', function() {
-            audio.next();
-        });
+            socket.on('next', function() {
+                Audio.next();
+            });
 
-        socket.on('jump', function(spec) {
-            audio.jumpTo(spec.listId, spec.songIndex);
+            socket.on('jump', function(spec) {
+                Audio.jumpTo(spec.listId, spec.songIndex);
+            });
         });
-    });
+}
+    
+module.exports = {
+    setIo:setIo
 };

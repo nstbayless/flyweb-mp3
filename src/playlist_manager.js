@@ -332,7 +332,7 @@ playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
  * Sets the socket IO object the playlist will emit updates on.
  * @param {socketIO} io: the IO object for the sockets.
  */
-playlist_manager.setSocketIO = function(io) {
+playlist_manager.setIo = function(io) {
     playlist_manager.io=io;
 };
 
