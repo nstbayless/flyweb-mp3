@@ -6,7 +6,7 @@ block content
     div.q
         h1 Add to #{list.name} from a website
         form(method="post" onSubmit="window.location='/p/#{list.id}'" action="/api/#{list.id}/songs/url")
-            p Video URL:
+            p Video URL (YouTube, Vimeo, and hundreds of other sites supported):
             input(type="text" name="url")
             input(type="hidden" name="redirect" value="/p/#{list.id}")
             input(type="submit" value="Submit")
