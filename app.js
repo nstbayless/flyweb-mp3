@@ -15,12 +15,15 @@ var app = express();
 var io = require('socket.io')();
 app.io = io;
 
-var audio = require('./src/audio')(io);
+var audio = require('./src/audio');
+audio.setIo(io);
+audio.startLoop();
 
 var playlistManager = require('./src/playlist_manager');
-playlistManager.setSocketIO(io);
+playlistManager.setIo(io);
 
-require('./src/sockets')(io, audio, playlistManager);
+var Sockets = require('./src/sockets');
+Sockets.setIo(io);
 
 // multer
 app.upload = upload;

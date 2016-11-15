@@ -1,16 +1,75 @@
+/* jslint browser: true */
 /* globals document, $, Sortable, angular, io, list, currentListId, currentSongIndex */
 var app = angular.module("angApp", []);
 var socket = io();
 
 app.controller("angCon", function ($scope) {
+    var dragEnabled = false;
+    var touchLastX;
+
+    $("#progress-bar-handle").bind("mousedown touchstart", function(e) {
+        e.preventDefault();
+        dragEnabled = true;
+    });
+
+    $("body").bind("mouseup touchend", function(e) {
+        if (dragEnabled) {
+            var bar = $("#progress-bar");
+            var x;
+
+            if (e.type === "mouseup") {
+                x = e.pageX;
+            } else if (e.type === "touchend") {
+                x = touchLastX;
+            }
+
+            socket.emit("seek", {
+                time: Math.floor(((x - bar.offset().left) / bar.width()) * $scope.status.duration)
+            });
+
+            dragEnabled = false;
+        }
+    });
+
+    $("body").bind("mousemove touchmove", function(e) {
+        if (dragEnabled) {
+            var bar = $("#progress-bar");
+            var x, percent;
+
+            if (e.type === "mousemove") {
+                x = e.pageX;
+            } else if (e.type === "touchmove") {
+                x = e.originalEvent.touches[0].pageX;
+                touchLastX = x;
+            }
+            
+            percent = (x - bar.offset().left) / bar.width();
+            $scope.updateProgress(percent);
+        }
+    });
+
+    $(window).resize(function() {
+        $scope.updateProgress($scope.status.time_elapsed / $scope.status.duration);
+    });
+
+    $scope.updateProgress = function(percent) {
+        var bar = $("#progress-bar");
+        var handle = $("#progress-bar-handle");
+
+        percent = isNaN(percent) ? 0 : percent;
+        percent = percent < 0 ? 0 : percent;
+        percent = percent > 1 ? 1 : percent;
+
+        $scope.status.time_elapsed = Math.floor($scope.status.duration * percent);
+        $scope.progress_style.width = percent * 100 + "%";
+        $("#progress-bar-handle").offset({
+            top: bar.offset().top + bar.height() / 2 - handle.height() / 2,
+            left: bar.offset().left - handle.width() / 2 + bar.width() * percent
+        });
+        $scope.$apply();
+    };
 
     socket.emit("updateRequest");
-
-    $("#progress-bar").click(function(e) {
-        socket.emit("seek", {
-            time: Math.floor(((e.pageX - $(this).offset().left) / $(this).width()) * $scope.status.duration)
-        });
-    });
 
     // jade input variables:
 
@@ -215,18 +274,18 @@ app.controller("angCon", function ($scope) {
 
     // live update status for current song
     socket.on("status", function(status) {
-        var prog_percent = status.time_elapsed / status.duration;
-        prog_percent = isNaN(prog_percent) ? 0 : prog_percent * 100;
-
         if (status.state === "paused") {
             $("#controls-play").removeClass("glyphicon-pause").addClass("glyphicon-play");
         } else if (status.state === "playing") {
             $("#controls-play").removeClass("glyphicon-play").addClass("glyphicon-pause");
         }
 
+        status.time_elapsed = status.time_elapsed > status.duration ? status.duration : status.time_elapsed;
         $scope.status = status;
-        $scope.progress_style.width = prog_percent + "%";
-        $scope.$apply();
+
+        if (!dragEnabled) {
+            $scope.updateProgress(status.time_elapsed / status.duration);
+        }
     });
 
     // live update playlist
