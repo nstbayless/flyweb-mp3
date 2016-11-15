@@ -31,6 +31,7 @@ warn(Ogg,"ogg");
 warn(Vorbis,"vorbis");
 
 var speaker;
+var bitGate;
 
 function emitStatus() {
 	io.sockets.emit("status", {
@@ -44,8 +45,7 @@ function emitStatus() {
 function seek(time) {
 	if (speaker) {
 		audio_manager.seek_time = time;
-		speaker.end();
-
+    	endMusic();
 		return audio_manager.get_state();
 	}
 }
@@ -57,17 +57,15 @@ function play_file(song, seekTime) {
     var stream = Fs.createReadStream(file);
     var totalBytesSeen = 0;
     var rate = 0;
-    var transform = new Stream.Transform({
+
+    bitGate = new Stream.Transform({
         transform: function (chunk, encoding, callback) {
 			totalBytesSeen += chunk.length;
-
 			if (!seekTime || audio_manager.get_time_elapsed() >= seekTime) {
 				this.push(chunk);
                 emitStatus();
 			}
-
 			audio_manager.set_time_elapsed(totalBytesSeen / (4 * rate));
-
             callback();
         }
     });
@@ -82,7 +80,7 @@ function play_file(song, seekTime) {
     speaker = new Speaker({
         channels: 2,
         bitDepth: 16,
-        sampleRate: 10
+        sampleRate: 0
     });
 
     //TODO: refactor decoder picking into its own function
@@ -146,12 +144,11 @@ function play_file(song, seekTime) {
 
     //stream = stream.pipe(new Throttle(44100));
     stream.pipe(decoder_read);
-    decoder_write.pipe(transform).pipe(speaker);
+    decoder_write.pipe(bitGate).pipe(speaker);
 
-    speaker.on("finish", () => {
+    bitGate.on("finish", () => {
         audio_manager.set_time_elapsed(0);
         audio_manager.set_state("paused");
-
 		if (audio_manager.seek_time !== 0) {
 			play(song, audio_manager.seek_time);
 		} else if (audio_manager.jump_index>=0) {
@@ -182,15 +179,14 @@ function play_file(song, seekTime) {
 function jumpTo(listId,songIndex) {
     //TODO: listId ignored, multiple playlists not implemented
     audio_manager.jump_index= songIndex;
-
-    speaker.end();
+    endMusic();
     return audio_manager.play_state;
 }
 
 function prev() {
 	if (speaker) {
 		audio_manager.prev_flag = true;
-		speaker.end();
+		endMusic();
 		return audio_manager.play_state;
 	}
 }
@@ -198,7 +194,7 @@ function prev() {
 function next() {
 	if (speaker) {
 		audio_manager.prev_flag = false;
-		speaker.end();
+		endMusic();
 		return audio_manager.play_state;
 	}
 }
@@ -208,12 +204,11 @@ function pause() {
 	if (speaker) {
 		if (audio_manager.is_paused()) {
 			audio_manager.set_state("playing");
-			speaker.uncork();
+			bitGate.uncork();
 		} else if (audio_manager.is_playing()) {
 			audio_manager.set_state("paused");
-			speaker.cork();
+			bitGate.cork();
 		}
-
 		return audio_manager.play_state;
 	}
 }
@@ -249,6 +244,11 @@ function checkStart() {
 		}
 
 	}
+}
+
+function endMusic() {
+    speaker.cork();
+    bitGate.end();
 }
 
 // sets IO object for broadcasting
