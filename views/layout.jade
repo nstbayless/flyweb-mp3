@@ -20,17 +20,19 @@ html(ng-app="angApp")
                 var currentListId = "#{currentListId}";
     body(ng-controller="angCon")
         block body
-        header
-            block header
-            section#logo
-                block logo
-                a(href="/") #{title}
-        div#content
-            block content
-            if (list)
-                div#fab
-                    block fab
-                    a#fab-add(href="/add/#{list.id}")
+        div#main
+            block main
+            div#nav
+                block nav
+                section#logo
+                    block logo
+                    a(href="/") #{title}
+            div#content
+                block content
+                if (list)
+                    div#fab
+                        block fab
+                        a#fab-add(href="/add/#{list.id}")
         footer
             block footer
             div#player-song
