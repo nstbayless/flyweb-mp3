@@ -5,29 +5,45 @@ var socket = io();
 
 app.controller("angCon", function ($scope) {
     var dragEnabled = false;
+    var touchLastX;
 
-    $("#progress-bar-handle").mousedown(function(e) {
+    $("#progress-bar-handle").bind("mousedown touchstart", function(e) {
         e.preventDefault();
         dragEnabled = true;
     });
 
-    $("body").mouseup(function(e) {
+    $("body").bind("mouseup touchend", function(e) {
         if (dragEnabled) {
             var bar = $("#progress-bar");
-            
-            socket.emit("seek", {
-                time: Math.floor(((e.pageX - bar.offset().left) / bar.width()) * $scope.status.duration)
-            });
-        }
+            var x;
 
-        dragEnabled = false;
+            if (e.type === "mouseup") {
+                x = e.pageX;
+            } else if (e.type === "touchend") {
+                x = touchLastX;
+            }
+
+            socket.emit("seek", {
+                time: Math.floor(((x - bar.offset().left) / bar.width()) * $scope.status.duration)
+            });
+
+            dragEnabled = false;
+        }
     });
 
-    $("body").mousemove(function(e) {
+    $("body").bind("mousemove touchmove", function(e) {
         if (dragEnabled) {
             var bar = $("#progress-bar");
-            var percent = (e.pageX - bar.offset().left) / bar.width();
+            var x, percent;
 
+            if (e.type === "mousemove") {
+                x = e.pageX;
+            } else if (e.type === "touchmove") {
+                x = e.originalEvent.touches[0].pageX;
+                touchLastX = x;
+            }
+            
+            percent = (x - bar.offset().left) / bar.width();
             $scope.updateProgress(percent);
         }
     });
@@ -265,7 +281,6 @@ app.controller("angCon", function ($scope) {
         }
 
         status.time_elapsed = status.time_elapsed > status.duration ? status.duration : status.time_elapsed;
-
         $scope.status = status;
 
         if (!dragEnabled) {
