@@ -147,6 +147,8 @@ function play_file(song, seekTime) {
     decoder_write.pipe(bitGate).pipe(speaker);
 
     bitGate.on("finish", () => {
+        speaker.cork();
+        speaker = null;
         audio_manager.set_time_elapsed(0);
         audio_manager.set_state("paused");
 		if (audio_manager.seek_time !== 0) {
@@ -215,13 +217,12 @@ function pause() {
 
 //takes song metadata, makes playable information for update below
 function play(song, seekTime) {
-	//copy song metadata into realized object:
-	audio_manager.set_current(song);
-
 	//adjusts re object based on song type:
-	if (song.type == "empty") {
+	if (!song || song.type == "empty") {
+        audio_manager.set_current(Song.Song("-1"));
 		audio_manager.current_song.name = "Nothing Playing";
 	} else if (song.type == "upload") {
+        audio_manager.set_current(song);
 		console.log("Now playing: " + song.name);
 		audio_manager.set_state("playing");
 		play_file(song, seekTime);
