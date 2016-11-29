@@ -6,20 +6,23 @@ var Playlist = require("./_playlist");
 var Song = require("./_song");
 
 var START_OF_LIST = -1;
-var playlist_manager = {};
-playlist_manager.queue = Playlist.Playlist("q");
-playlist_manager.queue.name = "Play Queue";
-playlist_manager.currentList = playlist_manager.queue;
-playlist_manager.currentListId = "q";
-playlist_manager.songIndex = START_OF_LIST;
-playlist_manager.songMap = {};
-playlist_manager.listMap = {
-    "q": playlist_manager.queue
-};
-playlist_manager.nextSongId = 0;
 
-// sockets
-playlist_manager.io = {};
+function PlaylistManager() {
+    this.queue = Playlist.Playlist("q");
+    this.queue.name = "Play Queue";
+    this.currentList = this.queue;
+    this.currentListId = "q";
+    this.songIndex = START_OF_LIST;
+    this.songMap = {};
+    this.listMap = {
+        "q": this.queue
+    };
+    this.nextSongId = 0;
+
+    // sockets
+    this.io = {};
+}
+
 
 /**
  * Get the specified playlist.
@@ -29,13 +32,15 @@ playlist_manager.io = {};
  *          {Object} err: the error if exists
  *          {Object} result: the playlist object
  */
-playlist_manager.getPlaylist = function(list, callback) {
-    var l = playlist_manager.queue;
-    if (list in playlist_manager.listMap) {
-        l = playlist_manager.listMap[list];
-    } else {
+PlaylistManager.prototype.getPlaylist = function(list, callback) {
+    var l = this.queue;
+    if (list in this.listMap) {
+        l = this.listMap[list];
+    }
+    else {
         // TODO: read from db
     }
+
     if (callback) {
         callback(null, l);
     }
@@ -48,9 +53,9 @@ playlist_manager.getPlaylist = function(list, callback) {
  *          {Object} err: the error if exists
  *          {String} result: the playlist ID
  */
-playlist_manager.currentPlaylist = function(callback) {
+PlaylistManager.prototype.currentPlaylist = function(callback) {
     if (callback) {
-        callback(null, playlist_manager.currentList.id);
+        callback(null, this.currentList.id);
     }
 };
 
@@ -61,9 +66,9 @@ playlist_manager.currentPlaylist = function(callback) {
  *          {Object} err: the error if exists
             {Number} result: the song index
  */
-playlist_manager.currentSongIndex = function(callback) {
+PlaylistManager.prototype.currentSongIndex = function(callback) {
     if (callback) {
-        callback(null, playlist_manager.songIndex);
+        callback(null, this.songIndex);
     }
 };
 
@@ -72,9 +77,9 @@ playlist_manager.currentSongIndex = function(callback) {
  *
  * @return {Number}: the song ID
  */
-playlist_manager.generateSongId = function() {
-    playlist_manager.nextSongId++;
-    return playlist_manager.nextSongId;
+PlaylistManager.prototype.generateSongId = function() {
+    this.nextSongId++;
+    return this.nextSongId;
 };
 
 /**
@@ -85,13 +90,15 @@ playlist_manager.generateSongId = function() {
  *          {Object} err: the error if exists
  *          {Song} result: the song object
  */
-playlist_manager.getSong = function(songId, callback) {
+PlaylistManager.prototype.getSong = function(songId, callback) {
     var s = null;
-    if (songId in playlist_manager.songMap) {
-        s = playlist_manager.songMap[songId];
-    } else {
+    if (songId in this.songMap) {
+        s = this.songMap[songId];
+    }
+    else {
         // TODO: read from db
     }
+
     if (callback) {
         callback(null, s);
     }
@@ -107,19 +114,19 @@ playlist_manager.getSong = function(songId, callback) {
  *          {Object} err: the error if exists
  *          {Song} result: the song to be played
  */
-playlist_manager.chooseSong = function (listId, songIndex, callback) {
-    if (songIndex < 0 || songIndex >= playlist_manager.currentList.songIds.length) {
+PlaylistManager.prototype.chooseSong = function (listId, songIndex, callback) {
+    if (songIndex < 0 || songIndex >= this.currentList.songIds.length) {
         songIndex = 0;
     }
 
-    if (playlist_manager.currentListId !== listId) {
+    if (this.currentListId !== listId) {
         // TODO: support for multiple playlists
     }
 
-    playlist_manager.songIndex = songIndex;
+    this.songIndex = songIndex;
     // alert clients to track change
-    playlist_manager.emitCurrentSong();
-    playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(err, s) {
+    this.emitCurrentSong();
+    this.getSong(this.currentList.songIds[this.songIndex], function(err, s) {
         if (callback) {
             callback(null, s);
         }
@@ -132,14 +139,14 @@ playlist_manager.chooseSong = function (listId, songIndex, callback) {
  *          {Object} err: the error if exists
  *          {Song} result: the next song to be played
  */
-playlist_manager.nextSong = function(callback) {
-    playlist_manager.songIndex++;
-    if (playlist_manager.songIndex >= playlist_manager.currentList.songIds.length) {
-        playlist_manager.songIndex = 0;
+PlaylistManager.prototype.nextSong = function(callback) {
+    this.songIndex++;
+    if (this.songIndex >= this.currentList.songIds.length) {
+        this.songIndex = 0;
     }
     // alert clients to track change
-    playlist_manager.emitCurrentSong();
-    playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(err, s) {
+    this.emitCurrentSong();
+    this.getSong(this.currentList.songIds[this.songIndex], function(err, s) {
         if (callback) {
             callback(null, s);
         }
@@ -152,14 +159,14 @@ playlist_manager.nextSong = function(callback) {
  *          {Object} err: the error if exists
  *          {Song} result: the previous song to be played
  */
-playlist_manager.prevSong = function(callback) {
-    playlist_manager.songIndex--;
-    if (playlist_manager.songIndex < 0) {
-        playlist_manager.songIndex = playlist_manager.currentList.songIds.length - 1;
+PlaylistManager.prototype.prevSong = function(callback) {
+    this.songIndex--;
+    if (this.songIndex < 0) {
+        this.songIndex = this.currentList.songIds.length - 1;
     }
     // alert clients to track change
-    playlist_manager.emitCurrentSong();
-    playlist_manager.getSong(playlist_manager.currentList.songIds[playlist_manager.songIndex], function(err, s) {
+    this.emitCurrentSong();
+    this.getSong(this.currentList.songIds[this.songIndex], function(err, s) {
         if (callback) {
             callback(null, s);
         }
@@ -172,27 +179,27 @@ playlist_manager.prevSong = function(callback) {
  * @param {Number} songId: the song ID
  * @param {Function} callback(err): the callback function, with error if exists
  */
-playlist_manager.addSong = function(list, songId, callback) {
+PlaylistManager.prototype.addSong = function(list, songId, callback) {
     // get the list object to add to
     var l = null;
     if (list === "q") {
-        l = playlist_manager.queue;
-        playlist_manager.getSong(songId, function(err, s) {
+        l = this.queue;
+        this.getSong(songId, function(err, s) {
             Playlist.addSong(l, s);
             Playlist.addSongId(l, songId);
             // alert clients about update
-            playlist_manager.emitList(list,l);
-        });
+            this.emitList(list, l);
+        }.bind(this));
     }
     else {
-        playlist_manager.getPlaylist(list, function(err, l) {
-            playlist_manager.getSong(songId, function(err, s) {
+        this.getPlaylist(list, function(err, l) {
+            this.getSong(songId, function(err, s) {
                 Playlist.addSong(l, s);
                 Playlist.addSongId(l, songId);
                 // alert clients about update
-                playlist_manager.emitList(list,l);
-            });
-        });
+                this.emitList(list, l);
+            }.bind(this));
+        }.bind(this));
     }
 
     if (callback) {
@@ -208,13 +215,13 @@ playlist_manager.addSong = function(list, songId, callback) {
  {Number} id: the song ID
  {Object} err: error produced
  */
-playlist_manager.createSong = function(list, path, callback) {
-    var id = playlist_manager.generateSongId();
+PlaylistManager.prototype.createSong = function(list, path, callback) {
+    var id = this.generateSongId();
     var s = Song.Song(id);
     s.path = path;
     s.type = "upload";
-    playlist_manager.songMap[id] = s;
-    playlist_manager.addSong(list, id, function() {
+    this.songMap[id] = s;
+    this.addSong(list, id, function() {
         if (callback) {
             callback(id, false);
         }
@@ -229,26 +236,26 @@ playlist_manager.createSong = function(list, path, callback) {
  *          {Object} err: the error if exists
  *          {Boolean} removedCurrentSong: whether the currently playing song was removed
  */
-playlist_manager.removeSong = function (listId, songIndex, callback) {
-    playlist_manager.getPlaylist(listId, function (err, l) {
+PlaylistManager.prototype.removeSong = function (listId, songIndex, callback) {
+    this.getPlaylist(listId, function (err, l) {
         if (songIndex < 0 || songIndex >= l.songIds.length) {
             callback("Index out of range", false);
         }
 
         // last (bottom) song in list or only song
-        var isCurrentSong = (songIndex === playlist_manager.songIndex);
+        var isCurrentSong = (songIndex === this.songIndex);
 
         // remove song
         l.songIds.splice(songIndex, 1);
         l.songs.splice(songIndex, 1);
         
         // alert clients to change in playlist
-        playlist_manager.emitList(listId,l);
+        this.emitList(listId, l);
 
         // move current song if necessary:
-        if (songIndex < playlist_manager.songIndex) {
-            playlist_manager.songIndex--;
-            playlist_manager.emitCurrentSong();
+        if (songIndex < this.songIndex) {
+            this.songIndex--;
+            this.emitCurrentSong();
         }
 
         // if playing song was removed, report this
@@ -258,7 +265,7 @@ playlist_manager.removeSong = function (listId, songIndex, callback) {
         else if (callback) {
             callback(null, false);
         }
-    });
+    }.bind(this));
 };
 
 /**
@@ -267,18 +274,18 @@ playlist_manager.removeSong = function (listId, songIndex, callback) {
  * @param {Array} songIds: a list of song IDs
  * @param {Function} callback(err): the callback function, with error if exists
  */
-playlist_manager.replaceList = function(list, songIds, callback) {
-    playlist_manager.getPlaylist(list, function(err, l) {
+PlaylistManager.prototype.replaceList = function(list, songIds, callback) {
+    this.getPlaylist(list, function(err, l) {
         l.songIds = songIds;
         l.songs = [];
         for (var i = 0; i < l.songIds.length; i++) {
-            l.songs.push(playlist_manager.songMap[songIds[i]]);
+            l.songs.push(this.songMap[songIds[i]]);
         }
-        playlist_manager.emitList(list,l);
+        this.emitList(list, l);
         if (callback) {
             callback(null);
         }
-    });
+    }.bind(this));
 };
 
 /**
@@ -288,8 +295,8 @@ playlist_manager.replaceList = function(list, songIds, callback) {
  * @param {Number} newIndex: the new index of the song in the list
  * @param {Function} callback(err): the callback function, with error if exists
  */
-playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
-    playlist_manager.getPlaylist(list, function(err, l) {
+PlaylistManager.prototype.moveSong = function(list, oldIndex, newIndex, callback) {
+    this.getPlaylist(list, function(err, l) {
         if (oldIndex < 0 || oldIndex >= l.songIds.length ||
             newIndex < 0 || newIndex >= l.songIds.length) {
             callback("Index out of range");
@@ -312,37 +319,40 @@ playlist_manager.moveSong = function(list, oldIndex, newIndex, callback) {
         l.songs.splice(newIndex, 0, song[0]);
         
         // update current song index if current song was moved
-        var minIndex = Math.min(oldIndex,newIndex);
-        var maxIndex = Math.max(oldIndex,newIndex);
-        if (playlist_manager.songIndex >= minIndex && playlist_manager.songIndex<=maxIndex) {
+        var minIndex = Math.min(oldIndex, newIndex);
+        var maxIndex = Math.max(oldIndex, newIndex);
+        if (this.songIndex >= minIndex && this.songIndex <= maxIndex) {
             // new value of songIndex depends on nature of move
-            if (playlist_manager.songIndex == oldIndex) {
-                playlist_manager.songIndex = newIndex;
-            } else if (newIndex<oldIndex) {
-                playlist_manager.songIndex++;
-            } else if (newIndex>oldIndex) {
-                playlist_manager.songIndex--;
-            } else {
+            if (this.songIndex == oldIndex) {
+                this.songIndex = newIndex;
+            }
+            else if (newIndex < oldIndex) {
+                this.songIndex++;
+            }
+            else if (newIndex > oldIndex) {
+                this.songIndex--;
+            }
+            else {
                 assert(false);
             }
         }
         
         // alert clients to change in list
-        playlist_manager.emitList(list,l);
-        playlist_manager.emitCurrentSong();
+        this.emitList(list, l);
+        this.emitCurrentSong();
         
         if (callback) {
             callback(null);
         }
-    });
+    }.bind(this));
 };
 
 /**
  * Sets the socket IO object the playlist will emit updates on.
  * @param {socketIO} io: the IO object for the sockets.
  */
-playlist_manager.setIo = function(io) {
-    playlist_manager.io=io;
+PlaylistManager.prototype.setIo = function(io) {
+    this.io = io;
 };
 
 /** 
@@ -351,19 +361,19 @@ playlist_manager.setIo = function(io) {
  * @param(optional) {playlist} list: the playlist object to emit
  *                                   (If not provided, it will be retrieved)
 */
-playlist_manager.emitList = function(listId, list) {
-    var _f_emit = function (listId,list) {
+PlaylistManager.prototype.emitList = function(listId, list) {
+    var _f_emit = function (listId, list) {
         // TODO: only emit to clients who are subscribed to the given playlist
-        playlist_manager.io.sockets.emit("playlist", {
+        this.io.sockets.emit("playlist", {
             //TODO: timestamp
 	        listId: listId,
             list: list
         });
-    };
+    }.bind(this);
     if (!list) {
-        playlist_manager.getPlaylist(listId, function (err, list) {
+        this.getPlaylist(listId, function (err, list) {
             _f_emit(listId, list);
-        });
+        }.bind(this));
     }
     else {
         _f_emit(listId, list);
@@ -373,12 +383,12 @@ playlist_manager.emitList = function(listId, list) {
 /** 
  * Emit updates for the currently playing track
 */
-playlist_manager.emitCurrentSong = function() {
-    playlist_manager.currentPlaylist(function (err,listId) {
-        playlist_manager.currentSongIndex(function (err,songIndex) {
-            playlist_manager.io.sockets.emit("track", {listId:listId,songIndex:songIndex});
-        });
-    });
+PlaylistManager.prototype.emitCurrentSong = function() {
+    this.currentPlaylist(function (err, listId) {
+        this.currentSongIndex(function (err, songIndex) {
+            this.io.sockets.emit("track", {listId:listId, songIndex:songIndex});
+        }.bind(this));
+    }.bind(this));
 };
 
-module.exports = playlist_manager;
+module.exports = new PlaylistManager();
