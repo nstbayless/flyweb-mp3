@@ -220,7 +220,8 @@ function play(song, seekTime) {
 	//adjusts re object based on song type:
 	if (!song || song.type == "empty") {
         audio_manager.set_current(Song.Song("-1"));
-		audio_manager.current_song.name = "Nothing Playing";
+		audio_manager.current_song.name = "No Song";
+        emitStatus();
 	} else if (song.type == "upload") {
         audio_manager.set_current(song);
 		console.log("Now playing: " + song.name);
