@@ -10,14 +10,8 @@ html(ng-app="angApp")
         script(src="/static/js/jquery.form.min.js" charset="utf-8")
         script(src="/static/js/angular.min.js" charset="utf-8")
         script(src="/static/js/socket.io.js" charset="utf-8")
+        script(src="/static/js/sortable.js" charset="utf-8")
         script(src="/javascripts/angapp.js")
-        if (list)
-            script.
-                var list = !{JSON.stringify(list)};
-        if (currentSongIndex!==undefined)
-            script.
-                var currentSongIndex = #{currentSongIndex};
-                var currentListId = "#{currentListId}";
     body(ng-controller="angCon")
         block body
         div#main
@@ -29,10 +23,9 @@ html(ng-app="angApp")
                     a(href="/") #{title}
             div#content
                 block content
-                if (list)
-                    div#fab
-                        block fab
-                        a#fab-add(href="/add/#{list.id}")
+                div#fab
+                    block fab
+                    a#fab-add(href="/add")
         footer
             block footer
             div#player-song
@@ -45,5 +38,5 @@ html(ng-app="angApp")
                 span#progress-elapsed {{pretty_time(status.time_elapsed)}}
                 div#progress-bar
                     div#progress-bar-elapsed(ng-style="progress_style")
-                    div#progress-bar-handle
+                    div#progress-bar-handle(ng-style="handle_style")
                 span#progress-total {{pretty_time(status.duration)}}
