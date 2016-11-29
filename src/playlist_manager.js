@@ -16,7 +16,7 @@ playlist_manager.songMap = {};
 playlist_manager.listMap = {
     "q": playlist_manager.queue
 };
-playlist_manager.nextId = 0;
+playlist_manager.nextSongId = 0;
 
 // sockets
 playlist_manager.io = {};
@@ -65,6 +65,16 @@ playlist_manager.currentSongIndex = function(callback) {
     if (callback) {
         callback(null, playlist_manager.songIndex);
     }
+};
+
+/**
+ * Generate a song ID for a new song being added.
+ *
+ * @return {Number}: the song ID
+ */
+playlist_manager.generateSongId = function() {
+    playlist_manager.nextSongId++;
+    return playlist_manager.nextSongId;
 };
 
 /**
@@ -199,8 +209,7 @@ playlist_manager.addSong = function(list, songId, callback) {
  {Object} err: error produced
  */
 playlist_manager.createSong = function(list, path, callback) {
-    var id = playlist_manager.nextId;
-    playlist_manager.nextId++;
+    var id = playlist_manager.generateSongId();
     var s = Song.Song(id);
     s.path = path;
     s.type = "upload";
