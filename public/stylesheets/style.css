@@ -12,9 +12,12 @@ body {
 	height: 100%;
 }
 
-header {
-	position: fixed;
-	top: 0;
+#main {
+	height: calc(100% - 150px);
+	overflow-y: auto;
+}
+
+#nav {
 	width: 100%;
 	height: 65px;
 	padding: 10px 20px;
@@ -31,12 +34,6 @@ header {
 	line-height: 45px;
 }
 
-#content {
-	height: calc(100% - 65px - 150px);
-	margin-top: 65px;
-	overflow-y: auto;
-}
-
 footer {
 	position: fixed;
 	bottom: 0;
@@ -45,7 +42,6 @@ footer {
 	padding: 15px;
 	background-color: #333;
 	color: white;
-	text-align: center;
 }
 
 #player-song {
@@ -54,6 +50,7 @@ footer {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	text-align: center;
 }
 
 #song-name {
@@ -63,6 +60,8 @@ footer {
 #player-controls {
 	height: 40px;
 	font-size: 1.5em;
+	user-select: none;
+	text-align: center;
 }
 
 #controls-prev, #controls-play, #controls-next {
@@ -74,6 +73,8 @@ footer {
 #player-progress {
 	height: 40px;
 	font-size: 1.5em;
+	user-select: none;
+	text-align: center;
 }
 
 #progress-elapsed, #progress-total {
@@ -85,7 +86,7 @@ footer {
 	vertical-align: middle;
 	width: 50%;
 	height: 5px;
-	margin: 0 15px;
+	margin: 0 20px;
 	background-color: #fff;
 	text-align: left;
 }
@@ -100,10 +101,10 @@ footer {
 }
 
 #progress-bar-handle {
-	width: 20px;
-	height: 20px;
-	border-radius: 10px;
 	background-color: var(--theme-primary);
+	width: 30px;
+	height: 30px;
+	border-radius: 15px;
 	display: inline-block;
 	position: absolute;
 	left: -20px;
@@ -111,8 +112,8 @@ footer {
 
 #fab {
 	position: fixed;
-	bottom: 170px;
-	right: 20px;
+	bottom: 150px;
+	right: 0;
 }
 
 #fab-add {
@@ -125,18 +126,6 @@ footer {
 
 #fab-add:hover {
 	background-position: bottom;
-}
-
-div.nav {
-	font-size: 32px;
-	color: #fff;
-	background-color: #f71;
-	height: 48px;
-	max-height: 48px;
-	padding: 0px 12px;
-	display: block;
-	width:100%;
-	position:fixed;
 }
 
 div.pane {
@@ -152,16 +141,10 @@ a.fill {
 	width: 80%;
 	text-decoration: none;
 }
+
 a.fill:hover {
 	color: #fff;
 	text-decoration: none;
-}
-
-div.menu {
-	float:right;
-	display: block;
-	text-align: right;
-	width: 40px;
 }
 
 div.q {
@@ -192,63 +175,53 @@ td.num {
 	padding-left: 16px;
 }
 
-div.bottomfloat {
-	position:fixed;
-	left:0px;
-	bottom:0px;
-	width:100%;
+@media only screen and (max-width: 736px) and (orientation:portrait) {
+	#main {
+		height: calc(100% - 130px);
+	}
+
+	#fab {
+		bottom: 130px;
+	}
+
+	footer {
+		height: 130px;
+		padding: 5px 10px;
+	}
 }
 
-div.footer {
-	height:48px;
-	width:100%;
-	background-color: #bbb;
-	padding: 7px 0px;
-}
+@media only screen and (max-width: 736px) and (orientation:landscape) {
+	#main {
+		height: 70%;
+	}
 
-p.footer {
-	text-align: center;
-	text-decoration:bold;
-	color: #222;
-	font-size:16px;
-	line-height: 60%
-}
+	#fab {
+		bottom: 30%;
+	}
 
-p.tracker {
-	font-family:'Lucida Console', monospace;
-}
+	footer {
+		height: 30%;
+		padding: 5px 10px;
+	}
 
-div.formcontainer {
-    border-radius:8px;
-    background-color: #f0f0f0;
-    padding: 15px 25px;
-    min-width: 400px;
-}
+	#player-song {
+		display: inline-block;
+		width: 70%;
+		height: 45%;
+	}
 
-input {
-    margin-bottom: 10px;
-}
+	#player-controls {
+		display: inline-block;
+		width: 30%;
+		vertical-align: top;
+		height: 45%;
+	}
 
-input[type=text], select{
-    width:100%;
-    padding: 6px 10px;
-    display: inline-block;
-    border: 1px solid #d0d0d0;
-    border-radius: 3px;
-    box-sizing: border-box;
-}
+	#player-progress {
+		height: 45%;
+	}
 
-input[type=submit] {
-    width: 100%;
-    background-color: var(--theme-primary);
-    color: white;
-    padding: 6px 10px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-input[type=submit]:hover {
-    background-color: var(--theme-primary-hover);
+	#progress-bar {
+		width: 70%;
+	}
 }
