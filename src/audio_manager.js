@@ -1,56 +1,56 @@
-var audio_manager = {};
+function AudioManager() {
+    //the song currently playing
+    this.current_song = null;
+    this.time_elapsed = 0;
+    this.play_state = 'paused';
 
-//the song currently playing
-audio_manager.current_song = null;
-audio_manager.time_elapsed = 0;
-audio_manager.play_state = 'paused';
+    this.seek_time = 0;
 
-audio_manager.seek_time = 0;
+    // when playback halts (e.g. user skips), prev flag indicate jump to previous track instead of next
+    this.prev_flag = false;
 
-// when playback halts (e.g. user skips), prev flag indicate jump to previous track instead of next
-audio_manager.prev_flag = false;
+    // when playback halts, if this is non-negative, jump to the given track. (Overrides prev flag.)
+    this.jump_index = -1;
+}
 
-// when playback halts, if this is non-negative, jump to the given track. (Overrides prev flag.)
-audio_manager.jump_index = -1;
-
-audio_manager.current_is_empty = function() {
-    return !audio_manager.current_song || audio_manager.current_song.type == 'empty';
+AudioManager.prototype.current_is_empty = function() {
+    return !this.current_song || this.current_song.type == 'empty';
 };
 
-audio_manager.is_playing = function() {
-    return audio_manager.play_state == 'playing';
+AudioManager.prototype.is_playing = function() {
+    return this.play_state == 'playing';
 };
 
-audio_manager.is_paused = function() {
-    return audio_manager.play_state == 'paused';
+AudioManager.prototype.is_paused = function() {
+    return this.play_state == 'paused';
 };
 
-audio_manager.get_state = function() {
-    return audio_manager.play_state;
+AudioManager.prototype.get_state = function() {
+    return this.play_state;
 };
 
-audio_manager.get_title = function() {
-    return audio_manager.current_song.name;
+AudioManager.prototype.get_title = function() {
+    return this.current_song.name;
 };
 
-audio_manager.get_duration = function() {
-    return audio_manager.current_song.duration;
+AudioManager.prototype.get_duration = function() {
+    return this.current_song.duration;
 };
 
-audio_manager.get_time_elapsed = function() {
-    return audio_manager.time_elapsed;
+AudioManager.prototype.get_time_elapsed = function() {
+    return this.time_elapsed;
 };
 
-audio_manager.set_current = function(song) {
-    audio_manager.current_song = song;
+AudioManager.prototype.set_current = function(song) {
+    this.current_song = song;
 };
 
-audio_manager.set_time_elapsed = function(time) {
-    audio_manager.time_elapsed = time;
+AudioManager.prototype.set_time_elapsed = function(time) {
+    this.time_elapsed = time;
 };
 
-audio_manager.set_state = function(state) {
-    audio_manager.play_state = state;
+AudioManager.prototype.set_state = function(state) {
+    this.play_state = state;
 };
 
-module.exports = audio_manager;
+module.exports = new AudioManager();
