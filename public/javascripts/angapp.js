@@ -35,7 +35,7 @@ app.controller('angCon', function($scope) {
                 $('.pl-song').addClass('sort');
             },
             onEnd: function(evt) {
-                $('.pl-song').addClass('sort');
+                $('.pl-song').removeClass('sort');
                 move_song(evt.oldIndex, evt.newIndex);
             }
         });

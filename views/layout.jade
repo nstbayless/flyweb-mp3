@@ -18,14 +18,13 @@ html(ng-app="angApp")
             block main
             div#nav
                 block nav
-                section#logo
-                    block logo
+                span#logo
                     a(href="/") #{title}
+                span#add-plus-wrapper
+                    a(href="/add")
+                        span(class="glyphicon glyphicon-plus" aria-hidde="true")
             div#content
                 block content
-                div#fab
-                    block fab
-                    a#fab-add(href="/add")
         footer
             block footer
             div#player-song
