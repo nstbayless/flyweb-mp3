@@ -248,6 +248,7 @@ module.exports = (upload, audio) => {
                         else {
                             manager.getSong(id, function (err, s) {
                                 s.type = "upload";
+                                s.format="mp3";
                                 s.name = title;
                                 s.duration = metadata.duration;
                                 return res.status(200).send();
