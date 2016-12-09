@@ -198,7 +198,7 @@ module.exports = (upload, audio) => {
      */
     function postSongUrl(req, res, next, listId) {
         assert(!!req.body.url);
-        youtubedl.getInfo(req.body.url, [], function(err, info) {
+        youtubedl.getInfo(req.body.url, [], { maxBuffer: 1024 * 1024 }, function(err, info) {
             if (err) {
                 throw err;
             }
