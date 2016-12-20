@@ -2,40 +2,40 @@ doctype html
 html(ng-app="angApp")
     head
         block head
-        title=title
-        link(rel="stylesheet" href="/static/css/bootstrap.min.css")
-        link(rel='stylesheet', href='/stylesheets/style.css')
-        meta(name="viewport" content="width=device-width, initial-scale=1")
-        script(src="/static/js/jquery.js" charset="utf-8")
-        script(src="/static/js/jquery.form.min.js" charset="utf-8")
-        script(src="/static/js/angular.min.js" charset="utf-8")
-        script(src="/static/js/socket.io.js" charset="utf-8")
-        script(src="/static/js/sortable.js" charset="utf-8")
-        script(src="/javascripts/angapp.js")
+            title=title
+            link(rel="stylesheet" href="/static/css/bootstrap.min.css")
+            link(rel='stylesheet', href='/stylesheets/style.css')
+            meta(name="viewport" content="width=device-width, initial-scale=1")
+            script(src="/static/js/jquery.js" charset="utf-8")
+            script(src="/static/js/jquery.form.min.js" charset="utf-8")
+            script(src="/static/js/angular.min.js" charset="utf-8")
+            script(src="/static/js/socket.io.js" charset="utf-8")
+            script(src="/static/js/sortable.js" charset="utf-8")
+            script(src="/javascripts/angapp.js")
     body(ng-controller="angCon")
         block body
-        div#main
-            block main
-            div#nav
-                block nav
-                span#logo
-                    a(href="/") #{title}
-                span#add-plus-wrapper
-                    a(href="/add")
-                        span(class="glyphicon glyphicon-plus" aria-hidde="true")
-            div#content
-                block content
-        footer
-            block footer
-            div#player-song
-                span#song-name {{status.title}}
-            div#player-controls
-                span#controls-prev(class="glyphicon glyphicon-step-backward" aria-hidden="true" ng-click="prev_song()")
-                span#controls-play(class="glyphicon glyphicon-play" aria-hidden="true" ng-click="pause_song()")
-                span#controls-next(class="glyphicon glyphicon-step-forward" aria=hidden="true" ng-click="next_song()")
-            div#player-progress
-                span#progress-elapsed {{pretty_time(status.time_elapsed)}}
-                div#progress-bar
-                    div#progress-bar-elapsed(ng-style="progress_style")
-                    div#progress-bar-handle(ng-style="handle_style")
-                span#progress-total {{pretty_time(status.duration)}}
+            div#main
+                block main
+                    div#nav
+                        block nav
+                            span#logo
+                                a(href="/") #{title}
+                            span#add-plus-wrapper
+                                a(href="/add")
+                                    span(class="glyphicon glyphicon-plus" aria-hidde="true")
+                    div#content
+                        block content
+            footer
+                block footer
+                    div#player-song
+                        span#song-name {{status.title}}
+                    div#player-controls
+                        span#controls-prev(class="glyphicon glyphicon-step-backward" aria-hidden="true" ng-click="prev_song()")
+                        span#controls-play(class="glyphicon glyphicon-play" aria-hidden="true" ng-click="pause_song()")
+                        span#controls-next(class="glyphicon glyphicon-step-forward" aria=hidden="true" ng-click="next_song()")
+                    div#player-progress
+                        span#progress-elapsed {{pretty_time(status.time_elapsed)}}
+                        div#progress-bar
+                            div#progress-bar-elapsed(ng-style="progress_style")
+                            div#progress-bar-handle(ng-style="handle_style")
+                        span#progress-total {{pretty_time(status.duration)}}

@@ -35,6 +35,7 @@ html, body {
 #add-plus-wrapper a {
 	color: white;
 	font-size: 1.5em;
+	outline: none;
 }
 
 footer {
@@ -63,6 +64,9 @@ footer {
 #player-controls {
 	height: 40px;
 	font-size: 1.5em;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
 	user-select: none;
 	text-align: center;
 }
@@ -76,6 +80,9 @@ footer {
 #player-progress {
 	height: 40px;
 	font-size: 1.5em;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
 	user-select: none;
 	text-align: center;
 }
@@ -114,6 +121,11 @@ footer {
 	cursor: pointer;
 }
 
+#pl-add-message {
+	text-align: center;
+	margin-top: 5%;
+}
+
 #playlist {
 	width: 80%;
 	margin: 0 auto;
@@ -121,6 +133,9 @@ footer {
 
 .pl-song {
 	height: 45px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
 	user-select: none;
 }
 
@@ -157,6 +172,7 @@ footer {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	cursor: pointer;
 }
 
 .pl-song-duration {

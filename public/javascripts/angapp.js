@@ -98,6 +98,12 @@ app.controller('angCon', function($scope) {
         });
 
         update_current();
+
+        if ($scope.list.songs.length) {
+            $('#pl-add-message').hide();
+        } else {
+            $('#pl-add-message').show();
+        }
     }
 
     // bold currently playing song
@@ -227,6 +233,16 @@ app.controller('angCon', function($scope) {
     // must update progress bar CSS on window resize
     $(window).resize(function() {
         update_progress($scope.status.time_elapsed / $scope.status.duration);
+    });
+
+    // switch songs if song name clicked
+    $('#playlist').on('click', '.pl-song-name', function(e) {
+        var index = $(e.target).parent()[0].id.split('-').pop();
+
+        socket.emit('jump', {
+            listId: 'q',
+            songIndex: index
+        });
     });
 
     // call remove_song when remove button clicked

@@ -1,4 +1,9 @@
 extends layout
 
-block content
+append content
     div#playlist
+    p#pl-add-message
+        | It looks like this queue is empty. Feel free to 
+        a(href="/add")
+            | add
+        |  to it!

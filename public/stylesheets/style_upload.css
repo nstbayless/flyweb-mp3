@@ -1,3 +1,13 @@
+#add-list {
+	width: 80%;
+	margin: 0 auto;
+}
+
+#add-list h1 {
+	font-size: 26px;
+	margin: 15px 0;
+}
+
 #progbar {
 	width: 80%;
 	height:14px;
@@ -16,7 +26,7 @@
 }
 
 .add-module {
-	margin-right: 10px;
+	margin: 0 10px 10px 0;
 	display: inline-block;
 }
 
@@ -41,9 +51,15 @@
 	margin: 10px 0;
 }
 
-#fi {
+#fform, #fi {
 	width: 100%;
 	height: 100%;
 	opacity: 0;
 	cursor: pointer;
+}
+
+@media only screen and (max-width: 736px) {
+	#add-list h1 {
+		margin: 5% 0;
+	}
 }
