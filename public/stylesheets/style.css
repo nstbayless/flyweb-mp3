@@ -1,6 +1,5 @@
 html {
 	height: 100%;
-	overflow: hidden;
 }
 
 body {
@@ -116,7 +115,7 @@ footer {
 }
 
 #progress-bar-handle {
-	background-color: var(--theme-primary);
+	background-color: #ff7711;
 	width: 30px;
 	height: 30px;
 	border-radius: 15px;
