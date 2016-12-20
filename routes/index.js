@@ -28,48 +28,33 @@ module.exports = () => {
 
     // GET view for adding to playlist or queue
     function getAdd(req, res, next, path) {
-        var listId = "";
-        if (path.length > 0) {
-            listId = path[0];
+        if (path[0] === "url") {
+            return res.render("add-url", {
+                title: res.server_name
+            });
         }
-        manager.getPlaylist(listId, function (err, list) {
-            if (path.length <= 1) { // /add[/{plid}]
-                return res.render("add", {
-                    title: res.server_name,
-                    list: list,
-                    track: audio_manager.current_song
-                });
-            } else {
-                if (path[1] == "url") {
-                    // /add[/{plid}]/url
-                    return res.render("add-url", {
-                        title: res.server_name,
-                        list: list,
-                        track: audio_manager.current_song
-                    });
-                }
-                return next();
-            }
+
+        return res.render("add", {
+            title: res.server_name
         });
     }
 
     /* GET router */
     router.get(/.*/, function(req, res, next) {
-        //parse URL:
+        // parse URL
         var path = req.url.split("/").filter((e) => {
             return e.length > 0;
         });
+
         if (path.length === 0) {
-            //render home page:
+            //render home page
             return getPlaylist(req, res, next, []);
         } else {
-            if (path[0] == "p") {
-                return getPlaylist(req, res, next, path.slice(1));
-            }
             if (path[0] == "add") {
                 return getAdd(req, res, next, path.slice(1));
             }
         }
+
         next();
     });
 

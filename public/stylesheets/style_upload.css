@@ -8,23 +8,6 @@
 	margin: 15px 0;
 }
 
-#progbar {
-	width: 80%;
-	height:14px;
-	background: #fcfcfc;
-	outline: #000 solid thin;
-	margin: 32px auto;
-}
-
-#progbarprogress {
-	height: 100%;
-	background: #45e;
-}
-
-#errormessage {
-	font-weight: bold;
-}
-
 .add-module {
 	margin: 0 10px 10px 0;
 	display: inline-block;
@@ -56,6 +39,34 @@
 	height: 100%;
 	opacity: 0;
 	cursor: pointer;
+}
+
+#upload-progress-bar {
+	height: 20px;
+	border: 1px solid black;
+	background-color: #fcfcfc;
+}
+
+#upload-progress-elapsed {
+	height: 100%;
+	width: 0%;
+	background-color: #7988ff;
+}
+
+#upload-error {
+	font-weight: bold;
+	font-size: 18px;
+	color: orangered;
+}
+
+#add-url {
+	width: 80%;
+	margin: 0 auto;
+}
+
+#add-url h1 {
+	font-size: 26px;
+	margin: 15px 0;
 }
 
 @media only screen and (max-width: 736px) {

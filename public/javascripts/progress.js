@@ -1,118 +1,85 @@
-/* globals window, document, XMLHttpRequest, FormData, list*/
+/* jslint browser: true */
+/* globals $ */
 
-// for keeping track of file upload progress
-
-// DOM form element
-var eltForm;
-
-// DOM input element for file input
-var eltFormFileInput;
-
-// DOM div containing progress bar 
-var progressBarContainer;
-
-// DOM div of (inner) progress bar
-var progressBar;
-
-// DOM error message element
-var errorMessage;
-
-// determines whether progress bar or form is visible
-function setProgressBarVisibility(visible) {
-    if (visible) {
-        eltForm.style.display = 'none';
-        progressBarContainer.style.display = 'inline';
-    } else {
-        eltForm.style.display = 'inline';
-        progressBarContainer.style.display = 'none';
-    }
-}
-
-//displays upload portion
-//p: portion uploaded from 0 to 1
+// displays upload progress
 function uploadProgress(p) {
-    var style = ((100 * p) + '%');
-    console.log(style);
-    progressBar.style.width = style;
+    var style = (100 * p) + '%';
+
+    $('#upload-progress-elapsed').animate({
+        width: style
+    }, 100);
 }
 
-//POST the given file to the given url
-//cb: (err,success)=>(void)
+// POST the given file to the given url
+// cb: (err,success)=>(void)
 function uploadFiles(files, url, cb, progress) {
     var xhr = new XMLHttpRequest();
+    var f;
+    var fd = new FormData();
 
-    //check for obvious errors:
+    // check for obvious errors:
     if (!xhr.upload) {
         return cb('Browser does not support uploading');
     }
-    var f;
-    for (var i=0;i<files.length;i++) {
-        f = files[i];
-    }
-    var fd = new FormData();
-    
-    //add song file to form data:
-    for (i=0;i<files.length;i++) {
+
+    // add song file to form data
+    for (var i = 0; i < files.length; i++) {
         f = files[i];
         fd.append('song[]', f, f.name);
     }
 
-    //callback delegation:
+    // callback delegation
     xhr.upload.addEventListener('progress', function(e) {
-        var pc = parseInt(e.loaded / e.total);
-        progress(pc);
+        progress(e.loaded / e.total);
     }, false);
     xhr.upload.addEventListener('load', function() {
-        progress(1);
         cb(null, true);
     }, false);
     xhr.upload.addEventListener('error', function() {
         cb('Error uploading');
     }, false);
     xhr.upload.addEventListener('abort', function() {
-        cb('Upload aborted', true);
+        cb('Upload aborted', false);
     }, false);
 
-    //do POST to the given endpoint:
+    // do POST to the given endpoint
     xhr.open('POST', url, true);
-
-    //begin upload:
+    // begin upload
     xhr.send(fd);
+
     return cb();
 }
 
-//called when a file uploaded or upload dialogue cancelled
-function submitOnChange(evt) {
-    //retrieve uploaded file
-    var f = evt.target.files;
-    if (f) {
-        //file provided
-        setProgressBarVisibility(true);
-        errorMessage.innerHTML = '';
-        var url = eltForm.getAttribute('action');
-        uploadFiles(f, url, (err, success) => {
-            //display form to be re-shown:
-            if (err) {
-                setProgressBarVisibility(false);
-                errorMessage.innerHTML = 'Error: ' + err;
-            }
-            if (success) {
-                var redirect = '/p/' + list.id;
-                window.location.replace(redirect);
-            }
-        }, uploadProgress);
-    } else {
-        //no file provided
-    }
-}
+$(function() {
+    // hide progress bar & error message
+    $('#upload-progress-bar').hide();
+    $('#upload-error').hide();
 
-window.onload = function() {
-    eltForm = document.getElementById('fform');
-    eltFormFileInput = document.getElementById('fi');
-    eltFormFileInput.addEventListener('change', submitOnChange, false);
+    // handle file submit
+    $('#fi').on('change', function() {
+        var f = $('#fi')[0].files;
 
-    progressBarContainer = document.getElementById('progbarcontainer');
-    progressBar = document.getElementById('progbarprogress');
-    errorMessage = document.getElementById('errormessage');
-    setProgressBarVisibility(false);
-};
+        if (f) {
+            var url = $('#fform').attr('action');
+
+            $('#add-module-container').hide();
+            $('#upload-error').hide();
+            $('#upload-progress-bar').show();
+
+            uploadFiles(f, url, (err, success) => {
+                if (err) {
+                    // re-display form along with error message
+                    $('#upload-progress-bar').hide();
+                    $('#add-module-container').show();
+                    $('#upload-error').show().text('Error: ' + err);
+                }
+
+                if (success) {
+                    setTimeout(function() {
+                        window.location.replace('/');
+                    }, 500);
+                }
+            }, uploadProgress);
+        }
+    });
+});
