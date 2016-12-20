@@ -48,4 +48,8 @@ input[type=submit]:hover {
 	#add-url h1 {
 		margin: 5% 0;
 	}
+
+    #url-container {
+        max-width: 100%;
+    }
 }
