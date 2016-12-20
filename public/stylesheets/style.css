@@ -88,12 +88,13 @@ footer {
 }
 
 #progress-elapsed, #progress-total {
+	display: inline-block;
 	line-height: 40px;
+	overflow: hidden;
 }
 
 #progress-bar {
 	display: inline-block;
-	vertical-align: middle;
 	width: 50%;
 	height: 5px;
 	margin: 0 20px;
@@ -191,13 +192,15 @@ footer {
 		height: calc(100% - 130px);
 	}
 
-	#fab {
-		bottom: 130px;
-	}
-
 	footer {
 		height: 130px;
 		padding: 5px 10px;
+	}
+
+	#progress-elapsed, #progress-total {
+		width: 50px;
+		white-space: nowrap;
+		text-overflow: ellipsis;
 	}
 
 	#playlist {
