@@ -1,13 +1,14 @@
 extends layout
 
-block head
+append head
+    link(rel='stylesheet', href='/stylesheets/style_url.css')
 
-block content
-    div.q
-        h1 Add to #{list.name} from a website
-        div.formcontainer(style="width:600px;margin:auto;")
-            form(method="post" action="/api/#{list.id}/songs/url")
+append content
+    div#add-url
+        h1 Add to Playlist from a Website
+        div#url-container
+            form(method="post" action="/api/q/songs/url")
                 p Video URL (YouTube, Vimeo, and hundreds of other sites supported):
                 input(type="text" name="url")
-                input(type="hidden" name="redirect" value="/p/#{list.id}")
+                input(type="hidden" name="redirect" value="/")
                 input(type="submit" value="Submit")

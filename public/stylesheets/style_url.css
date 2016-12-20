@@ -1,0 +1,51 @@
+#add-url {
+	width: 80%;
+	margin: 0 auto;
+}
+
+#add-url h1 {
+	font-size: 26px;
+	margin: 15px 0;
+}
+
+#url-container {
+	width: 600px;
+	margin: auto;
+	padding: 15px 25px;
+	border-radius: 8px;
+	background-color: #f0f0f0;
+}
+
+input {
+    margin-bottom: 10px;
+}
+
+input[type=text], select{
+    width:100%;
+    padding: 6px 10px;
+    display: inline-block;
+    border: 1px solid #d0d0d0;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+input[type=submit] {
+    width: 100%;
+    background-color: #ff7711;
+    color: white;
+    padding: 6px 10px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+input[type=submit]:hover {
+    background-color: #f77307;
+}
+
+@media only screen and (max-width: 736px) {
+	#add-url h1 {
+		margin: 5% 0;
+	}
+}
