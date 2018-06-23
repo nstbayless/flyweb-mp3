@@ -5,7 +5,7 @@ Server that plays music, controlled from Firefox by FlyWeb
 How to start:
 
 ```
-sudo apt-get install libavahi-compat-libdnssd-dev libasound2-dev libavcodec-extra avconv libav-tools
+sudo apt-get install libavahi-compat-libdnssd-dev libasound2-dev libavcodec-extra libav-tools
 npm install
 npm start
 ```
